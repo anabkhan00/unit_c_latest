@@ -8,6 +8,29 @@
 
     <div class="container-fluid" id="project-content" style="position: absolute; top: 185px; left: 60px; width: 95%;">
         <div class="row">
+            <div class="row">
+                
+                <div class="col-12 rounded p-3" style="background-color: #F4F4F4;">
+                    <div style="display: flex; margin-bottom: 15px; justify-content: space-between;">
+                            <div>
+                                <p style="color: #0C5097; font-weight: bold; font-size: 18px;">Projects Overview</p>
+                            </div>
+                            <div>
+                                <button type="button" class="btn" style="background: #0C5097; color: white"
+                                    data-bs-toggle="modal" data-bs-target="#projectModal">+</button>
+                            </div>
+                        </div>
+                    @foreach($projects as $project)
+    <button type="button"
+        class="btn btn-project"
+        style="background:#0C5097; color:white"
+        data-project='@json($project)'>
+        {{ $project->name }}
+    </button>
+@endforeach
+
+                </div>
+            </div>
             <div class="d-flex flex-row w-100 gap-3" style="margin-bottom: 0;">
                 <div class="flex-grow-1 p-3" style="min-width: 350px; max-width: 500px; ">
                     <div class="rounded p-3" style="background-color: #F4F4F4; height: 252px !important;">
@@ -15,10 +38,21 @@
                             <div>
                                 <p style="color: #0C5097; font-weight: bold; font-size: 18px;">Tasks Overview</p>
                             </div>
-                            <div>
+                            {{--  <div>
                                 <button type="button" class="btn" style="background: #0C5097; color: white"
                                     data-bs-toggle="modal" data-bs-target="#projectModal">+</button>
-                            </div>
+                            </div>  --}}
+                                         
+<button type="button"
+    id="editMainButton"
+    class="btn btn-edit-project"
+    style="background:#0C5097; color:white"
+    data-bs-toggle="modal"
+    data-bs-target="#editMainProjectModal"
+    data-project="">
+    Edit Selected Project
+</button>
+
                         </div>
                         <div class="row my-3">
                             <div class="col-6">
@@ -160,14 +194,15 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-end w-100">
                     <div class="d-flex flex-wrap align-items-end gap-3">
                         <div class="d-flex flex-column">
-                            <div id="project-filter-wrapper">
-                                <select id="projectFilter" class="form-select form-select-sm" style="min-width: 160px;">
-                                    <option value="all" selected>All</option>
-                                    @foreach ($tasks->pluck('project')->unique('id') as $project)
-                                        <option value="{{ $project->id }}">{{ $project->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+<div id="project-filter-wrapper" style="min-width: 180px;">
+    <select id="projectFilter" class="form-select form-select-sm" style="min-width: 180px;">
+        <option value="all" selected>All</option>
+        @foreach ($projects as $project)
+            <option value="{{ $project->id }}">{{ $project->name }}</option>
+        @endforeach
+    </select>
+</div>
+
                         </div>
                         <div class="d-flex align-items-end">
                             <button id="upcoming" class="btn btn-outline-primary btn-sm px-3">Upcoming Deadlines</button>
@@ -209,7 +244,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-3 content show" id="content1">
+            <div class="row mt-3 tab-pane board-tab fade h-screen-90 content" style="margin-bottom: 10px;" id="content1">
                 <div class="col-lg-12 p-3 mb-3 rounded" style="background-color: #F4F4F4;">
                     <table id="projects-table" class="table table-responsive table-striped">
                         <thead>
@@ -229,13 +264,26 @@
                         <tbody>
                             @forelse ($tasks as $task)
                                 <tr class="project-row" data-project-id="{{ $task->project_id }}">
+                                    {{--  <td style="font-size: 12px;">{{ $task->project->name }}</td>
+                                                            <button type="button"
+                                                class="btn btn-edit-project"
+                                                style="background:#0C5097; color:white"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editMainProjectModal"
+                                                data-project='@json($project)'>
+                                                {{ $project->name }}
+                                            </button>  --}}
+                                            <td style="font-size: 12px; cursor:pointer; color:#0C5097;"
+    class="open-edit-project-modal"
+    data-project-id="{{ $task->project->id }}">
+    {{ $task->project->name }}
+</td>
+                                    <td style="font-size: 12px;">{{ $task->assignee->name ?? 'Unassigned' }}</td>
                                     <td style="font-size: 12px; cursor: pointer;" class="project-name"
                                         data-id="{{ $task->id }}" data-bs-toggle="modal"
                                         data-bs-target="#statusHistoryModal">
-                                        {{ $task->project->name }}
+                                        {{ $task->title }}
                                     </td>
-                                    <td style="font-size: 12px;">{{ $task->assignee->name ?? 'Unassigned' }}</td>
-                                    <td style="font-size: 12px;">{{ $task->title }}</td>
                                     <td style="font-size: 12px;">
                                         {{ $task->project->start_date ? \Carbon\Carbon::parse($task->project->start_date)->format('d, M Y') : '—' }}
                                         <input type="hidden" class="hidden-start-date"
@@ -436,6 +484,47 @@
   </div>
             </div>
         </div>
+<div class="modal fade" id="subTaskModal" tabindex="-1" aria-labelledby="subTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="subTaskModalLabel">Add Sub Task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="subTaskForm">
+          <input type="hidden" id="task_id" name="task_id">
+
+          <div class="mb-3">
+            <label for="task_name" class="form-label">Parent Task</label>
+            <input type="text" class="form-control" id="task_name" name="task_name" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label for="title" class="form-label">Sub Task Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+        <label for="status" class="form-label">Status</label>
+        <select name="status" id="status" class="form-select" required>
+            <option value="not_started">Not Started</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+        </select>
+    </div>
+          <button type="submit" class="btn btn-primary">Save Sub Task</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{--  {{ dd($tasks) }}  --}}
 
         <!-- Add Project Modal -->
         <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -465,6 +554,15 @@
                                         <option value="">Select Owner</option>
                                         @foreach ($users as $user)
                                             <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="created_by" class="col-form-label">Team:</label>
+                                    <select class="form-control" id="created_by" name="team_id" required>
+                                        <option value="">Select Team</option>
+                                        @foreach ($teams as $team)
+                                            <option value="{{ $team->id }}">{{ $team->team_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -541,6 +639,106 @@
                 </div>
             </div>
         </div>
+<!-- 🔹 Task Info Modal -->
+<div class="modal fade" id="taskInfoModal" tabindex="-1" aria-labelledby="taskInfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskInfoModalLabel">Task Information</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Task ID:</strong> <span id="modalTaskId"></span></p>
+        <p><strong>Task Name:</strong> <span id="modalTaskName"></span></p>
+
+        <!-- ✅ Documents List -->
+        <div id="documentList" class="mt-3"></div>
+      </div>
+
+      <div class="modal-footer">
+        <input type="file" id="uploadDocumentInput" hidden>
+        <button type="button" class="btn btn-primary" id="uploadDocumentBtn">Upload Document</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+        <div class="modal fade" id="editMainProjectModal" tabindex="-1" aria-labelledby="editMainProjectLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(90deg,#0C5097,#1A73E8);color:white;border-radius:10px 10px 0 0;">
+                <h1 class="modal-title fs-5" id="editMainProjectLabel">Edit Project</h1>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="edit-project-form" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <input type="hidden" id="edit_project_id" name="id">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="col-form-label">Project Name:</label>
+                            <input type="text" class="form-control" id="edit_project_name" name="name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="col-form-label">Project Owner:</label>
+                            <select class="form-control" id="edit_created_by" name="created_by" required>
+                                <option value="">Select Owner</option>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <label class="col-form-label mt-2">Project Description:</label>
+                    <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <label class="col-form-label">Start Date:</label>
+                            <input type="date" class="form-control" id="edit_start_date" name="start_date">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="col-form-label">End Date:</label>
+                            <input type="date" class="form-control" id="edit_end_date" name="end_date">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="col-form-label">Status:</label>
+                            <select class="form-control" id="edit_status" name="status">
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5>Tasks</h5>
+                    <div id="edit-tasks-section"></div>
+
+                    <!-- Add Task Button -->
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="addEditTaskBtn">+ Add Task</button>
+
+                    <div class="modal-footer mt-4">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Update Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
         <!-- Edit Task Modal -->
         <div class="modal fade" id="editProjectModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -956,6 +1154,127 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    //////////////////////////////////////////////////////
+
+    <script>
+$(document).on('click', '.open-edit-project-modal', function () {
+    let projectId = $(this).data('project-id');
+
+    $.ajax({
+        url: '/project/' + projectId,
+        type: 'GET',
+        success: function (response) {
+
+            // ✅ Fill basic project fields
+            $('#edit_project_id').val(response.id);
+            $('#edit_project_name').val(response.name);
+            $('#edit_description').val(response.description);
+            $('#edit_status').val(response.status.toLowerCase().replace(' ', '_')); // normalize back to option value
+
+            // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
+            if (response.start_date) {
+                let parts = response.start_date.split('-');
+                $('#edit_start_date').val(parts.reverse().join('-'));
+            }
+            if (response.end_date) {
+                let parts = response.end_date.split('-');
+                $('#edit_end_date').val(parts.reverse().join('-'));
+            }
+
+            // ✅ Creator (handle nested object)
+            if (response.created_by && response.created_by.id) {
+                $('#edit_created_by').val(response.created_by.id);
+            } else {
+                $('#edit_created_by').val('');
+            }
+
+            // ✅ Tasks
+            let tasksHTML = '';
+            if (response.tasks && response.tasks.length > 0) {
+                response.tasks.forEach(task => {
+                    tasksHTML += `
+                        <div class="border rounded p-2 mb-2">
+                            <input type="hidden" name="tasks[${task.id}][id]" value="${task.id}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Title:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][title]" value="${task.title}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][status]" value="${task.status}">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <label class="form-label">Description:</label>
+                                    <textarea class="form-control form-control-sm" name="tasks[${task.id}][description]">${task.description ?? ''}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                tasksHTML = `<p class="text-muted">No tasks found for this project.</p>`;
+            }
+
+            $('#edit-tasks-section').html(tasksHTML);
+
+            // ✅ Finally, show modal
+            $('#editMainProjectModal').modal('show');
+        },
+        error: function (xhr) {
+            console.error(xhr);
+            alert('Error loading project details.');
+        }
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ✅ Setup CSRF Token for all AJAX requests
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    });
+
+    // ✅ When "Sub Task" button clicked, fill modal fields
+    $(document).on('click', '.open-subtask-modal', function () {
+        const taskId = $(this).data('task-id');
+        const taskName = $(this).data('task-name');
+
+        $('#task_id').val(taskId);
+        $('#task_name').val(taskName);
+    });
+
+    // ✅ Submit form via AJAX
+    $('#subTaskForm').on('submit', function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: '/sub-tasks',
+            method: 'POST',
+            data: $(this).serialize(),
+            success: function (response) {
+                alert('Sub Task added successfully!');
+                $('#subTaskModal').modal('hide');
+                $('#subTaskForm')[0].reset();
+            },
+            error: function (xhr) {
+                if (xhr.status === 419) {
+                    alert('CSRF token mismatch — please refresh the page.');
+                } else {
+                    alert('Error: ' + (xhr.responseJSON?.message || 'Something went wrong'));
+                }
+            }
+        });
+    });
+
+});
+</script>
     <script>
         window.AppRoutes = {
             graph: @json(route('project.graph')),
@@ -974,28 +1293,155 @@
         <!-- Google Charts Loader -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-  
+<script>
+$(document).ready(function () {
+    let currentTaskId = null;
 
+    // 🔹 Load documents when modal opens
+    $('#taskInfoModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const taskId = button.data('task-id');
+        const taskName = button.data('task-name');
 
+        currentTaskId = taskId;
+        $('#modalTaskId').text(taskId);
+        $('#modalTaskName').text(taskName);
+        $('#documentList').html('<p class="text-muted">Loading documents...</p>');
+
+        loadDocuments(taskId);
+    });
+
+    // 🔹 Open file picker
+    $('#uploadDocumentBtn').on('click', function () {
+        $('#uploadDocumentInput').click();
+    });
+
+    // 🔹 Upload document
+    $('#uploadDocumentInput').on('change', function (e) {
+        if (!currentTaskId) return;
+
+        let file = e.target.files[0];
+        let formData = new FormData();
+        formData.append('task_id', currentTaskId);
+        formData.append('document', file);
+
+        $.ajax({
+            url: '/tasks/documents',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (response) {
+                $('#uploadDocumentInput').val('');
+                renderDocuments(response.documents);
+            },
+            error: function (xhr) {
+                console.error('Upload error:', xhr.responseText);
+                alert('Upload failed.');
+            }
+        });
+    });
+
+    // 🔹 Load documents function
+    function loadDocuments(taskId) {
+        $.ajax({
+            url: `/tasks/${taskId}/documents`,
+            type: 'GET',
+            success: function (response) {
+                renderDocuments(response.documents);
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                $('#documentList').html('<p class="text-danger">Failed to load documents.</p>');
+            }
+        });
+    }
+
+    // 🔹 Render documents (with Download + Delete buttons)
+    function renderDocuments(documents) {
+        if (!documents || documents.length === 0) {
+            $('#documentList').html('<p class="text-muted">No documents uploaded yet.</p>');
+            return;
+        }
+
+        let html = '<ul class="list-group">';
+        documents.forEach(doc => {
+            let fileName = doc.document_path.split('/').pop();
+            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="/storage/${doc.document_path}" target="_blank">${fileName}</a>
+                        <small class="text-muted d-block">by ${doc.uploaded_by}</small>
+                    </div>
+                    <div>
+                        <a href="/storage/${doc.document_path}" download class="btn btn-sm btn-success me-2">
+                            <i class="bi bi-download"></i> Download
+                        </a>
+                        <button class="btn btn-sm btn-danger delete-doc-btn" data-id="${doc.id}">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </div>
+                </li>`;
+        });
+        html += '</ul>';
+
+        $('#documentList').html(html);
+    }
+
+    // 🔹 Delete document
+    $(document).on('click', '.delete-doc-btn', function () {
+        const docId = $(this).data('id');
+        if (!confirm('Are you sure you want to delete this document?')) return;
+
+        $.ajax({
+            url: `/tasks/documents/${docId}`,
+            type: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function (response) {
+                renderDocuments(response.documents);
+            },
+            error: function (xhr) {
+                console.error(xhr.responseText);
+                alert('Failed to delete document.');
+            }
+        });
+    });
+});
+</script>
 
 
 
 
 
 <script>
-    // Dynamic tasks from backend
+    document.addEventListener('DOMContentLoaded', function() {
+        showContent('content1');
+    });
+
     var allTasks = @json($tasks);
 
+    // ✅ Filter function (now includes project filter)
     function getFilteredTasks() {
-        var from = document.getElementById('filter-from').value;
-        var to = document.getElementById('filter-to').value;
-        var resource = document.getElementById('filter-resource').value;
+        var from = document.getElementById('filter-from')?.value;
+        var to = document.getElementById('filter-to')?.value;
+        var resource = document.getElementById('filter-resource')?.value;
+        var selectedProject = document.getElementById('projectFilter')?.value;
 
         return allTasks.filter(function(task) {
             var match = true;
 
             var start = task.project && task.project.start_date ? new Date(task.project.start_date) : null;
             var end = task.due_date ? new Date(task.due_date) : null;
+
+            // ✅ Project filter
+            if (selectedProject && selectedProject !== 'all') {
+                match = match && task.project_id == selectedProject;
+            }
 
             if (from) {
                 if (start) {
@@ -1004,6 +1450,7 @@
                     match = false;
                 }
             }
+
             if (to) {
                 if (end) {
                     match = match && end <= new Date(to);
@@ -1011,6 +1458,7 @@
                     match = false;
                 }
             }
+
             if (resource) {
                 if (task.assignee && task.assignee.name) {
                     match = match && task.assignee.name === resource;
@@ -1018,6 +1466,7 @@
                     match = false;
                 }
             }
+
             return match;
         });
     }
@@ -1039,112 +1488,140 @@
         }
     }
 
-    function renderChart(tasks) {
-        var ctx = document.getElementById('ganttChart').getContext('2d');
-        if (window.ganttChartInstance) {
-            window.ganttChartInstance.destroy();
-        }
+function renderChart(tasks) {
+    var ctx = document.getElementById('ganttChart').getContext('2d');
 
-        var validTasks = tasks.filter(function(task) {
-            return task.project && task.project.start_date && task.due_date;
-        });
+    if (window.ganttChartInstance) {
+        window.ganttChartInstance.destroy();
+    }
 
-        var chartTasks = validTasks.map(function(task) { return task.title; });
-        var chartResources = validTasks.map(function(task) { return task.assignee ? task.assignee.name : ''; });
+    var validTasks = tasks.filter(t => t.project && t.project.start_date && t.due_date);
 
-        var timelineData = validTasks.map(function(task, i) {
-            return {
-                x: new Date(task.project.start_date).toISOString(),
-                x2: new Date(task.due_date).toISOString(),
-                y: i
-            };
-        });
+    if (validTasks.length === 0) {
+        console.warn("No valid tasks found");
+        return;
+    }
 
-        var barColors = validTasks.map(function() {
-            return '#0C5097'; // Green for all
-        });
+    const parseDate = d => new Date(d);
+    const allDates = validTasks.flatMap(t => [parseDate(t.project.start_date), parseDate(t.due_date)]);
+    const minDate = new Date(Math.min(...allDates));
+    const maxDate = new Date(Math.max(...allDates));
 
-        var data = {
-            labels: chartTasks,
-            datasets: [
-                {
-                    type: 'bar',
-                    label: "Tasks Timeline",
-                    data: timelineData,
-                    backgroundColor: barColors,
-                    borderRadius: 4,
-                    barPercentage: 0.6,
-                    parsing: {
-                        xAxisKey: 'x',
-                        xMaxKey: 'x2',
-                        yAxisKey: 'y'
-                    }
-                }
-            ]
-        };
+    const diffInDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+    const isShortDuration = diffInDays < 30;
 
-        var options = {
-            indexAxis: "y",
-            parsing: {
-                xAxisKey: 'x',
-                xMaxKey: 'x2',
-                yAxisKey: 'y'
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    position: "top",
-                    type: "time",
-                    time: {
-                        unit: "day",
-                        displayFormats: {
-                            day: "MMM dd, yyyy"
-                        },
-                        tooltipFormat: "PP"
-                    },
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    },
-                    ticks: {
-                        color: '#222',
-                        font: { size: 13 }
-                    }
+    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+    const data = {
+        labels: validTasks.map(t => t.title),
+        datasets: [{
+            label: 'Tasks Timeline',
+            data: validTasks.map(t => [parseDate(t.project.start_date), parseDate(t.due_date)]),
+            backgroundColor: '#0C5097',
+            borderRadius: 6,
+            barPercentage: 0.7
+        }]
+    };
+
+    const options = {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                type: 'time',
+                position: 'top',
+                min: minDate,
+                max: maxDate,
+                time: {
+                    unit: isShortDuration ? 'day' : 'month',
+                    displayFormats: isShortDuration
+                        ? { day: 'E' }
+                        : { month: 'MMM yyyy' }
                 },
-                y: {
-                    ticks: {
-                        autoSkip: false,
-                        callback: function(value, index) {
-                            return ''; // Show task name
-                        },
-                        color: '#222',
-                        font: { size: 13 }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(ctx) {
-                            var start = ctx.raw.x ? new Date(ctx.raw.x).toLocaleDateString() : '';
-                            var end = ctx.raw.x2 ? new Date(ctx.raw.x2).toLocaleDateString() : '';
-                            return chartTasks[ctx.raw.y] + " (" + chartResources[ctx.raw.y] + "): " + start + " → " + end;
+                grid: { color: '#e0e0e0' },
+                ticks: {
+                    color: '#000',
+                    font: { size: 12 },
+                    maxRotation: 0, // ✅ prevent rotation
+                    minRotation: 0, // ✅ keep labels straight
+                    callback: function (value) {
+                        const date = new Date(value);
+                        if (isShortDuration) {
+                            const dayName = dayNames[date.getDay()];
+                            // ✅ For Monday, show date above M in two lines
+                            if (dayName === 'M') {
+                                const formatted = date.toLocaleDateString('en-US', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                });
+                                return [formatted, dayName]; // 👈 two lines (array form)
+                            } else {
+                                return [dayName]; // single line for others
+                            }
+                        } else {
+                            return date.toLocaleDateString('en-US', {
+                                month: 'short',
+                                year: 'numeric'
+                            });
                         }
                     }
                 },
-                legend: {
-                    display: false
+                title: {
+                    display: true,
+                    text: isShortDuration ? 'Days of Week' : 'Months',
+                    color: '#0C5097',
+                    font: { size: 14, weight: 'bold' }
+                }
+            },
+            y: {
+                grid: { display: false },
+                ticks: {
+                    color: '#000',
+                    font: { size: 12 },
+                    callback: (value, index) => validTasks[index] ? validTasks[index].title : ''
                 }
             }
-        };
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function (ctx) {
+                        const start = ctx.raw[0] ? new Date(ctx.raw[0]).toLocaleDateString() : '';
+                        const end = ctx.raw[1] ? new Date(ctx.raw[1]).toLocaleDateString() : '';
+                        const task = validTasks[ctx.dataIndex];
+                        return `${task.title} (${task.assignee?.name || ''}): ${start} → ${end}`;
+                    }
+                }
+            }
+        }
+    };
 
-        window.ganttChartInstance = new Chart(ctx, {
-            type: "bar",
-            data,
-            options
-        });
+    window.ganttChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data,
+        options
+    });
+}
+
+
+
+    function updateGantt() {
+        var filtered = getFilteredTasks();
+        renderTable(filtered);
+        renderChart(filtered);
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('filter-search')?.addEventListener('click', updateGantt);
+        document.getElementById('projectFilter')?.addEventListener('change', updateGantt); // ✅ Added project filter listener
+        updateGantt();
+    });
+</script>
+
+
+
 
     function updateGantt() {
         var filtered = getFilteredTasks();
@@ -1158,9 +1635,115 @@
     });
     
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const projectButtons = document.querySelectorAll('.btn-project');
+    const editButton = document.getElementById('editMainButton');
+    const projectFilter = document.getElementById('projectFilter');
+
+    // 🔹 Dropdown change par active button highlight karna
+    projectFilter.addEventListener('change', function () {
+        const selectedId = this.value;
+        projectButtons.forEach(btn => {
+            const project = JSON.parse(btn.getAttribute('data-project'));
+            if (project.id.toString() === selectedId) {
+                btn.classList.add('active-project');
+            } else {
+                btn.classList.remove('active-project');
+            }
+        });
+    });
+
+    // 🔹 Button click par dropdown aur edit data dono update karna
+    projectButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            // Remove active class from all project buttons
+            projectButtons.forEach(btn => btn.classList.remove('active-project'));
+
+            // Add active class to clicked one
+            this.classList.add('active-project');
+
+            // Get project data
+            const project = JSON.parse(this.getAttribute('data-project'));
+
+            // Set data on edit button
+            editButton.setAttribute('data-project', JSON.stringify(project));
+            editButton.textContent = `Edit: ${project.name}`;
+
+            // ✅ Dropdown select update
+            projectFilter.value = project.id?.toString();
+
+            // ✅ Trigger dropdown change event (to run same logic)
+            projectFilter.dispatchEvent(new Event('change'));
+        });
+    });
+
+    // 🔹 Edit button modal open par data set karna
+    editButton.addEventListener('click', function () {
+        const project = JSON.parse(this.getAttribute('data-project') || '{}');
+        if (project.id) {
+            document.getElementById('editProjectId').value = project.id;
+            document.getElementById('editProjectName').value = project.name;
+        }
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Listen for button click
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('open-task-modal')) {
+            const taskId = e.target.getAttribute('data-task-id');
+            const taskName = e.target.getAttribute('data-task-name');
+
+            // Fill modal data
+            document.getElementById('modalTaskId').textContent = taskId;
+            document.getElementById('modalTaskName').textContent = taskName;
+        }
+    });
+});
+</script>
+
+
 
 
 @endpush
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <style>
      .container {
@@ -1252,7 +1835,7 @@
         font-size: 12px;
         color: #0C5097;
         transition: all 0.3s ease;
-    }
+    }content
 
     .nav-tabs .nav-link.active {
         font-size: 15px;
@@ -1340,7 +1923,7 @@
     }
 
     #statusHistoryModal .project-details .fw-medium {
-        color: #1f2937;
+        color: #1f293content7;
         word-break: break-word;
         font-size: 0.9375rem;
         margin-bottom: 0.25rem;
@@ -1476,3 +2059,4 @@
         }
     }
 </style>
+ 

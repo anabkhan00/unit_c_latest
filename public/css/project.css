@@ -189,8 +189,9 @@ tbody, td, tfoot, th, thead, tr {
 }
 
 .content.show {
+    
     opacity: 1;
-    max-height: 500px;
+    max-height: 1000px;
 }
 
 #filter {

@@ -45,6 +45,43 @@ window.addTaskRow = function () {
         }
     });
 };
+$('.project-list').on('dragover', function (e) {
+    e.preventDefault(); // browser ko default drop se rokho
+});
+
+$('.project-list-item').on('dragstart', function (e) {
+    e.originalEvent.dataTransfer.setData('text/plain', $(this).data('id'));
+});
+
+$('.project-list').on('drop', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const taskId = e.originalEvent.dataTransfer.getData('text/plain');
+    const newStatus = $(this).data('status');
+
+    $.ajax({
+        url: '/tasks/update-status',
+        type: 'POST',
+        data: {
+            id: taskId,
+            status: newStatus,
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            // ✅ Page refresh nahi hoga
+            // Sirf task ko nayi list me move kar do
+            const taskItem = $(`[data-id="${taskId}"]`);
+            taskItem.appendTo(`.project-list[data-status="${newStatus}"]`);
+
+            // Optional: thoda animation effect
+            taskItem.hide().fadeIn(400);
+        },
+        error: function (xhr) {
+            console.error('Error updating task status:', xhr.responseText);
+        }
+    });
+});
 
 window.removeTaskRow = function (button) {
     $(button).closest('.task-row').remove();
@@ -146,8 +183,47 @@ function filterTasks(projectId) {
                                         <small class="text-muted">Created by: ${task.project?.creator?.name || 'Unknown'}</small>
                                     </div>
                                 </div>
+                                <button 
+            type="button" 
+            class="btn btn-sm btn-outline-primary open-task-modal" 
+            data-task-id="${task.id}" 
+            data-task-name="${task.title}"
+            data-bs-toggle="modal" 
+            data-bs-target="#taskInfoModal">
+            documents
+        </button>
+
+        <button 
+    type="button" 
+    class="btn btn-sm btn-outline-success open-subtask-modal" 
+    data-task-id="${task.id}" 
+    data-task-name="${task.title}"
+    data-bs-toggle="modal" 
+    data-bs-target="#subTaskModal">
+    Sub Task
+</button>
+<div class="mt-3 ms-3">
+    <h6>Sub Tasks:</h6>
+    <ul class="list-group">
+        ${task.sub_task && task.sub_task.length > 0 
+            ? task.sub_task.map(sub => `
+                <li class="list-group-item p-2">
+                    <strong>Title:</strong> ${sub.title} <br>
+                    <strong>Description:</strong> ${sub.description || 'N/A'} <br>
+                    
+                    
+                    <small class="text-muted">Created At: ${new Date(sub.created_at).toLocaleString()}</small>
+                </li>
+            `).join('')
+            : '<li class="list-group-item">No sub tasks yet.</li>'
+        }
+    </ul>
+</div>
+
+                                
                             </div>
                         </li>
+                        
                     `);
                 });
             });
@@ -407,9 +483,9 @@ $(document).ready(function () {
                         $('#projectModal').modal('hide');
 
                         table.draw();
-                        setTimeout(() => {
-                            window.location.reload(); // Reload page after a short delay
-                        }, 500); // Delay to allow Swal to close
+                        // setTimeout(() => {
+                        //     window.location.reload(); // Reload page after a short delay
+                        // }, 500); // Delay to allow Swal to close
                         updateChart();
                         filterTasks(selectedProjectId);
                     });
@@ -489,9 +565,9 @@ $(document).ready(function () {
                 }).then(() => {
                     $('#editProjectModal').modal('hide');
                     table.draw();
-                    setTimeout(() => {
-                        window.location.reload(); // Reload page after a short delay
-                    }, 500); // Delay to allow Swal to close
+                    // setTimeout(() => {
+                    //     window.location.reload(); // Reload page after a short delay
+                    // }, 500); // Delay to allow Swal to close
                     updateChart();
                     filterTasks(selectedProjectId);
                 });
@@ -537,9 +613,9 @@ $(document).ready(function () {
                     success: function (response) {
                         Swal.fire('Deleted!', response.message, 'success');
                         table.draw();
-                        setTimeout(() => {
-                            window.location.reload(); // Reload page after a short delay
-                        }, 500); // Delay to allow Swal to close
+                        // setTimeout(() => {
+                        //     window.location.reload(); // Reload page after a short delay
+                        // }, 500); // Delay to allow Swal to close
                         updateChart();
                         filterTasks(selectedProjectId);
                     },
@@ -769,9 +845,9 @@ $(document).ready(function () {
                     data: { status: newStatus, _token: csrfToken },
                     success: function () {
                         table.draw();
-                        setTimeout(() => {
-                            window.location.reload(); // Reload page after a short delay
-                        }, 500); // Delay to allow Swal to close
+                        // setTimeout(() => {
+                        //     window.location.reload(); // Reload page after a short delay
+                        // }, 500); // Delay to allow Swal to close
                         updateChart();
                         filterTasks(selectedProjectId);
                     },

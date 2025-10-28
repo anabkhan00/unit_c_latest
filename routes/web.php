@@ -21,6 +21,8 @@ use App\Http\Controllers\MinisiteController;
 use App\Http\Controllers\NewsFeedController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SocialiteController;
+use App\Http\Controllers\TasksDocumentController;
+use App\Http\Controllers\SubTaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -111,7 +113,20 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/folders/{id}', [EmailController::class, 'destroy'])->name('folders.destroy');
 
     //Project
+    
+// Upload document
+    Route::post('/tasks/documents', [TasksDocumentController::class, 'store'])->name('tasks-documents.store');
+    Route::get('/tasks/{taskId}/documents', [TasksDocumentController::class, 'getDocuments'])
+     ->name('tasks.documents');
+
+
+Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.store');
+
+    // Delete document
+    Route::delete('/tasks/documents/{docId}', [TasksDocumentController::class, 'destroy'])->name('tasks-documents.destroy');
+
     Route::resource('project', ProjectController::class);
+    Route::put('/projects_main/{id}', [ProjectController::class, 'update_main'])->name('project.main.update');
     Route::get('/projects/graph', [ProjectController::class, 'graph'])->name('project.graph');
     Route::get('/tasks', [TaskController::class, 'fetchTasks'])->name('fetch.tasks');
     Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('task.show');

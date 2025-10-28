@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Auth;
 class TaskController extends Controller
 {
     public function fetchTasks(Request $request)
-    {
-        $query = Task::with(['project', 'assignee', 'project.creator']);
+    {   
+        $query = Task::with(['project', 'sub_task','assignee', 'project.creator']);
 
+        
         if ($request->has('project_id') && $request->project_id !== 'all') {
             $query->where('project_id', $request->project_id);
         }
@@ -59,6 +60,16 @@ class TaskController extends Controller
                 'assignee' => $task->assignee ? ['id' => $task->assignee->id, 'name' => $task->assignee->name] : null,
                 'expected_days' => $expectedDays,
                 'days_used' => $daysUsed,
+                'sub_task' => $task->sub_task->map(function ($sub) {
+                return [
+                    'id' => $sub->id,
+                    'title' => $sub->title,
+                    'description' => $sub->description,
+                    'status' => $sub->status,
+                    'created_at' => $sub->created_at ? $sub->created_at->toDateTimeString() : null,
+                    'updated_at' => $sub->updated_at ? $sub->updated_at->toDateTimeString() : null,
+                ];
+            }),
             ];
         });
 
