@@ -26,6 +26,7 @@ class MinisiteController extends Controller
 
     public function storePage(Request $request)
     {
+        // dd($request->all());
         try {
             $request->validate([
                 'page_logo' => 'nullable|image',
