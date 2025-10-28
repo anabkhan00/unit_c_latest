@@ -10,23 +10,18 @@
     </style>
     <div class="container" id="minisite-content" style="position: absolute; top: 175px; left: 60px; width: 95%;">
         <div class="row">
+<div class="row">
 
-
-            <div class="col-lg-7 col-md-7 p-3 rounded welcome" >
-                <div class="row">
-                    <div class="col-md-12"
-                        style="color: #0C5097;font-family: Montserrat, sans-serif;
-                                font-size: 28px;
-                                font-weight: 700;
-                                line-height: 48.76px;
-                                text-align: left;
-                                ">
-                        WELCOME TO MINISITE 
-                    </div>
-
-                    <div class="col-md-5">
-                        <button class="btn btn-lg dropdown-toggle" type="button"
-                            style="padding:5px;background: #D9D9D9 ;color:black;font-weight:600; width:100%"
+  <div class="container mt-4">
+    <div class="row align-items-start">
+      <!-- Left Column -->
+      <div class="col-md-3 p-0 m-0 bg-light border">
+        <!-- Dropdown -->
+        <div class="dropdown p-0 m-0 mb-3">    
+          <button class="btn btn-secondary dropdown-toggle w-100 rounded-0" type="button id="dropdownMenuButton"
+            data-bs-toggle="dropdown"
+            aria-expanded="false""
+                            style="padding:5px;background: #000000 ;color:rgb(255, 255, 255);font-weight:600; width:100%"
                             data-bs-toggle="dropdown" id="teamDropdown">
                             <span style="font-size: 24px;" id="selectedTeam">Select Team</span>
                         </button>
@@ -40,102 +35,53 @@
                                 </li>
                             @endforeach
                         </ul>
-                    </div>
-                    <div class="col-md-12 mt-2">
-                        <div id="minisiteRecords"
-                            style="display: none; margin-top: 5px; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
-                            <ul class="m-0" id="recordList" style="list-style-type: none; padding-left: 0;"></ul>
-                        </div>
-                    </div>
-                </div>
+        </div>
 
-
-                <div>
-
-                </div>
-
-
-
-                <div style="display: flex; margin-top: 15px; margin-bottom: 15px;">
-                    <button class="btn" type="button"
+        <!-- Buttons under dropdown -->
+        <div class="row">
+          <div class="col-6">
+            {{--  <button class="btn btn-primary w-100 rounded-0">Button 1</button>  --}}
+            <button class="btn w-100 rounded-0" type="button"
                         style="background: #0C5097; margin-right: 15px; color: white; font-size: 12px;"
                         data-bs-toggle="modal" data-bs-target="#addPageModal">Add New Page</button>
-                    <button class="btn" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
+          </div>
+          <div class="col-6">
+            <button id="showDocumentsBtn" class="btn btn-outline-primary w-100 rounded-0">
+  Documents
+</button>
+
+          </div>
+        </div>
+
+        <div class="row mt-2">
+          <div class="col-12">
+            <div class="col-md-12 mt-2">
+                        <div id="minisiteRecords"
+                            style="display: none; margin-top: 5px; padding: 10px; border: 1px solid #ccc; border-radius: 0px;">
+                            <ul class="m-0" id="recordList" style="list-style-type: none;  padding-left: 0;"></ul>
+                        </div>
+                    </div>
+           
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column Sections -->
+      <div class="col-md-9">
+        {{--  sirf document dutton ka click par ya active ho paki par ya show na ho  --}}
+        <div id="document-main" class="content-section bg-secondary text-white border p-3">
+            <button class="btn" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
                         data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
-                </div>
-            
-                <div>
-                    <div style="margin-bottom: 10px;">
-                        <span style="font-size: 16px ; font-weight: 500;">
-                            Minisite makes it easy for you to collaborate and arrange relavant content for your
-                            specific teams.
-                        </span>
-                    </div>
-                    <div>
-                        <span style="font-size: 16px ; font-weight: 500;">
-                            Please visit your relavent minisite by clicking the dropdown on the left side bar or add
-                            a new page to the existing Minisite.
-                        </span>
-                    </div>
-                </div>
+                        <div class="row">
+                            @foreach ($documents as $document)
+                            <div class=" col-2 document-item mb-2 p-2 border rounded">
+                                {{ $document->document_title }}
+                            </div>
+                        @endforeach
+                        </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div style="display: flex;">
-                     
-                    <div>
-                        <img src="http://172.25.240.1:8000/images/avatar.png"
-                            style="width: 70px; height: 70px; object-fit: cover; border-radius: 100px;" alt="">
-                    </div>
-                    <div style="padding-top: 10px; padding-left: 5px;">
-                        <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;">Yaqoob Abubakar
-                            <span
-                                style="background: #0C5097; color: white; font-size: 8px; padding: 1px 4px 2px 4px; border-radius: 10px;">
-                                Admin
-                            </span>
-                        </p>
-                        <p style="font-size: 14px;color: #707070;">Project Manager, Tresmark</p>
-                    </div>
-                </div>
-                    </div>
-                           <div class="col-md-6">
-                        <div style="display: flex;">
-                   <div>
-                        <img src="http://172.25.240.1:8000/images/avatar.png"
-                            style="width: 70px; height: 70px; object-fit: cover; border-radius: 100px;" alt="">
-                    </div>
-                    <div style="padding-top: 10px; padding-left: 5px;">
-                        <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;">Yaqoob Abubakar
-                            <span
-                                style="background: #0C5097; color: white; font-size: 8px; padding: 1px 4px 2px 4px; border-radius: 10px;">
-                                Admin
-                            </span>
-                        </p>
-                        <p style="font-size: 14px;color: #707070;">Project Manager, Tresmark</p>
-                    </div>
-                </div>
-                    </div>
-                           <div class="col-md-6 mt-3">
-                        <div style="display: flex;">
-                   <div>
-                        <img src="http://172.25.240.1:8000/images/avatar.png"
-                            style="width: 70px; height: 70px; object-fit: cover; border-radius: 100px;" alt="">
-                    </div>
-                    <div style="padding-top: 10px; padding-left: 5px;">
-                        <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;">Yaqoob Abubakar
-                            <span
-                                style="background: #0C5097; color: white; font-size: 8px; padding: 1px 4px 2px 4px; border-radius: 10px;">
-                                Admin
-                            </span>
-                        </p>
-                        <p style="font-size: 14px;color: #707070;">Project Manager, Tresmark</p>
-                    </div>
-                </div>
-                    </div>
-                </div>
-
-            </div>
-
+        </div>
+        <div id="team-main" class="content-section  text-white border p-3">
             <div class="col-lg-6 col-md-6" id="pageDetails" style="display: none;">
                 <div class="card shadow">
                     <div class="card-header">
@@ -146,6 +92,82 @@
                     </div>
                 </div>
             </div>
+          <div class="col-lg-7 col-md-7 p-3 rounded welcome" >
+                <div class="row">
+                    
+                    
+                    <div class="col-md-12"
+                        style="color: #0C5097;font-family: Montserrat, sans-serif;
+                                font-size: 28px;
+                                font-weight: 700;
+                                line-height: 48.76px;
+                                text-align: left;
+                                ">
+                        WELCOME TO MINISITE 
+                    </div>
+
+                    <div class="col-md-5">
+                        
+                    </div>
+                    
+                </div>
+
+
+                <div>
+
+                </div>
+
+
+
+                <div style="display: flex; margin-top: 15px; margin-bottom: 15px;">
+                    
+                    <button class="btn" type="button" style="background-color: #0C5097; color: rgb(187, 187, 187); font-size: 12px;"
+                        data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
+                </div>
+            
+                <div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-size: 16px ; color:#000000; font-weight: 500;">
+                            Minisite makes it easy for you to collaborate and arrange relavant content for your
+                            specific teams.
+                        </span>
+                    </div>
+                    <div>
+                        <span style="font-size: 16px ; color:#000000; font-weight: 500;">
+                            Please visit your relavent minisite by clicking the dropdown on the left side bar or add
+                            a new page to the existing Minisite.
+                        </span>
+                    </div>
+                </div>
+
+
+                    <div class="row" id="teamUsersContainer">
+                        <p class="text-muted ps-3 mt-2">Please select a team to view users.</p>
+                    </div>
+
+                </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Documents -->
+        <div id="documents" class="content-section bg-secondary text-white border p-3 d-none">
+          <h4>Documents</h4>
+          <p>Documents content appears here.</p>
+        </div>
+
+       </div>
+      </div>
+    </div>
+  </div>
+    </div>
+
+            
+
+            
 
             <div class="col-lg-5 col-md-5">
                 <div>
@@ -351,11 +373,13 @@
                                 listItem.style.borderRadius = "5px";
                                 listItem.style.color = "white";
                                 listItem.style.padding = "5px 5px";
+                                
                             };
                             listItem.onmouseout = function () {
                                 listItem.style.backgroundColor = "transparent";
                                 listItem.style.color = "black";
                                 listItem.style.padding = "5px 0px";
+                                
                             };
                             recordList.appendChild(listItem);
                         });
@@ -375,44 +399,43 @@
     }
 
     document.getElementById("recordList").addEventListener("click", function (e) {
-        let listItem = e.target.closest("li"); // Ensure we get the LI even if clicking on <strong>
+    let listItem = e.target.closest("li");
 
-        if (listItem && listItem.hasAttribute("data-page-id")) {
-            let pageId = listItem.getAttribute("data-page-id");
-            //console.log(pageId);
-            document.querySelector(".welcome").style.display = "none";
+    if (listItem && listItem.hasAttribute("data-page-id")) {
+        let pageId = listItem.getAttribute("data-page-id");
+        document.querySelector(".welcome").style.display = "none";
 
-            fetch(`/get-page-records/${pageId}`)
-                .then(response => response.json())
-                .then(data => {
-                    let page = data[0];
+        fetch(`/get-page-records/${pageId}`)
+            .then(response => response.json())
+            .then(data => {
+                let page = data[0];
 
-                    let pageDetails = document.getElementById("pageDetails");
-                    pageDetails.style.display = "block";
-                    document.getElementById("pageTitle").innerText = capitalizeWords(page.page_title);
-                    document.getElementById("pageRecords").innerHTML = `
-                        <div>
-                            <img src="/${page.image}" alt="${page.page_title}" class="page-image" style="width:10%">
-                        </div>
-                        <div class="page-description">
-                            <p>${page.page_description}</p>
-                        </div>
-                        <div class="page-actions mt-3">
-                            <button class="btn btn-edit" onclick="editPage(${page.id})">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-delete" onclick="confirmDelete(${page.id})">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-                        </div>
-                    `;
+                let pageDetails = document.getElementById("pageDetails");
+                pageDetails.style.display = "block";
+                document.getElementById("pageTitle").innerText = capitalizeWords(page.page_title);
+                document.getElementById("pageRecords").innerHTML = `
+                    <div>
+                        <img src="/${page.image}" alt="${page.page_title}" class="page-image" style="width:10%">
+                    </div>
+                    <div class="page-description">
+                        <p>${page.page_description}</p>
+                    </div>
+                    <div class="page-actions mt-3">
+                        <button class="btn btn-edit" onclick="editPage(${page.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-delete" onclick="confirmDelete(${page.id})">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error("Error fetching page details:", error);
+            });
+    }
+});
 
-                })
-                .catch(error => {
-                    console.error("Error fetching page details:", error);
-                });
-        }
-    });
 
 });
 
@@ -557,4 +580,148 @@ document.getElementById('activity').addEventListener('click', function () {
             });
         });
     </script>
+
+
+
+
+
+<script>
+    // Get teams data from backend
+    const teamsData = @json($teams);
+
+    // When a team from the dropdown is clicked
+    document.querySelectorAll('.team-option').forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const teamId = this.getAttribute('data-team-id');
+            const teamName = this.getAttribute('data-team-name');
+
+            // Update dropdown button text
+            document.getElementById('selectedTeam').innerText = teamName;
+
+            // Remove "active" class from all dropdown items
+            document.querySelectorAll('.team-option').forEach(opt => {
+                opt.classList.remove('active');
+                opt.style.backgroundColor = ''; 
+                opt.style.color = '';
+            });
+
+            // Add "active" class to the selected team item
+            this.classList.add('active');
+            this.style.backgroundColor = '#0C5097';
+            this.style.color = 'white';
+
+            // Load users
+            const container = document.getElementById('teamUsersContainer');
+            container.innerHTML = ''; // Clear old users
+
+            const selectedTeam = teamsData.find(team => team.id == teamId);
+
+            if (selectedTeam && selectedTeam.users.length > 0) {
+                selectedTeam.users.forEach(user => {
+                    const userHTML = `
+                        <div class="col-md-6 mt-3">
+                            <div style="display: flex;">
+                                <div>
+                                    <img src="${user.profile_image ? '/' + user.profile_image : '/images/avatar.png'}"
+                                        style="width: 70px; height: 70px; object-fit: cover; border-radius: 100px;" alt="">
+                                </div>
+                                <div style="padding-top: 10px; padding-left: 5px;">
+                                    <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;">
+                                        ${user.name}
+                                        <span
+                                            style="background: #0C5097; color: white; font-size: 8px; padding: 1px 4px 2px 4px; border-radius: 10px;">
+                                            ${user.role ?? 'Member'}
+                                        </span>
+                                    </p>
+                                    <p style="font-size: 14px;color: #707070;">
+                                        ${user.designation ?? 'Team Member'}, ${selectedTeam.team_name}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += userHTML;
+                });
+            } else {
+                container.innerHTML = `<p class="text-muted ps-3 mt-2">No users found for this team.</p>`;
+            }
+        });
+    });
+</script>
+<script>
+    document.querySelectorAll(".dropdown-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
+        e.preventDefault();
+        const target = e.target.getAttribute("data-target");
+        const teamId = e.target.getAttribute("data-team-id"); // optional, if you have one
+
+        document.getElementById("dropdownMenuButton").innerText = e.target.innerText;
+
+        if (target === "team") {
+            // Instead of new route — reuse your existing /get-page-records endpoint
+            fetch(`/get-page-records/${teamId}`) 
+                .then(response => response.json())
+                .then(data => {
+                    let section = document.getElementById("pageDetails");
+                    document.querySelector(".welcome").style.display = "none";
+                    section.style.display = "block";
+
+                    if (data.length > 0) {
+                        let team = data[0];
+                        section.innerHTML = `
+                            <h4>${team.team_name ?? 'Team'}</h4>
+                            <p>${team.team_description ?? 'No description available.'}</p>
+                            <hr>
+                            <h5>Pages</h5>
+                            <ul>
+                                ${data.map(page => `
+                                    <li onclick="loadPage(${page.id})">${page.page_title}</li>
+                                `).join('')}
+                            </ul>
+                        `;
+                    } else {
+                        section.innerHTML = `<p>No data found for this team.</p>`;
+                    }
+                })
+                .catch(err => console.error("Error loading team data:", err));
+        }
+    });
+});
+function loadPage(pageId) {
+    fetch(`/get-page-records/${pageId}`)
+        .then(res => res.json())
+        .then(data => {
+            let page = data[0];
+            let section = document.getElementById("pageDetails");
+            section.innerHTML = `
+                <h4>${page.page_title}</h4>
+                <img src="/${page.image}" style="width:15%" />
+                <p>${page.page_description}</p>
+            `;
+        })
+        .catch(err => console.error(err));
+}
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const documentSection = document.getElementById("document-main");
+    const teamSection = document.getElementById("team-main");
+    const docButton = document.getElementById("showDocumentsBtn");
+
+    // Hide document section by default
+    documentSection.style.display = "none";
+
+    // Add click event to "Documents" button
+    docButton.addEventListener("click", function () {
+        documentSection.style.display = "block";   // Show document section
+        teamSection.style.display = "none";        // Hide team section
+    });
+});
+</script>
+
+
 @endpush

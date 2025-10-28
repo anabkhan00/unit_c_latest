@@ -1169,6 +1169,7 @@ $(document).on('click', '.open-edit-project-modal', function () {
             $('#edit_project_id').val(response.id);
             $('#edit_project_name').val(response.name);
             $('#edit_description').val(response.description);
+            $('#edit_description').val(response.description);
             $('#edit_status').val(response.status.toLowerCase().replace(' ', '_')); // normalize back to option value
 
             // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
