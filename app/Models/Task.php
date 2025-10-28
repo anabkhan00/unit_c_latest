@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SubTask;
 
 class Task extends Model
 {
@@ -11,6 +12,11 @@ class Task extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function sub_task()
+    {
+        return $this->hasMany(SubTask::class,'task_id');
     }
 
     public function assignee()

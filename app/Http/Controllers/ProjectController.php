@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Auth;
 class ProjectController extends Controller
 {
     public function index()
-    {
+    { 
         $users = User::where('id', '!=', Auth::id())->get();
-        $tasks = Task::with(['project', 'assignee'])->get();
+        $tasks = Task::with(['project', 'sub_task','assignee'])->get();
 
         $tasks->each(function ($task) {
             $task->expected_days = $task->due_date && $task->project->start_date
@@ -33,10 +33,11 @@ class ProjectController extends Controller
         $overdueTasks = Task::where('due_date', '<', now())
             ->where('status', '!=', 'done')
             ->count();
-
+        $projects = Project::with('tasks')->get();
         $emails = Email::with('receiver')->where('receiver_id', Auth::id())->get();
         $media = Media::where('user_id', Auth::id())->get();
 
+        // dd($projects);
         return view('pages.project', compact(
             'users',
             'tasks',
@@ -45,7 +46,8 @@ class ProjectController extends Controller
             'todoTasks',
             'overdueTasks',
             'emails',
-            'media'
+            'media',
+            'projects'
         ));
     }
 
@@ -134,9 +136,80 @@ class ProjectController extends Controller
         $project->load('tasks');
         return view('pages.project-edit', compact('project', 'users'));
     }
+    
+    public function update_main(Request $request, $id)
+{
+    // ✅ 1. Validate incoming request
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'created_by' => 'required|integer|exists:users,id',
+        'description' => 'nullable|string',
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'status' => 'required|in:not_started,in_progress,completed',
+        'tasks' => 'nullable|array',
+        'tasks.*.title' => 'required|string|max:255',
+        'tasks.*.description' => 'nullable|string',
+        'tasks.*.assigned_to' => 'nullable|integer|exists:users,id',
+        'tasks.*.priority' => 'nullable|in:low,medium,high',
+        'tasks.*.due_date' => 'nullable|date',
+    ]);
+
+    // ✅ 2. Find the project
+    $project = Project::with('tasks')->findOrFail($id);
+
+    // ✅ 3. Update project main info
+    $project->update([
+        'name' => $request->name,
+        'created_by' => $request->created_by,
+        'description' => $request->description,
+        'start_date' => $request->start_date,
+        'end_date' => $request->end_date,
+        'status' => $request->status,
+    ]);
+
+    // ✅ 4. Handle tasks
+    $existingTaskIds = $project->tasks->pluck('id')->toArray();
+    $incomingTasks = $request->tasks ?? [];
+
+    $newTaskIds = [];
+
+    foreach ($incomingTasks as $taskData) {
+        if (isset($taskData['id']) && in_array($taskData['id'], $existingTaskIds)) {
+            // 🟢 Update existing task
+            $task = Task::find($taskData['id']);
+            $task->update([
+                'title' => $taskData['title'],
+                'description' => $taskData['description'] ?? null,
+                'assigned_to' => $taskData['assigned_to'] ?? null,
+                'priority' => $taskData['priority'] ?? 'medium',
+                'due_date' => $taskData['due_date'] ?? null,
+            ]);
+            $newTaskIds[] = $task->id;
+        } else {
+            // 🆕 Create new task
+            $task = $project->tasks()->create([
+                'title' => $taskData['title'],
+                'description' => $taskData['description'] ?? null,
+                'assigned_to' => $taskData['assigned_to'] ?? null,
+                'priority' => $taskData['priority'] ?? 'medium',
+                'due_date' => $taskData['due_date'] ?? null,
+            ]);
+            $newTaskIds[] = $task->id;
+        }
+    }
+
+    // 🔴 Delete tasks that were removed in the form
+    $tasksToDelete = array_diff($existingTaskIds, $newTaskIds);
+    if (!empty($tasksToDelete)) {
+        Task::whereIn('id', $tasksToDelete)->delete();
+    }
+
+    return redirect()->back()->with('success', 'Project updated successfully!');
+}
 
     public function update(Request $request, Project $project)
-    {
+    {   
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
