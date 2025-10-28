@@ -190,7 +190,7 @@ function filterTasks(projectId) {
             data-task-name="${task.title}"
             data-bs-toggle="modal" 
             data-bs-target="#taskInfoModal">
-            View Task
+            documents
         </button>
 
         <button 
@@ -210,10 +210,8 @@ function filterTasks(projectId) {
                 <li class="list-group-item p-2">
                     <strong>Title:</strong> ${sub.title} <br>
                     <strong>Description:</strong> ${sub.description || 'N/A'} <br>
-                    <strong>Status:</strong> 
-                    <span class="badge bg-${sub.status === 'completed' ? 'success' : sub.status === 'in_progress' ? 'warning' : 'secondary'}">
-                        ${sub.status}
-                    </span> <br>
+                    
+                    
                     <small class="text-muted">Created At: ${new Date(sub.created_at).toLocaleString()}</small>
                 </li>
             `).join('')

@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Email;
+use App\Models\Team;
 use App\Models\Media;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class ProjectController extends Controller
                 ? Carbon::parse($task->project->start_date)->diffInDays($task->completed_at ?? now())
                 : null;
         });
-
+        $teams = Team::get();
         $completedTasks = Task::where('status', 'done')->count();
         $inProgressTasks = Task::where('status', 'in_progress')->count();
         $todoTasks = Task::where('status', 'todo')->count();
@@ -47,7 +48,8 @@ class ProjectController extends Controller
             'overdueTasks',
             'emails',
             'media',
-            'projects'
+            'projects',
+            'teams'
         ));
     }
 
@@ -58,7 +60,8 @@ class ProjectController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {       
+        // dd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -71,6 +74,7 @@ class ProjectController extends Controller
             'tasks.*.assigned_to' => 'nullable|exists:users,id',
             'tasks.*.priority' => 'required|in:low,medium,high',
             'tasks.*.due_date' => 'nullable|date|after_or_equal:start_date',
+            
         ]);
 
         $project = Project::create([
@@ -80,6 +84,7 @@ class ProjectController extends Controller
             'end_date' => $validated['end_date'],
             'status' => $validated['status'],
             'created_by' => $validated['created_by'],
+            'team_id' => $request->team_id
         ]);
 
         if (!empty($validated['tasks'])) {

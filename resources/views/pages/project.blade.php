@@ -557,6 +557,15 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="created_by" class="col-form-label">Team:</label>
+                                    <select class="form-control" id="created_by" name="team_id" required>
+                                        <option value="">Select Team</option>
+                                        @foreach ($teams as $team)
+                                            <option value="{{ $team->id }}">{{ $team->team_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <label for="description" class="col-form-label">Project Description:</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
@@ -1146,6 +1155,82 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     //////////////////////////////////////////////////////
+
+    <script>
+$(document).on('click', '.open-edit-project-modal', function () {
+    let projectId = $(this).data('project-id');
+
+    $.ajax({
+        url: '/project/' + projectId,
+        type: 'GET',
+        success: function (response) {
+
+            // ✅ Fill basic project fields
+            $('#edit_project_id').val(response.id);
+            $('#edit_project_name').val(response.name);
+            $('#edit_description').val(response.description);
+            $('#edit_status').val(response.status.toLowerCase().replace(' ', '_')); // normalize back to option value
+
+            // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
+            if (response.start_date) {
+                let parts = response.start_date.split('-');
+                $('#edit_start_date').val(parts.reverse().join('-'));
+            }
+            if (response.end_date) {
+                let parts = response.end_date.split('-');
+                $('#edit_end_date').val(parts.reverse().join('-'));
+            }
+
+            // ✅ Creator (handle nested object)
+            if (response.created_by && response.created_by.id) {
+                $('#edit_created_by').val(response.created_by.id);
+            } else {
+                $('#edit_created_by').val('');
+            }
+
+            // ✅ Tasks
+            let tasksHTML = '';
+            if (response.tasks && response.tasks.length > 0) {
+                response.tasks.forEach(task => {
+                    tasksHTML += `
+                        <div class="border rounded p-2 mb-2">
+                            <input type="hidden" name="tasks[${task.id}][id]" value="${task.id}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Title:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][title]" value="${task.title}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][status]" value="${task.status}">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <label class="form-label">Description:</label>
+                                    <textarea class="form-control form-control-sm" name="tasks[${task.id}][description]">${task.description ?? ''}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                tasksHTML = `<p class="text-muted">No tasks found for this project.</p>`;
+            }
+
+            $('#edit-tasks-section').html(tasksHTML);
+
+            // ✅ Finally, show modal
+            $('#editMainProjectModal').modal('show');
+        },
+        error: function (xhr) {
+            console.error(xhr);
+            alert('Error loading project details.');
+        }
+    });
+});
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -1422,11 +1507,9 @@ function renderChart(tasks) {
     const minDate = new Date(Math.min(...allDates));
     const maxDate = new Date(Math.max(...allDates));
 
-    // ✅ Calculate duration in days
     const diffInDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
-
-    // ✅ Choose label format based on duration
     const isShortDuration = diffInDays < 30;
+
     const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     const data = {
@@ -1451,38 +1534,44 @@ function renderChart(tasks) {
                 min: minDate,
                 max: maxDate,
                 time: {
-                    unit: 'day',
+                    unit: isShortDuration ? 'day' : 'month',
                     displayFormats: isShortDuration
                         ? { day: 'E' }
-                        : { day: 'MMM d, yyyy' },
-                    tooltipFormat: 'MMM d, yyyy'
-                },
-                title: {
-                    display: true,
-                    text: isShortDuration ? 'Days of Week' : 'Timeline',
-                    color: '#0C5097',
-                    font: { size: 14, weight: 'bold' }
+                        : { month: 'MMM yyyy' }
                 },
                 grid: { color: '#e0e0e0' },
                 ticks: {
-                    color: '#222',
-                    autoSkip: true,
+                    color: '#000',
                     font: { size: 12 },
-                    // ✅ Custom tick label: e.g. "W (23 Oct 2025)"
-                    callback: function(value) {
+                    maxRotation: 0, // ✅ prevent rotation
+                    minRotation: 0, // ✅ keep labels straight
+                    callback: function (value) {
                         const date = new Date(value);
                         if (isShortDuration) {
                             const dayName = dayNames[date.getDay()];
-                            const formattedDate = date.toLocaleDateString('en-US', {
-                                day: 'numeric',
+                            // ✅ For Monday, show date above M in two lines
+                            if (dayName === 'M') {
+                                const formatted = date.toLocaleDateString('en-US', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                });
+                                return [formatted, dayName]; // 👈 two lines (array form)
+                            } else {
+                                return [dayName]; // single line for others
+                            }
+                        } else {
+                            return date.toLocaleDateString('en-US', {
                                 month: 'short',
                                 year: 'numeric'
                             });
-                            return `${dayName} (${formattedDate})`;
-                        } else {
-                            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                         }
                     }
+                },
+                title: {
+                    display: true,
+                    text: isShortDuration ? 'Days of Week' : 'Months',
+                    color: '#0C5097',
+                    font: { size: 14, weight: 'bold' }
                 }
             },
             y: {
@@ -1515,6 +1604,7 @@ function renderChart(tasks) {
         options
     });
 }
+
 
 
     function updateGantt() {
@@ -1618,6 +1708,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 @endpush
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <style>
      .container {
