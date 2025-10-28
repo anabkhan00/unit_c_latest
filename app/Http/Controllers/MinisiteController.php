@@ -6,6 +6,7 @@ use App\Models\Team;
 use App\Models\Email;
 use App\Models\Media;
 use App\Models\Minisite;
+use App\Models\MinisiteDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,9 +20,9 @@ class MinisiteController extends Controller
      
         $emails = Email::with('receiver')->where('receiver_id', auth()->id())->get();
         $media = Media::where('user_id', auth()->id())->get();
-        $teams =  Team::all();
-       
-        return view('pages.minisite', compact('emails', 'media', 'teams'));
+        $teams =  Team::with('users')->get();
+        $documents = MinisiteDocument::get();
+        return view('pages.minisite', compact('emails', 'media', 'teams','documents'));
     }
 
     public function storePage(Request $request)
@@ -76,7 +77,7 @@ class MinisiteController extends Controller
             $documentPath = null;
         }
 
-        Minisite::create([
+        MinisiteDocument::create([
             'document' => $documentPath,
             'document_title' => $request->document_title,
             'document_added_by' => Auth::id(),
