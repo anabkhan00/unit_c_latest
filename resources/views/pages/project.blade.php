@@ -8,9 +8,32 @@
 
     <div class="container-fluid" id="project-content" style="position: absolute; top: 185px; left: 60px; width: 95%;">
         <div class="row">
-            <div class="d-flex flex-row w-100 gap-3" style="margin-bottom: 0;">
-                <div class="flex-grow-1 p-3" style="min-width: 350px; max-width: 500px; ">
-                    <div class="rounded p-3" style="background-color: #F4F4F4; height: 252px !important;">
+            <div class="row">
+                
+                <div class="col-12 rounded p-3" style="background-color: #F4F4F4;">
+                    <div style="display: flex;  justify-content: space-between;">
+                            <div>
+                                <p style="color: #0C5097; font-weight: bold; font-size: 18px;">Projects Overview</p>
+                            </div>
+                            <div>
+                                <button type="button" class="btn" style="background: #0C5097; color: white"
+                                    data-bs-toggle="modal" data-bs-target="#projectModal">+</button>
+                            </div>
+                        </div>
+                    @foreach($projects as $project)
+    <button type="button"
+        class="btn btn-project mt-1"
+        style="background:#0C5097; color:white ; font-size:12px;"
+        data-project='@json($project)'>
+        {{ $project->name }}
+    </button>
+@endforeach
+
+                </div>
+            </div>
+            <div class="d-flex flex-row w-100 p-0" style="margin-bottom: 0;">
+                <div class="flex-grow-1 p-3 px-0" style="min-width: 350px; max-width: 500px; ">
+                    <div class="rounded p-3 " style="background-color: #F4F4F4; height: 252px !important;">
                         <div style="display: flex; margin-bottom: 15px; justify-content: space-between;">
                             <div>
                                 <p style="color: #0C5097; font-weight: bold; font-size: 18px;">Tasks Overview</p>
@@ -18,7 +41,18 @@
                             <div>
                                 <button type="button" class="btn" style="background: #0C5097; color: white"
                                     data-bs-toggle="modal" data-bs-target="#projectModal">+</button>
-                            </div>
+                            </div>  --}}
+                                         
+<button type="button"
+    id="editMainButton"
+    class="btn btn-edit-project"
+    style="background:#0C5097; color:white;"
+    data-bs-toggle="modal"
+    data-bs-target="#editMainProjectModal"
+    data-project="">
+    Edit Selected Project
+</button>
+
                         </div>
                         <div class="row my-3">
                             <div class="col-6">
@@ -34,20 +68,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 51 51" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.136719" y="0.355225" width="50.1475" height="50.1475"
-                                                    fill="url(#pattern0_246_331)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_331" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_331" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_331" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                          <img src="{{ asset('images/cp.svg') }}" class="img-fluid">
                                         </div>
                                     </div>
                                 </div>
@@ -65,20 +86,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 53" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.404297" y="0.628418" width="51.6011" height="51.6011"
-                                                    fill="url(#pattern0_246_334)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_334" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_334" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_334" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                           <img src="{{ asset('images/tp.svg') }}" class="img-fluid">
                                         </div>
                                     </div>
                                 </div>
@@ -98,20 +106,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 52" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.409668" y="0.212891" width="50.8743" height="50.8743"
-                                                    fill="url(#pattern0_246_337)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_337" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_337" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_337" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                          <img src="{{ asset('images/lp.svg') }}" class="img-fluid">
                                         </div>
                                     </div>
                                 </div>
@@ -128,20 +123,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 52" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.409668" y="0.212891" width="50.8743" height="50.8743"
-                                                    fill="url(#pattern0_246_338)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_338" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_338" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_338" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                             <img src="{{ asset('images/th.svg') }}" class="img-fluid">
                                         </div>
                                     </div>
                                 </div>
@@ -152,7 +134,7 @@
                 <div class="flex-grow-1 p-3 d-flex align-items-stretch" style="min-width: 350px;">
                     <div class="w-100 rounded d-flex align-items-center justify-content-center"
                         style="background-color: #F4F4F4; height: 100%; min-height: 225px;">
-                        <canvas id="project-bar-chart" style="height: 100%; width: 100%;"></canvas>
+                        <canvas id="project-bar-chart" style="height: 250px; width: 100%;"></canvas>
                     </div>
                 </div>
             </div>
@@ -251,8 +233,8 @@
                                     <td class="text-center">
                                         <span
                                             class="
-                                            {{ $task->status == 'todo' ? 'bg-primary' : '' }}
-                                            {{ $task->status == 'in_progress' ? 'bg-info' : '' }}
+                                            {{ $task->status == 'todo' ? 'bg-dark' : '' }}
+                                            {{ $task->status == 'in_progress' ? 'bg-danger' : '' }}
                                             {{ $task->status == 'done' ? 'bg-success' : '' }}
                                             badge"
                                             style="font-size: 12px; width: 100px; padding: 0.25rem;">
@@ -1045,99 +1027,112 @@
             window.ganttChartInstance.destroy();
         }
 
-        var validTasks = tasks.filter(function(task) {
-            return task.project && task.project.start_date && task.due_date;
-        });
+    var validTasks = tasks.filter(t => t.project && t.project.start_date && t.due_date);
 
-        var chartTasks = validTasks.map(function(task) { return task.title; });
-        var chartResources = validTasks.map(function(task) { return task.assignee ? task.assignee.name : ''; });
+    if (validTasks.length === 0) {
+        console.warn("No valid tasks found");
+        return;
+    }
 
-        var timelineData = validTasks.map(function(task, i) {
-            return {
-                x: new Date(task.project.start_date).toISOString(),
-                x2: new Date(task.due_date).toISOString(),
-                y: i
-            };
-        });
+    const parseDate = d => new Date(d);
+    const allDates = validTasks.flatMap(t => [parseDate(t.project.start_date), parseDate(t.due_date)]);
+    const minDate = new Date(Math.min(...allDates));
+    const maxDate = new Date(Math.max(...allDates));
 
-        var barColors = validTasks.map(function() {
-            return '#0C5097'; // Green for all
-        });
+    const diffInDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+    const isShortDuration = diffInDays < 30;
 
-        var data = {
-            labels: chartTasks,
-            datasets: [
-                {
-                    type: 'bar',
-                    label: "Tasks Timeline",
-                    data: timelineData,
-                    backgroundColor: barColors,
-                    borderRadius: 4,
-                    barPercentage: 0.6,
-                    parsing: {
-                        xAxisKey: 'x',
-                        xMaxKey: 'x2',
-                        yAxisKey: 'y'
-                    }
-                }
-            ]
-        };
+    const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-        var options = {
-            indexAxis: "y",
-            parsing: {
-                xAxisKey: 'x',
-                xMaxKey: 'x2',
-                yAxisKey: 'y'
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    position: "top",
-                    type: "time",
-                    time: {
-                        unit: "day",
-                        displayFormats: {
-                            day: "MMM dd, yyyy"
-                        },
-                        tooltipFormat: "PP"
-                    },
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    },
-                    ticks: {
-                        color: '#222',
-                        font: { size: 13 }
-                    }
+    const data = {
+        labels: validTasks.map(t => t.title),
+    datasets: [{
+    label: 'Tasks Timeline',
+    data: validTasks.map(t => [parseDate(t.project.start_date), parseDate(t.due_date)]),
+    backgroundColor: '#0C5097',
+    borderRadius: 6,
+    barPercentage: 0.6,
+    categoryPercentage: 0.6,
+    barThickness: 25,       // ✅ Fixed height for bars
+    maxBarThickness: 28,    // ✅ Prevents huge bars on few tasks
+}]
+
+    };
+
+    const options = {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                type: 'time',
+                position: 'top',
+                min: minDate,
+                max: maxDate,
+                time: {
+                    unit: isShortDuration ? 'day' : 'month',
+                    displayFormats: isShortDuration
+                        ? { day: 'E' }
+                        : { month: 'MMM yyyy' }
                 },
-                y: {
-                    ticks: {
-                        autoSkip: false,
-                        callback: function(value, index) {
-                            return ''; // Show task name
-                        },
-                        color: '#222',
-                        font: { size: 13 }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(ctx) {
-                            var start = ctx.raw.x ? new Date(ctx.raw.x).toLocaleDateString() : '';
-                            var end = ctx.raw.x2 ? new Date(ctx.raw.x2).toLocaleDateString() : '';
-                            return chartTasks[ctx.raw.y] + " (" + chartResources[ctx.raw.y] + "): " + start + " → " + end;
+                grid: { color: '#e0e0e0' },
+                ticks: {
+                    color: '#000',
+                    font: { size: 12 },
+                    maxRotation: 0, // ✅ prevent rotation
+                    minRotation: 0, // ✅ keep labels straight
+                    callback: function (value) {
+                        const date = new Date(value);
+                        if (isShortDuration) {
+                            const dayName = dayNames[date.getDay()];
+                            // ✅ For Monday, show date above M in two lines
+                            if (dayName === 'M') {
+                                const formatted = date.toLocaleDateString('en-US', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                });
+                                return [formatted, dayName]; // 👈 two lines (array form)
+                            } else {
+                                return [dayName]; // single line for others
+                            }
+                        } else {
+                            return date.toLocaleDateString('en-US', {
+                                month: 'short',
+                                year: 'numeric'
+                            });
                         }
                     }
                 },
-                legend: {
-                    display: false
+                title: {
+                    display: true,
+                    text: isShortDuration ? 'Days of Week' : 'Months',
+                    color: '#0C5097',
+                    font: { size: 14, weight: 'bold' }
+                }
+            },
+            y: {
+                grid: { display: false },
+                ticks: {
+                    color: '#000',
+                    font: { size: 12 },
+                    callback: (value, index) => validTasks[index] ? validTasks[index].title : ''
                 }
             }
-        };
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function (ctx) {
+                        const start = ctx.raw[0] ? new Date(ctx.raw[0]).toLocaleDateString() : '';
+                        const end = ctx.raw[1] ? new Date(ctx.raw[1]).toLocaleDateString() : '';
+                        const task = validTasks[ctx.dataIndex];
+                        return `${task.title} (${task.assignee?.name || ''}): ${start} → ${end}`;
+                    }
+                }
+            }
+        }
+    };
 
         window.ganttChartInstance = new Chart(ctx, {
             type: "bar",
