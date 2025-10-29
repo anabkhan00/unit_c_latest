@@ -1,6 +1,10 @@
+
 @extends('layouts.master')
 
 @section('content')
+<!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     @include('pages.main', ['emails' => $emails])
     <link rel="stylesheet" href="{{ asset('css/minisite.css') }}">
     <style>
@@ -15,7 +19,7 @@
   <div class="container mt-4">
     <div class="row align-items-start">
       <!-- Left Column -->
-      <div class="col-md-3 p-0 m-0 bg-light border">
+      <div class="col-md-3 p-2 m-0 rounded" style="background-color: #edf0f2 ; height: 500px; ">
         <!-- Dropdown -->
         <div class="dropdown p-0 m-0 mb-3">    
           <button class="btn btn-secondary dropdown-toggle w-100 rounded-0" type="button id="dropdownMenuButton"
@@ -41,13 +45,16 @@
         <div class="row">
           <div class="col-6">
             {{--  <button class="btn btn-primary w-100 rounded-0">Button 1</button>  --}}
-            <button class="btn w-100 rounded-0" type="button"
-                        style="background: #0C5097; margin-right: 15px; color: white; font-size: 12px;"
-                        data-bs-toggle="modal" data-bs-target="#addPageModal">Add New Page</button>
+            <button class="btn w-100 rounded" type="button"
+                        style="background: #0C5097;  color: white; font-size: 12px;"
+                        data-bs-toggle="modal" data-bs-target="#addPageModal"><p class="m-0"><i class="bi bi-file-earmark-plus" style="color:white !important ; font-size: 18px"></i></p>
+                    <p class="m-0">Add New Page</p></button>
           </div>
           <div class="col-6">
-            <button id="showDocumentsBtn" class="btn btn-outline-primary w-100 rounded-0">
-  Documents
+            <button id="showDocumentsBtn"
+                style="background: #0C5097;  color: white; font-size: 12px;" class="btn btn-outline-primary w-100 rounded">
+ <p class="m-0"><i class="bi bi-folder" style="color:white !important ; font-size: 18px"></i></p>
+                    <p class="m-0">Documents</p>
 </button>
 
           </div>
@@ -57,7 +64,7 @@
           <div class="col-12">
             <div class="col-md-12 mt-2">
                         <div id="minisiteRecords"
-                            style="display: none; margin-top: 5px; padding: 10px; border: 1px solid #ccc; border-radius: 0px;">
+                            style="display: none; margin-top: 5px; padding: 10px;  border-radius: 0px;">
                             <ul class="m-0" id="recordList" style="list-style-type: none;  padding-left: 0;"></ul>
                         </div>
                     </div>
@@ -69,28 +76,30 @@
       <!-- Right Column Sections -->
       <div class="col-md-9">
         {{--  sirf document dutton ka click par ya active ho paki par ya show na ho  --}}
-        <div id="document-main" class="content-section bg-secondary text-white border p-3">
-            <button class="btn" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
+        <div id="document-main" class="content-section p-3" style="color: #0C5097;">
+            <button class="btn mb-3" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
                         data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
                         <div class="row">
                             @foreach ($documents as $document)
-                            <div class=" col-2 document-item mb-2 p-2 border rounded">
-                                {{ $document->document_title }}
+                            <div class=" col-4 document-item mb-2 p-3 ">
+                          <div class="row">
+                            <div class="col-md-12 border p-5 rounded ">
+                                <p class="text-center">      {{ $document->document_title }}</p>
+                            </div>
+                          </div>
                             </div>
                         @endforeach
                         </div>
 
         </div>
-        <div id="team-main" class="content-section  text-white border p-3">
-            <div class="col-lg-6 col-md-6" id="pageDetails" style="display: none;">
-                <div class="card shadow">
-                    <div class="card-header">
-                        <h3 id="pageTitle" class="card-title mb-0"></h3>
-                    </div>
-                    <div class="card-body" id="pageRecords">
+        <div id="team-main" class="content-section  text-white  p-3">
+            <div class="col-lg-12 col-md-12" id="pageDetails" style="display: none;">
+             
+               
+                    <div class="card-body w-100" id="pageRecords">
                         <!-- Content will be populated by JavaScript -->
                     </div>
-                </div>
+             
             </div>
           <div class="col-lg-7 col-md-7 p-3 rounded welcome" >
                 <div class="row">
@@ -106,9 +115,20 @@
                         WELCOME TO MINISITE 
                     </div>
 
-                    <div class="col-md-5">
-                        
-                    </div>
+                  <div class="col-lg-5 col-md-5">
+                <div>
+                    <img src="{{ asset('images/minisite.png') }}"
+                        style="width: 400px; position: absolute;
+                                object-fit:cover;
+                                height: 250px;
+                                left: 770px;
+                                gap: 0px;
+                                opacity: 0px;
+                                z-index: -1;
+                                "
+                        alt="">
+                </div>
+            </div>
                     
                 </div>
 
@@ -121,7 +141,7 @@
 
                 <div style="display: flex; margin-top: 15px; margin-bottom: 15px;">
                     
-                    <button class="btn" type="button" style="background-color: #0C5097; color: rgb(187, 187, 187); font-size: 12px;"
+                    <button class="btn" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
                         data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
                 </div>
             
@@ -169,20 +189,7 @@
 
             
 
-            <div class="col-lg-5 col-md-5">
-                <div>
-                    <img src="{{ asset('images/minisite.png') }}"
-                        style="width: 400px; position: absolute;
-                                object-fit:cover;
-                                height: 250px;
-                                left: 770px;
-                                gap: 0px;
-                                opacity: 0px;
-                                z-index: -1;
-                                "
-                        alt="">
-                </div>
-            </div>
+        
         </div>
         <div class="col-lg-4 col-md-4" id="teamActivityContainer"
             style="position: fixed; bottom: 0; right: 10px; transition: bottom 0.4s ease;">
@@ -363,9 +370,13 @@
                         data.forEach(record => {
                             //console.log(record);
                             let listItem = document.createElement("li");
-                            listItem.innerHTML = `<strong>${capitalizeWords(record.page_title)}</strong>`;
-                            listItem.style.padding = "5px 0";
+                            listItem.innerHTML = `${capitalizeWords(record.page_title)}`;
+                            listItem.style.padding = "10px 0px";
+                              listItem.style.color = "#0C5097";
                             listItem.style.cursor = "pointer";
+                               listItem.style.fontSize = "14px";   // ✅ font size set
+    listItem.style.fontWeight = "500";  // ✅ font weight set
+            listItem.style.borderBottom = "1px solid #0C5097"; // ✅ added border
                             listItem.style.transition = "background 0.3s ease";
                             listItem.setAttribute("data-page-id", record.id);
                             listItem.onmouseover = function () {
@@ -374,13 +385,17 @@
                                 listItem.style.color = "white";
                                 listItem.style.padding = "5px 5px";
                                 
-                            };
-                            listItem.onmouseout = function () {
-                                listItem.style.backgroundColor = "transparent";
-                                listItem.style.color = "black";
-                                listItem.style.padding = "5px 0px";
                                 
                             };
+                      listItem.onmouseout = function () {
+    listItem.style.backgroundColor = "transparent";
+  listItem.style.color = "#0C5097";
+              listItem.style.borderBottom = "1px solid #0C5097"; // ✅ added border
+    listItem.style.padding = "10px 0px";
+    listItem.style.fontSize = "14px";   // ✅ font size set
+    listItem.style.fontWeight = "500";  // ✅ font weight set
+};
+
                             recordList.appendChild(listItem);
                         });
                     } else {
@@ -401,39 +416,61 @@
     document.getElementById("recordList").addEventListener("click", function (e) {
     let listItem = e.target.closest("li");
 
-    if (listItem && listItem.hasAttribute("data-page-id")) {
-        let pageId = listItem.getAttribute("data-page-id");
-        document.querySelector(".welcome").style.display = "none";
+ if (listItem && listItem.hasAttribute("data-page-id")) {
+    let pageId = listItem.getAttribute("data-page-id");
+    document.querySelector(".welcome").style.display = "none";
 
-        fetch(`/get-page-records/${pageId}`)
-            .then(response => response.json())
-            .then(data => {
-                let page = data[0];
+    fetch(`/get-page-records/${pageId}`)
+        .then(response => response.json())
+        .then(data => {
+            let page = data[0];
+            let pageDetails = document.getElementById("pageDetails");
+            pageDetails.style.display = "block";
 
-                let pageDetails = document.getElementById("pageDetails");
-                pageDetails.style.display = "block";
-                document.getElementById("pageTitle").innerText = capitalizeWords(page.page_title);
-                document.getElementById("pageRecords").innerHTML = `
-                    <div>
-                        <img src="/${page.image}" alt="${page.page_title}" class="page-image" style="width:10%">
+
+            document.getElementById("pageRecords").innerHTML = `
+                <div style="font-family: Arial, sans-serif; background-color: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto; position: relative;">
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center;">
+                            <img src="/${page.image}" alt="${page.page_title}" style="width: 70px; height: 70px; border-radius: 50%; margin-right: 15px;">
+                            <h2 style="font-size: 32px; font-weight: 700; color: #0C5097; margin: 0;">${page.page_title}</h2>
+                        </div>
+                        <span style="font-size: 14px; color: #888;">Last updated on: ${new Date(page.updated_at).toLocaleDateString('en-GB', {
+                            day: '2-digit', month: 'short', year: 'numeric'
+                        })}</span>
                     </div>
-                    <div class="page-description">
-                        <p>${page.page_description}</p>
-                    </div>
-                    <div class="page-actions mt-3">
-                        <button class="btn btn-edit" onclick="editPage(${page.id})">
-                            <i class="fas fa-edit"></i> Edit
+
+                    <p style="font-size: 16px; line-height: 1.7; color: #333; margin-bottom: 15px;">
+                        ${page.page_description}
+                    </p>
+
+                    ${
+                        page.page_points
+                            ? `<ul style="padding-left: 20px; color: #333; margin-bottom: 30px;">
+                                    ${page.page_points.split('\n').map(point => `<li style="margin-bottom: 6px;">${point}</li>`).join('')}
+                               </ul>`
+                            : ''
+                    }
+
+                    <div style="text-align: center; margin-top: 40px;">
+                        <button onclick="editPage(${page.id})"
+                            style="background-color: #0C5097; color: #fff; border: none; border-radius: 50px; padding: 14px 40px; font-size: 18px; font-weight: bold; cursor: pointer; margin-right: 15px;">
+                            <i class="fas fa-edit"></i> Edit Content
                         </button>
-                        <button class="btn btn-delete" onclick="confirmDelete(${page.id})">
+                        <button onclick="confirmDelete(${page.id})"
+                            style="background-color: #d9534f; color: #fff; border: none; border-radius: 50px; padding: 14px 40px; font-size: 18px; font-weight: bold; cursor: pointer;">
                             <i class="fas fa-trash-alt"></i> Delete
                         </button>
                     </div>
-                `;
-            })
-            .catch(error => {
-                console.error("Error fetching page details:", error);
-            });
-    }
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error("Error fetching page details:", error);
+        });
+}
+
 });
 
 
@@ -625,17 +662,17 @@ document.getElementById('activity').addEventListener('click', function () {
                             <div style="display: flex;">
                                 <div>
                                     <img src="${user.profile_image ? '/' + user.profile_image : '/images/avatar.png'}"
-                                        style="width: 70px; height: 70px; object-fit: cover; border-radius: 100px;" alt="">
+                                        style="width: 50px; height: 50px; object-fit: cover; border-radius: 100px;" alt="">
                                 </div>
                                 <div style="padding-top: 10px; padding-left: 5px;">
-                                    <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;">
+                                    <p style="font-size: 14px;font-weight: bold;margin-bottom: 3px;color:black;">
                                         ${user.name}
                                         <span
                                             style="background: #0C5097; color: white; font-size: 8px; padding: 1px 4px 2px 4px; border-radius: 10px;">
                                             ${user.role ?? 'Member'}
                                         </span>
                                     </p>
-                                    <p style="font-size: 14px;color: #707070;">
+                                    <p style="font-size: 14px;color: #0C5097; font-weight: 500;">
                                         ${user.designation ?? 'Team Member'}, ${selectedTeam.team_name}
                                     </p>
                                 </div>
