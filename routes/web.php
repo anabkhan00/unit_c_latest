@@ -23,6 +23,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
+use App\Http\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -177,6 +178,22 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
         Route::post('/update-page/{id}',  'update');
         Route::delete('/delete-page/{id}',  'destroy');
     });
+
+    //chat
+    Route::get('/chat', [ChatController::class, 'index_list'])->name('chat.index_list');
+    Route::get('/chat/{receiver_id}', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+
+    Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
+    Route::post('/chat/upload', [ChatController::class, 'upload'])->name('chat.upload');
+
+
+    Route::get('/group-chat', [ChatController::class, 'teamList'])->name('group.chat.list');
+    Route::get('/group-chat/{team_id}', [ChatController::class, 'teamChat'])->name('group.chat.view');
+    Route::post('/group-chat/send', [ChatController::class, 'sendGroupMessage'])->name('group.chat.send');
+    Route::post('/chat/send-group-file', [ChatController::class, 'sendGroupFile'])->name('group.chat.send.file');
+
+
 
     //Folder
     Route::get('/folders', [FolderController::class, 'index'])->name('folders.index');
