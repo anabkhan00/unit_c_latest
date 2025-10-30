@@ -1,11 +1,13 @@
 <div class="side-bar">
-    <a href="{{ route('dashboard') }}">
-        <div class="logo"><img src="{{ asset('svg/logo.svg') }}" alt=""></div>
-    </a>
+    
     <ul class="inside-bar">
         <li class="inside-bar-item" id="talk-btn">
-            <img src="{{ asset('svg/talk.svg') }}" alt="">
-            <p class="inside-bar-text">Talk</p>
+
+                <img src="{{ asset('svg/talk.svg') }}" alt="">
+                <p class="inside-bar-text">Talk</p>
+
+
+
             <div class="talk-submenu" id="talk-submenu">
                 <div>
                     <div
@@ -1273,3 +1275,19 @@
         </li>
     </ul>
 </div>
+<!-- Chatify Modal -->
+<div class="modal fade" id="chatifyModal" tabindex="-1" aria-labelledby="chatifyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 800px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chatifyModalLabel">Chat</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="height: 600px; padding:0;">
+        <iframe src="{{ route('chatify') }}" style="width:100%; height:100%; border:none;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+
