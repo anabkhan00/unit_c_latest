@@ -121,20 +121,25 @@
         }
     @endphp
 
-    <div class="col-4 document-item mb-2 p-3">
+ <div class="col-4 document-item mb-2 p-3">
+    <a href="{{ asset('/' . $document->document) }}" 
+       download="{{ $document->document_name ?? basename($document->document_path) }}" 
+       style="text-decoration: none; color: inherit;">
         <div class="row">
-            <div class="col-md-12 border p-2 rounded">
+            <div class="col-md-12 border p-2 rounded" style="cursor: pointer;">
                 <div class="row">
                     <div class="col-md-12">
                         <p class="text-start m-0" style="font-size:16px; font-weight:600; color:black;">
-                            {{ $document->document_title }}
+                            {{ $document->document_name ?? $document->document_title }}
                         </p>
                     </div>
 
                     <div class="col-md-12 my-4 d-flex justify-content-center">
-                        <img src="{{ asset($icon) }}" class="img-fluid" style="height:50px; width:50px;" alt="">
+                        <img src="{{ asset($icon) }}" 
+                             class="img-fluid" 
+                             style="height:50px; width:50px;" 
+                             alt="Download Document">
                     </div>
-
                     <div class="col-md-12">
                         <p class="text-start m-0" style="font-size:12px; font-weight:500; color:black;">
                             Created at :
@@ -143,10 +148,13 @@
                             </span>
                         </p>
                     </div>
-             
+                </div>
             </div>
         </div>
-    </div>
+    </a>
+</div>
+
+
 @endforeach
 
                         </div>
