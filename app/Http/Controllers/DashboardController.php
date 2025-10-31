@@ -14,6 +14,7 @@ use App\Services\CalendarService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\CalendarRequest;
 use App\Models\Team;
+use App\Models\Meeting;
 use App\Notifications\EventNotification;
 use Illuminate\Support\Facades\Notification;
 
@@ -248,26 +249,74 @@ class DashboardController extends Controller
         return view('pages.full-calendar', compact('allArticles', 'emails', 'media'));
     }
 
+    // public function getEvents()
+    // {
+    //     $events = Calendar::all()->map(function ($event) {
+    //         return [
+    //             'id' => $event->id,
+    //             'title' => $event->event_title,
+    //             'start' => $event->all_day
+    //                 ? $event->event_date
+    //                 : $event->event_date . 'T' . $event->event_start_time,
+    //             'end' => $event->event_end_time
+    //                 ? $event->event_date . 'T' . $event->event_end_time
+    //                 : null,
+    //             'allDay' => (bool) $event->all_day,
+    //             'description' => $event->event_description,
+    //             'location' => $event->event_location,
+    //             //'created_by' => $event->creator ? $event->creator->name : 'Unknown'
+    //         ];
+    //     });
+
+    //     return response()->json($events);
+    // }
+
     public function getEvents()
     {
-        $events = Calendar::all()->map(function ($event) {
+
+    // ✅ Get all calendar events
+    $events = Calendar::all()->map(function ($event) {
+        return [
+            'id' => $event->id,
+            'title' => $event->event_title,
+            'start' => $event->all_day
+                ? $event->event_date
+                : $event->event_date . 'T' . $event->event_start_time,
+            'end' => $event->event_end_time
+                ? $event->event_date . 'T' . $event->event_end_time
+                : null,
+            'allDay' => (bool) $event->all_day,
+            'description' => $event->event_description,
+            'location' => $event->event_location,
+            'color' => '#3788d8', // Blue for normal events
+            'type' => 'event'
+        ];
+    });
+
+    // ✅ Get all meetings of logged-in user
+    $meetings = Meeting::with('participants')
+        ->whereHas('participants', function ($query) {
+            $query->where('user_id', auth()->id());
+        })
+        ->get()
+        ->map(function ($meeting) {
             return [
-                'id' => $event->id,
-                'title' => $event->event_title,
-                'start' => $event->all_day
-                    ? $event->event_date
-                    : $event->event_date . 'T' . $event->event_start_time,
-                'end' => $event->event_end_time
-                    ? $event->event_date . 'T' . $event->event_end_time
-                    : null,
-                'allDay' => (bool) $event->all_day,
-                'description' => $event->event_description,
-                'location' => $event->event_location,
-                //'created_by' => $event->creator ? $event->creator->name : 'Unknown'
+                'id' => $meeting->id,
+                'title' => $meeting->agenda ?? 'Meeting',
+                'start' => $meeting->start_time,
+                'end' => $meeting->end_time,
+                'allDay' => false,
+                'description' => $meeting->description ?? 'No description',
+                'location' => $meeting->location ?? 'Online/Office',
+                'color' => 'red', // 🔴 Meetings shown in red
+                'type' => 'meeting'
             ];
         });
 
-        return response()->json($events);
+    // ✅ Merge both collections
+    $allData = $events->merge($meetings);
+
+    return response()->json($allData);
     }
 
     public function deleteEvent($id)

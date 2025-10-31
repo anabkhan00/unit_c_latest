@@ -96,11 +96,11 @@ class MeetingController extends Controller
             $results = $this->calendarService->events->listEvents($calendarId, $optParams);
             $googleEvents = $results->getItems();
 
-            foreach ($googleEvents as $googleEvent) {
-                if ($this->isGoogleMeetEvent($googleEvent)) {
-                    $meetings[] = $this->formatGoogleEvent($googleEvent);
-                }
-            }
+            // foreach ($googleEvents as $googleEvent) {
+            //     if ($this->isGoogleMeetEvent($googleEvent)) {
+            //         $meetings[] = $this->formatGoogleEvent($googleEvent);
+            //     }
+            // }
 
             // Also get meetings from database
             $dbMeetings = Meeting::with(['user', 'participants'])

@@ -185,34 +185,35 @@ function filterTasks(projectId) {
                                 </div>
                                 <button 
             type="button" 
-            class="btn btn-sm btn-outline-primary open-task-modal" 
+            class=" open-task-modal" 
             data-task-id="${task.id}" 
             data-task-name="${task.title}"
-            data-bs-toggle="modal" 
+            data-bs-toggle="modal"  style="border:none !important; background-color:transparent;"
             data-bs-target="#taskInfoModal">
-            documents
+            <img src="/images/icon.svg" class="img-fluid" style="width:20px;height:20px;" alt="">
+
         </button>
 
         <button 
     type="button" 
-    class="btn btn-sm btn-outline-success open-subtask-modal" 
+    class=" open-subtask-modal" 
     data-task-id="${task.id}" 
     data-task-name="${task.title}"
-    data-bs-toggle="modal" 
+    data-bs-toggle="modal" style="border:none !important; background-color:transparent;"
     data-bs-target="#subTaskModal">
-    Sub Task
+         <img src="/images/icon (1).svg" class="img-fluid" style="width:20px;height:20px;" alt="">
 </button>
 <div class="mt-3 ms-3">
-    <h6>Sub Tasks:</h6>
+    <h6 style="font-size:14px !important; font-weight:600 !important">Sub Tasks:</h6>
     <ul class="list-group">
         ${task.sub_task && task.sub_task.length > 0 
             ? task.sub_task.map(sub => `
-                <li class="list-group-item p-2">
-                    <strong>Title:</strong> ${sub.title} <br>
-                    <strong>Description:</strong> ${sub.description || 'N/A'} <br>
+                <li class="list-group-item p-2" style="font-size:12px !important; font-weight:500 !important ; color:#0C5097 ;" >
+                    <strong style="font-size:14px !important; font-weight:600 !important ; color:black">Title:</strong> ${sub.title} <br>
+                    <strong style="font-size:14px !important; font-weight:600 !important ; color:black">Description:</strong> ${sub.description || 'N/A'} <br>
                     
                     
-                    <small class="text-muted">Created At: ${new Date(sub.created_at).toLocaleString()}</small>
+                    <small class="text-muted" style="font-size:10px !important; font-weight:600 !important ; color:black">Created At: ${new Date(sub.created_at).toLocaleString()}</small>
                 </li>
             `).join('')
             : '<li class="list-group-item">No sub tasks yet.</li>'

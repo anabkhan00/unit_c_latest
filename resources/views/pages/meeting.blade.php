@@ -216,7 +216,9 @@
                                 @if ($status !== 'Cancelled' && $status !== 'Finished' && $joinUrl !== '#')
                                     <a href="{{ $joinUrl }}" target="_blank" rel="noopener noreferrer"
                                         @if (!$isButtonEnabled) style="pointer-events: none; opacity: 0.5;" @endif>
-                                        <i class="fas fa-video" style="font-size: 20px; color: green;"></i>
+                                      <a href="<?= $meeting['join_url']; ?>" target="_blank">
+  <i class="fas fa-video" style="font-size: 20px; color: green;"></i>
+</a>
                                     </a>
                                 @endif
                             </td>
@@ -265,7 +267,19 @@
           <div id="agenda{{ $meeting['id'] }}" class="tab-pane-content d-flex flex-column" style="height:350px;">
             <div>
               <p class="twenty ">{{ $meeting['topic'] }}</p>
-              <p class="fouirteen ">invited you in the "{{   $joinUrl}}"</p>
+             <p class="fouirteen">
+  Invited you in the "{{ $joinUrl }}"
+  <i class="fas fa-copy" 
+     onclick="copyLink('{{ $joinUrl }}')" 
+     style="cursor: pointer; color: #555; margin-left: 10px; font-size: 18px;" 
+     title="Copy link"></i>
+  <a href="{{ $joinUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-success" style="margin-left: 10px;">
+    Join
+  </a>
+
+  <!-- Copy icon -->
+  
+</p>
               <p class=" fouirteenn">{{ $meeting['agenda'] ?? 'No agenda provided.' }}</p>
               <p class="twelve">Duration: {{ $meeting['duration'] }} minutes</p>
             </div>
@@ -467,5 +481,13 @@
 });
 
 </script>
-
+<script>
+function copyLink(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    alert('Link copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+</script>
 @endsection

@@ -77,18 +77,78 @@
       <div class="col-md-9">
         {{--  sirf document dutton ka click par ya active ho paki par ya show na ho  --}}
         <div id="document-main" class="content-section p-3" style="color: #0C5097;">
-            <button class="btn mb-3" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
-                        data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
+         
                         <div class="row">
-                            @foreach ($documents as $document)
-                            <div class=" col-4 document-item mb-2 p-3 ">
-                          <div class="row">
-                            <div class="col-md-12 border p-5 rounded ">
-                                <p class="text-center">      {{ $document->document_title }}</p>
-                            </div>
-                          </div>
-                            </div>
-                        @endforeach
+                    <div class="col-lg-4 col-md-4 document-item mb-2 p-3 ">
+    <div id="document-add-id" 
+         class="add-document-btn rounded d-flex flex-column align-items-center justify-content-center p-5"
+         style="background-color: white; border: 1px solid #ddd; cursor: pointer;"
+         data-bs-toggle="modal" 
+         data-bs-target="#addDocumentModal">
+
+        <div>
+            <svg width="20" height="28" viewBox="0 0 27 28" fill="black"
+                xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                    d="M17.3867 0.345215H10.7057V10.3667H0.207031V17.0477H10.7057V27.0692H17.3867V17.0477H26.931V10.3667H17.3867V0.345215Z"
+                    fill="black" />
+            </svg>
+        </div>
+
+        <div style="font-size: 16px; font-weight:600; color:#0C5097; margin-top:5px;">
+            Add Document
+        </div>
+    </div>
+</div>
+
+                      @foreach ($documents as $document)
+    @php
+        // File extension nikal lo
+        $extension = strtolower(pathinfo($document->document_path, PATHINFO_EXTENSION));
+
+        // Default image path
+        $icon = 'images/Group 1320.png';
+
+        // Extension ke hisaab se icon set karo
+        if ($extension === 'jpg' || $extension === 'jpeg') {
+            $icon = 'images/Group 1317.png';
+        } elseif ($extension === 'svg') {
+            $icon = 'images/Group 1318.png';
+        } elseif ($extension === 'pdf') {
+            $icon = 'images/Group 1319.png';
+        } elseif ($extension === 'png') {
+            $icon = 'images/Group 1320.png';
+        }
+    @endphp
+
+    <div class="col-4 document-item mb-2 p-3">
+        <div class="row">
+            <div class="col-md-12 border p-2 rounded">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="text-start m-0" style="font-size:16px; font-weight:600; color:black;">
+                            {{ $document->document_title }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-12 my-4 d-flex justify-content-center">
+                        <img src="{{ asset($icon) }}" class="img-fluid" style="height:50px; width:50px;" alt="">
+                    </div>
+
+                    <div class="col-md-12">
+                        <p class="text-start m-0" style="font-size:12px; font-weight:500; color:black;">
+                            Created at :
+                            <span style="font-size:12px; font-weight:500; color:#0C5097;">
+                                {{ $document->updated_at }}
+                            </span>
+                        </p>
+                    </div>
+             
+            </div>
+        </div>
+    </div>
+@endforeach
+
                         </div>
 
         </div>
@@ -141,8 +201,7 @@
 
                 <div style="display: flex; margin-top: 15px; margin-bottom: 15px;">
                     
-                    <button class="btn" type="button" style="background-color: #0C5097; color: white; font-size: 12px;"
-                        data-bs-toggle="modal" data-bs-target="#addDocumentModal">Add Document</button>
+         
                 </div>
             
                 <div>

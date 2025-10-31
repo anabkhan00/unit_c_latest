@@ -22,8 +22,8 @@
                         </div>
                     @foreach($projects as $project)
     <button type="button"
-        class="btn btn-project"
-        style="background:#0C5097; color:white"
+        class="btn btn-project mt-2"
+        style="background:#0C5097; color:white; font-size:12px;"
         data-project='@json($project)'>
         {{ $project->name }}
     </button>
@@ -31,8 +31,8 @@
 
                 </div>
             </div>
-            <div class="d-flex flex-row w-100 gap-3" style="margin-bottom: 0;">
-                <div class="flex-grow-1 p-3" style="min-width: 350px; max-width: 500px; ">
+            <div class="d-flex flex-row w-100 gap-3 p-0" style="margin-bottom: 0;">
+                <div class="flex-grow-1 py-3" style="min-width: 350px; max-width: 500px; ">
                     <div class="rounded p-3" style="background-color: #F4F4F4; height: 252px !important;">
                         <div style="display: flex; margin-bottom: 15px; justify-content: space-between;">
                             <div>
@@ -71,20 +71,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 51 51" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.136719" y="0.355225" width="50.1475" height="50.1475"
-                                                    fill="url(#pattern0_246_331)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_331" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_331" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_331" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                         <img src="{{ asset('images/image 10.svg') }}"  class="img-fluid"     alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -102,20 +89,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 53" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.404297" y="0.628418" width="51.6011" height="51.6011"
-                                                    fill="url(#pattern0_246_334)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_334" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_334" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_334" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                       <img src="{{ asset('images/image 11.svg') }}"  class="img-fluid"     alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -135,20 +109,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 52" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.409668" y="0.212891" width="50.8743" height="50.8743"
-                                                    fill="url(#pattern0_246_337)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_337" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_337" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_337" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                               <img src="{{ asset('images/image 12.svg') }}"  class="img-fluid"     alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -165,20 +126,7 @@
                                         </div>
                                         <div class="col-4"
                                             style="display: flex; align-items: center; justify-content: center;">
-                                            <svg width="40" viewBox="0 0 52 52" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                xmlns:xlink="http://www.w3.org/1999/xlink">
-                                                <rect x="0.409668" y="0.212891" width="50.8743" height="50.8743"
-                                                    fill="url(#pattern0_246_338)" />
-                                                <defs>
-                                                    <pattern id="pattern0_246_338" patternContentUnits="objectBoundingBox"
-                                                        width="1" height="1">
-                                                        <use xlink:href="#image0_246_338" transform="scale(0.0175439)" />
-                                                    </pattern>
-                                                    <image id="image0_246_338" width="57" height="57"
-                                                        xlink:href="data:image/png;base64,...(same as original)..." />
-                                                </defs>
-                                            </svg>
+                                                    <img src="{{ asset('images/image 13.svg') }}"  class="img-fluid"     alt="">
                                         </div>
                                     </div>
                                 </div>
@@ -189,7 +137,7 @@
                 <div class="flex-grow-1 p-3 d-flex align-items-stretch" style="min-width: 350px;">
                     <div class="w-100 rounded d-flex align-items-center justify-content-center"
                         style="background-color: #F4F4F4; height: 100%; min-height: 225px;">
-                        <canvas id="project-bar-chart" style="height: 100%; width: 100%;"></canvas>
+                        <canvas id="project-bar-chart" style="    height: 250.9px; width: 100%;"></canvas>
                     </div>
                 </div>
             </div>
@@ -302,8 +250,8 @@
                                     <td class="text-center">
                                         <span
                                             class="
-                                            {{ $task->status == 'todo' ? 'bg-primary' : '' }}
-                                            {{ $task->status == 'in_progress' ? 'bg-info' : '' }}
+                                            {{ $task->status == 'todo' ? 'bg-danger' : '' }}
+                                            {{ $task->status == 'in_progress' ? 'bg-dark' : '' }}
                                             {{ $task->status == 'done' ? 'bg-success' : '' }}
                                             badge"
                                             style="font-size: 12px; width: 100px; padding: 0.25rem;">
@@ -1506,6 +1454,7 @@ function renderChart(tasks) {
         return;
     }
 
+
     const parseDate = d => new Date(d);
     const allDates = validTasks.flatMap(t => [parseDate(t.project.start_date), parseDate(t.due_date)]);
     const minDate = new Date(Math.min(...allDates));
@@ -1518,13 +1467,15 @@ function renderChart(tasks) {
 
     const data = {
         labels: validTasks.map(t => t.title),
-        datasets: [{
-            label: 'Tasks Timeline',
-            data: validTasks.map(t => [parseDate(t.project.start_date), parseDate(t.due_date)]),
-            backgroundColor: '#0C5097',
-            borderRadius: 6,
-            barPercentage: 0.7
-        }]
+     datasets: [{
+    label: 'Tasks Timeline',
+    data: validTasks.map(t => [parseDate(t.project.start_date), parseDate(t.due_date)]),
+    backgroundColor: '#0C5097',
+    borderRadius: 6,
+    barPercentage: 0.7,
+    barThickness: 25,        // ✅ bar ki height fix
+    maxBarThickness: 30     // ✅ limit
+}]
     };
 
     const options = {
