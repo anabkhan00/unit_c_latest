@@ -22,19 +22,28 @@ class TasksDocumentController extends Controller
     ]);
 }
 
-    public function store(Request $request)
+public function store(Request $request)
 {
-    // dd($request->all());
     $request->validate([
         'task_id' => 'required|exists:tasks,id',
-        'document' => 'required|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:5120',
+        'document' => 'required|file',
     ]);
 
-    $path = $request->file('document')->store('task_documents', 'public');
+    $file = $request->file('document');
+
+    // Get the original name of the file (e.g. "report.pdf")
+    $originalName = $file->getClientOriginalName();
+
+    // Optional: ensure unique filename by prefixing timestamp
+    $fileName = $originalName;
+// time() . '_' . 
+    // Store file in public storage with the original name
+    $path = $file->storeAs('task_documents', $fileName, 'public');
 
     TasksDocument::create([
         'task_id' => $request->task_id,
         'document_path' => $path,
+        'document_name' => $originalName, // Optional: store original name separately
         'uploaded_by' => Auth::user()->name ?? 'Guest',
     ]);
 
@@ -47,6 +56,7 @@ class TasksDocumentController extends Controller
         'documents' => $documents,
     ]);
 }
+
 
 
     /**
