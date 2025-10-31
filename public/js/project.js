@@ -203,6 +203,15 @@ function filterTasks(projectId) {
     data-bs-target="#subTaskModal">
          <img src="/images/icon (1).svg" class="img-fluid" style="width:20px;height:20px;" alt="">
 </button>
+        <button 
+    type="button" 
+   
+ 
+ 
+   style="border:none !important; background-color:transparent;"
+   >
+         <img src="/images/chaticon.svg" class="img-fluid" style="width:20px;height:20px;" alt="">
+</button>
 <div class="mt-3 ms-3">
     <h6 style="font-size:14px !important; font-weight:600 !important">Sub Tasks:</h6>
     <ul class="list-group">
