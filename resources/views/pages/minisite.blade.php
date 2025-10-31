@@ -4,6 +4,7 @@
 @section('content')
 <!-- Bootstrap Icons CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     @include('pages.main', ['emails' => $emails])
     <link rel="stylesheet" href="{{ asset('css/minisite.css') }}">
@@ -82,7 +83,7 @@
                     <div class="col-lg-4 col-md-4 document-item mb-2 p-3 ">
     <div id="document-add-id" 
          class="add-document-btn rounded d-flex flex-column align-items-center justify-content-center p-5"
-         style="background-color: white; border: 1px solid #ddd; cursor: pointer;"
+         style="background-color: white; border: 1px solid #ddd; cursor: pointer;     height: 200px;"
          data-bs-toggle="modal" 
          data-bs-target="#addDocumentModal">
 
@@ -101,61 +102,72 @@
     </div>
 </div>
 
-                      @foreach ($documents as $document)
+@foreach ($documents as $document)
     @php
-        // File extension nikal lo
-        $extension = strtolower(pathinfo($document->document_path, PATHINFO_EXTENSION));
+        $filePath = $document->document_path ?? $document->document;
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-        // Default image path
-        $icon = 'images/Group 1320.png';
+        // Default icon if online not found
+        $defaultIcon = asset('images/Group 1320.png');
 
-        // Extension ke hisaab se icon set karo
-        if ($extension === 'jpg' || $extension === 'jpeg') {
-            $icon = 'images/Group 1317.png';
-        } elseif ($extension === 'svg') {
-            $icon = 'images/Group 1318.png';
-        } elseif ($extension === 'pdf') {
-            $icon = 'images/Group 1319.png';
-        } elseif ($extension === 'png') {
-            $icon = 'images/Group 1320.png';
+        // Common extensions mapping (your local icons if available)
+        $localIcons = [
+            'jpg' => 'images/Group 1317.png',
+            'jpeg' => 'images/Group 1317.png',
+            'png' => 'images/Group 1320.png',
+            'svg' => 'images/Group 1318.png',
+            'pdf' => 'images/Group 1319.png',
+            'doc' => 'images/doc.png',
+            'docx' => 'images/doc.png',
+            'xls' => 'images/xls.png',
+            'xlsx' => 'images/xls.png',
+            'zip' => 'images/zip.png',
+        ];
+
+        if (array_key_exists($extension, $localIcons)) {
+            $icon = asset($localIcons[$extension]);
+        } else {
+            $icon = "https://img.icons8.com/color/48/000000/{$extension}.png";
         }
     @endphp
 
- <div class="col-4 document-item mb-2 p-3">
-    <a href="{{ asset('/' . $document->document) }}" 
-       download="{{ $document->document_name ?? basename($document->document_path) }}" 
-       style="text-decoration: none; color: inherit;">
+    <div class="col-4 document-item mb-2 p-3">
         <div class="row">
-            <div class="col-md-12 border p-2 rounded" style="cursor: pointer;">
-                <div class="row">
-                    <div class="col-md-12">
-                        <p class="text-start m-0" style="font-size:16px; font-weight:600; color:black;">
-                            {{ $document->document_name ?? $document->document_title }}
-                        </p>
-                    </div>
+            <div class="col-md-12 border p-3 rounded text-center" style="cursor: pointer;">
+                <p class="text-start m-0" style="font-size:16px; font-weight:600; color:black;">
+                    {{ $document->document_name ?? $document->document_title }}
+                </p>
 
-                    <div class="col-md-12 my-4 d-flex justify-content-center">
-                        <img src="{{ asset($icon) }}" 
-                             class="img-fluid" 
-                             style="height:50px; width:50px;" 
-                             alt="Download Document">
-                    </div>
-                    <div class="col-md-12">
-                        <p class="text-start m-0" style="font-size:12px; font-weight:500; color:black;">
-                            Created at :
-                            <span style="font-size:12px; font-weight:500; color:#0C5097;">
-                                {{ $document->updated_at }}
-                            </span>
-                        </p>
-                    </div>
+                <div class="my-3">
+                    <img 
+                        src="{{ $icon }}" 
+                        onerror="this.onerror=null;this.src='{{ $defaultIcon }}';"
+                        class="img-fluid" 
+                        style="height:50px; width:50px;" 
+                        alt="{{ strtoupper($extension) }} Icon">
                 </div>
+
+                {{-- ✅ Download Button --}}
+                <a href="{{ asset('/' . $document->document) }}" 
+                   download="{{ $document->document ?? basename($filePath) }}" 
+                   class="btn btn-sm btn-primary"
+                   style="background-color:#0C5097; border:none; font-size:13px;">
+                    <i class="fa fa-download"></i> Download
+                </a>
+
+                <p class="text-start m-0 mt-3" style="font-size:12px; font-weight:500; color:black;">
+                    Created at :
+                    <span style="font-size:12px; font-weight:500; color:#0C5097;">
+                        {{ $document->updated_at }}
+                    </span>
+                </p>
             </div>
         </div>
-    </a>
-</div>
-
-
+    </div>
 @endforeach
+
+
+
 
                         </div>
 
