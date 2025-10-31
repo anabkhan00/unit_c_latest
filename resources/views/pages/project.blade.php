@@ -2,6 +2,8 @@
 
 @section('content')
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/project.css') }}">
     @include('pages.main', ['emails' => $emails])
@@ -248,19 +250,26 @@
                                     <td style="font-size: 12px;">{{ $task->expected_days ?? '—' }}</td>
                                     <td style="font-size: 12px;">{{ $task->days_used ?? '—' }}</td>
                                     <td class="text-center">
-                                        <span
-                                            class="
-                                            {{ $task->status == 'todo' ? 'bg-danger' : '' }}
-                                            {{ $task->status == 'in_progress' ? 'bg-dark' : '' }}
-                                            {{ $task->status == 'done' ? 'bg-success' : '' }}
-                                            badge"
-                                            style="font-size: 12px; width: 100px; padding: 0.25rem;">
-                                            {{ ucfirst(str_replace('_', ' ', $task->status)) }}
-                                        </span>
+                                  <span
+    class="badge"
+    style="
+        font-size: 12px;
+        width: 100px;
+        padding: 0.25rem;
+        background-color:
+            {{ $task->status == 'todo' ? '#5e6c84' : '' }}
+            {{ $task->status == 'in_progress' ? '#00b8d9' : '' }}
+            {{ $task->status == 'on_hold' ? '#ffc107' : '' }}
+            {{ $task->status == 'done' ? '#5aac44' : '' }};
+        color: #fff;
+    ">
+    {{ ucfirst(str_replace('_', ' ', $task->status)) }}
+</span>
+
                                     </td>
-                                    <td style="font-size: 12px;">
+                                    <td class="text-center" >
                                         <span class="badge"
-                                            style="background-color: {{ $task->priority == 'high' ? '#dc3545' : ($task->priority == 'medium' ? '#ffc107' : '#28a745') }};">
+                                            style="background-color: {{ $task->priority == 'high' ? '#D2222D' : ($task->priority == 'medium' ? '#FFBF00' : '#238823') }}; width: 100px; padding: 0.25rem; font-size: 12px;">
                                             {{ ucfirst($task->priority) }}
                                         </span>
                                     </td>
@@ -595,22 +604,22 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="taskInfoModalLabel">Task Information</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="taskInfoModalLabel"><i class="bi bi-paperclip me-1 " style="font-size: 16px;"></i> Attachments</h5>
+        <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body">
-        <p><strong>Task ID:</strong> <span id="modalTaskId"></span></p>
+ 
         <p><strong>Task Name:</strong> <span id="modalTaskName"></span></p>
 
         <!-- ✅ Documents List -->
         <div id="documentList" class="mt-3"></div>
       </div>
 
-      <div class="modal-footer">
+      <div class="modal-footer d-flex justify-content-between">
         <input type="file" id="uploadDocumentInput" hidden>
-        <button type="button" class="btn btn-primary" id="uploadDocumentBtn">Upload Document</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="" style="background-color: transparent; color:black; border:none; font-size:16px !important;font-weight:600" id="uploadDocumentBtn"> <i class="bi bi-cloud-arrow-up me-2"></i> Upload Document</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -1329,11 +1338,11 @@ $(document).ready(function () {
                         <small class="text-muted d-block">by ${doc.uploaded_by}</small>
                     </div>
                     <div>
-                        <a href="/storage/${doc.document_path}" download class="btn btn-sm btn-success me-2">
-                            <i class="bi bi-download"></i> Download
+                        <a href="/storage/${doc.document_path}" download class=" me-2" style="background-color: transparent; border: none;text-decoration:none; color:green;">
+                            <i class="bi bi-download" style="color:green; font-size:16px;"></i> 
                         </a>
-                        <button class="btn btn-sm btn-danger delete-doc-btn" data-id="${doc.id}">
-                            <i class="bi bi-trash"></i> Delete
+                        <button class=" delete-doc-btn" style="background-color: transparent; border: none;" data-id="${doc.id}">
+                       <i class="bi bi-trash3-fill" style="color:red; font-size:16px;"></i>
                         </button>
                     </div>
                 </li>`;
