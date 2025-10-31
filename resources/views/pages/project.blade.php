@@ -500,9 +500,9 @@
                                         required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="created_by" class="col-form-label">Project Owner:</label>
+                                    <label for="created_by" class="col-form-label">Project Manager:</label>
                                     <select class="form-control" id="created_by" name="created_by" required>
-                                        <option value="">Select Owner</option>
+                                        <option value="">Select Manager</option>
                                         @foreach ($users as $user)
                                             <option value="{{ $user->id }}">{{ $user->name }}</option>
                                         @endforeach
@@ -516,6 +516,16 @@
                                             <option value="{{ $team->id }}">{{ $team->team_name }}</option>
                                         @endforeach
                                     </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="project_name" class="col-form-label">SRO: </label>
+                                    <input type="text" class="form-control" id="sro" name="sro"
+                                        required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="project_name" class="col-form-label">CCIO:</label>
+                                    <input type="text" class="form-control" id="ccio" name="ccio"
+                                        required>
                                 </div>
                             </div>
                             <label for="description" class="col-form-label">Project Description:</label>

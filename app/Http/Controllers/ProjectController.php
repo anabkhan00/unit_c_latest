@@ -61,7 +61,7 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {       
-        // dd($request->all());
+        //  dd($request->all());
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -84,7 +84,10 @@ class ProjectController extends Controller
             'end_date' => $validated['end_date'],
             'status' => $validated['status'],
             'created_by' => $validated['created_by'],
-            'team_id' => $request->team_id
+            'team_id' => $request->team_id,
+            'sro' => $request->sro,
+            'ccio' => $request->ccio,
+    
         ]);
 
         if (!empty($validated['tasks'])) {
