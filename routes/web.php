@@ -184,6 +184,8 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::get('/chat/{receiver_id}', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
 
+    Route::post('/chat-users', [ChatController::class, 'users'])->name('chat.users');
+
     Route::post('/chat/send', [ChatController::class, 'send'])->name('chat.send');
     Route::post('/chat/upload', [ChatController::class, 'upload'])->name('chat.upload');
 

@@ -10,11 +10,19 @@ use Kreait\Firebase\Factory;
 class ChatController extends Controller
 {
     
+    // ChatController.php
+public function users()
+{
+    $receiver_id = auth()->user()->id;
+    $users = User::where('id', '!=', $receiver_id)->get();
+    return response()->json($users);
+}
+
     public function index_list()
     {   $receiver_id=auth()->user()->id;
         $users=User::get();
         // dd($users);
-        return view('chat.index', compact('receiver_id','users'));
+        return view('chat.index', );
     }
     public function index($receiver_id)
     {
