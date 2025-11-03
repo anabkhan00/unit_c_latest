@@ -417,6 +417,40 @@
         document.addEventListener("DOMContentLoaded", function() {
     loadUsers();
 });
+// 🟣 Modal open/close logic
+const modal = document.getElementById("chatModal");
+const btn = document.getElementById("openChatBtn");
+const span = document.getElementById("closeModal");
+
+// 🟢 When modal opens, re-fetch users and unread status
+btn.onclick = function() {
+    modal.style.display = "block";
+    refreshChatData(); // 🔥 new helper to reload users & unread badges
+};
+
+// 🟢 Close modal
+span.onclick = function() { 
+    modal.style.display = "none"; 
+};
+
+// 🟢 Close on outside click
+window.onclick = function(event) {
+    if (event.target == modal) modal.style.display = "none";
+};
+
+// 🔄 Reload users + unread badges + online users
+function refreshChatData() {
+    loadUsers();            // Fetch all users again
+    updateUserOnlineStatus(); // Update online indicators
+    updateMainBadge();        // Update unread counter
+}
+
+// 🔥 Load users when page first opens
+document.addEventListener("DOMContentLoaded", function() {
+    loadUsers();
+    updateUserOnlineStatus();
+});
+
     </script>
 </body>
 </html>

@@ -269,7 +269,7 @@
                                     </td>
                                     <td class="text-center" >
                                         <span class="badge"
-                                            style="background-color: {{ $task->priority == 'high' ? '#D2222D' : ($task->priority == 'medium' ? '#FFBF00' : '#238823') }}; width: 100px; padding: 0.25rem; font-size: 12px;">
+                                            style="background-color: {{ $task->priority == 'high' ? '#D2222D' : ($task->priority == 'medium' ? '#FFBF00' : '#5aac44') }}; width: 100px; padding: 0.25rem; font-size: 12px;">
                                             {{ ucfirst($task->priority) }}
                                         </span>
                                     </td>
@@ -536,19 +536,7 @@
                                     <input type="text" class="form-control" id="ccio" name="ccio"
                                         required>
                                 </div>
-                            </div>
-                            <label for="description" class="col-form-label">Project Description:</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label for="start_date" class="col-form-label">Start Date:</label>
-                                    <input type="date" class="form-control" id="start_date" name="start_date">
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="end_date" class="col-form-label">End Date:</label>
-                                    <input type="date" class="form-control" id="end_date" name="end_date">
-                                </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label for="status" class="col-form-label">Status:</label>
                                     <select class="form-control" id="status" name="status" required>
                                         <option value="not_started">Not Started</option>
@@ -556,6 +544,19 @@
                                         <option value="completed">Completed</option>
                                     </select>
                                 </div>
+                            </div>
+                            <label for="description" class="col-form-label">Project Description:</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="start_date" class="col-form-label">Start Date:</label>
+                                    <input type="date" class="form-control" id="start_date" name="start_date">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="end_date" class="col-form-label">End Date:</label>
+                                    <input type="date" class="form-control" id="end_date" name="end_date">
+                                </div>
+                                
                             </div>
                             <hr class="my-4">
                             <h5 class="mb-2">Tasks</h5>
