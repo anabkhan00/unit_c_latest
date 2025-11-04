@@ -42,14 +42,16 @@
         </div>
     </a>
 
+  <a href="{{ route('social.link') }}" style="color:inherit;font-weight:bold ; text-decoration:none">
     <div class="main-first">
         <div class="main-second" style="background: #31B6EF;">
             <img src="{{ asset('svg/social-media.svg') }}" alt="">
         </div>
         <div class="main-first-text">
-           <strong> Social Media</strong>
+            <strong>Social Media</strong>
         </div>
     </div>
+</a>
 
     <a href="{{ route('team.index') }}" style="color:inherit;font-weight:bold;text-decoration:none">
         <div class="main-first">
@@ -106,7 +108,7 @@
                 </div>
             </div>
             <div class="notification-main">
-                <p style="color: white; text-align: center; font-size: 12px; font-weight: 600;">{{ $emails->count() }}
+                {{--  <p style="color: white; text-align: center; font-size: 12px; font-weight: 600;">{{ $emails->count() }}  --}}
                 </p>
             </div>
         </div>
