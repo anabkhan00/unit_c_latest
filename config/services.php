@@ -42,5 +42,11 @@ return [
         'client_secret' => env('SLACK_CLIENT_SECRET'),
         'redirect' => env('SLACK_CALLBACK_REDIRECTS'),
     ],
+    'linkedin' => [
+    'client_id' => env('LINKEDIN_CLIENT_ID'),
+    'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+    'redirect_uri' => env('LINKEDIN_REDIRECT_URI'),
+    ],
+
 
 ];

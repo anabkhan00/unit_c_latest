@@ -942,7 +942,7 @@
                         <div id="imageSection" style="margin-bottom: 10px; text-align: center; width: 100%;">
                             <div id="imageContainer"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px;">
-                                @forelse ($media->where('type', 'image') as $image)
+                                {{--  @forelse ($media->where('type', 'image') as $image)
                                     <div class="media-container"
                                         style="position: relative; width: 155px; height: 100px;">
                                         <img src="{{ asset($image->path) }}" class="image-fluid"
@@ -956,7 +956,7 @@
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         images found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 
@@ -964,7 +964,7 @@
                         <div id="videoSection" style="display: none; width: 100%; text-align: center;">
                             <div id="videoContainer"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-                                @forelse ($media->where('type', 'video') as $video)
+                                {{--  @forelse ($media->where('type', 'video') as $video)
                                     <div class="media-container"
                                         style="position: relative; width: 150px; height: 120px;">
                                         <video width="100%" height="100%" controls
@@ -981,14 +981,14 @@
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         videos found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 
                         <!-- AUDIO SECTION -->
                         <div id="audioSection" style="display: none; width: 100%; text-align: center;">
                             <div id="audioContainer" style="display: grid; gap: 10px;">
-                                @forelse ($media->where('type', 'audio') as $audio)
+                                {{--  @forelse ($media->where('type', 'audio') as $audio)
                                     <div class="media-container" style="position: relative; display: inline-block;">
                                         <p style="font-size: 12px; font-weight: bold; color: gray; margin-bottom:3px">
                                             {{ $audio->user->name ?? 'Unknown' }} |
@@ -1006,7 +1006,7 @@
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         audios found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 

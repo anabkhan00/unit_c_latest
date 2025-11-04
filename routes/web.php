@@ -24,6 +24,7 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,7 +114,12 @@ Route::middleware(['auth'])->group(function () {
     });
     Route::delete('/folders/{id}', [EmailController::class, 'destroy'])->name('folders.destroy');
 
-    //Project
+    //Posts
+    Route::get('/social-link', [PostController::class, 'index'])->name('social.link');
+    Route::post('posts-create', [PostController::class, 'store'])->name('posts.store');
+    Route::get('linkedin/callback', [PostController::class, 'callback']);
+
+
     
 // Upload document
     Route::post('/tasks/documents', [TasksDocumentController::class, 'store'])->name('tasks-documents.store');
@@ -244,3 +250,4 @@ Route::fallback(function () {
         'message' => 'Route not found. Please check the URL and try again'
     ], 404);
 });
+
