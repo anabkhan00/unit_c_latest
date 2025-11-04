@@ -25,6 +25,8 @@ class User extends Authenticatable
         'profile_image',
         'google_id',
         'slack_id',
+        'linkedin_access_token',
+        'linkedin_token_expires_at',
     ];
 
     /**

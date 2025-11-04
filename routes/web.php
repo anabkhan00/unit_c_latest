@@ -24,6 +24,9 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\PostController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +104,13 @@ Route::middleware(['auth'])->group(function () {
         $exists = \App\Models\User::where('email', $email)->exists();
         return response()->json(['exists' => $exists]);
     });
+
+    //post
+    Route::get('posts-create', [PostController::class, 'create']);
+    Route::post('posts-create', [PostController::class, 'store'])->name('posts.store');
+    Route::get('linkedin/callback', [PostController::class, 'callback']);
+    
+
 
     Route::prefix('emails')->name('email.')->controller(EmailController::class)->group(function () {
         Route::post('/star/{id}', 'toggleStar')->name('star');
@@ -218,6 +228,8 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::post('zoom/meetings/store', [MeetingController::class, 'store'])->name('zoom.meetings.store');
     Route::get('/meetings/{id}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
     Route::post('/meetings/{id}/update', [MeetingController::class, 'update'])->name('meetings.update');
+    Route::get('/get-meeting-notifications', [MeetingController::class, 'getNotifications']);
+
 
 
     // Google Meet Routes

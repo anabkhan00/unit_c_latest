@@ -81,6 +81,23 @@
 
     <div>
         <main>
+            <!-- Meeting Notification Modal -->
+<div class="modal fade" id="meetingModal" tabindex="-1" aria-labelledby="meetingModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="meetingModalLabel">Meeting Starting Now</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="meetingDetails"></div>
+      <div class="modal-footer">
+        <a href="#" id="meetingJoinLink" class="btn btn-primary" target="_blank">Join Meeting</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
             <header>
                 @include('layouts.topbar')
             </header>
@@ -117,6 +134,33 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('js/common.js') }}"></script>
     <script src="{{ asset('js/snap.js') }}"></script>
+    <script>
+$(document).ready(function() {
+    // har 15 second me check kare
+    setInterval(function() {
+        $.ajax({
+            url: '/get-meeting-notifications',
+            type: 'GET',
+            success: function(response) {
+                if(response.length > 0){
+                    console.log(err);
+                    response.forEach(function(meeting){
+                        $('#meetingDetails').html("<strong>" + meeting.topic + "</strong><br>" + (meeting.agenda || ''));
+                        $('#meetingJoinLink').attr('href', meeting.meeting_url);
+
+                        var modal = new bootstrap.Modal(document.getElementById('meetingModal'));
+                        modal.show();
+                    });
+                }
+            },
+            error: function(err){
+                console.log(err);
+            }
+        });
+    }, 60000); 
+});
+</script>
+
 </body>
 
 </html>
