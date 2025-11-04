@@ -1,84 +1,41 @@
 <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<style>
-.talk-submenu {
-    position: absolute;
-    background: white;
-    width: 350px;
-    height: 500px;
-padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-    z-index: 1000;
-}
-.chat-detail-record {
-  position: absolute;
-  background: white;
-  width: 290px;
-  height: 180px;
-  left: 0px;
-  top: 40px;
-  border-radius: 5px;
-  padding: 10px;
-  border: none;
-}
-.chat-category {
-    display: flex;
+<style>
+
+.side-bar {
+    position: fixed;
+    background: #0C5097;
+    width: 50px;
+    height: 650vh;
+    display: flex
+;
     flex-direction: column;
     align-items: center;
-
-    cursor: pointer;
+    padding-top: 8px;
+    top: 0;
+    left: 1px !important;
+    z-index: 6;
 }
-
-.recent-chats .chat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.chat-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-}
-
-.chat-info {
-    flex: 1;
-    padding-left: 5px;
-}
-
-.chat-name {
-    font-size: 12px;
-    font-weight: bold;
-    margin: 0;
-}
-
-.chat-message {
-    font-size: 10px;
-    color: #707070;
-    margin: 0;
-}
-
 .chat-time {
     font-size: 10px;
 }
 
-        body { font-family: Arial; background: #f5f5f5; padding: 30px; }
+
 
         /* 🔘 Chat open button */
         #openChatBtn {
-            padding: 10px 20px;
-            background: #007bff;
+            padding: 0px;
+            background: transparent;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             position: relative;
         }
-        #openChatBtn:hover { background: #0056b3; }
+
 
         /* 🔴 Main unread badge */
         #mainBadge {
@@ -126,19 +83,67 @@ padding: 10px;
         .close:hover { color: black; }
 
         /* 💬 Chat styles */
-        .chat-box { background: #fff; padding: 20px; border-radius: 10px; width: 480px; margin: auto; }
-        .user-list { display: flex; overflow-x: auto; gap: 10px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
-        .message { display: flex; flex-direction: column; margin-bottom: 8px; }
-        .message.me { align-items: flex-end; }
-        .message img.chat-image { max-width: 180px; border-radius: 6px; margin: 5px 0; }
-        .status { font-size: 10px; margin-top: 2px; color: #555; }
-        .user { position: relative; padding: 8px 15px; background: #f0f0f0; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: all 0.3s; }
-        .user:hover { background: #e2e2e2; }
-        .user.active { background: #007bff; color: #fff; }
-        .online::before { content: ""; position: absolute; left: 6px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; background: #28a745; border-radius: 50%; box-shadow: 0 0 0 2px #fff; }
-        .badge { position: absolute; top: -4px; right: -6px; background: red; color: #fff; border-radius: 50%; font-size: 12px; padding: 2px 6px; display: none; }
+        .chat-box 
+        { 
+            background: #fff;
+             padding: 5px;
+              border-radius: 10px; 
+              width: 480px;
+               margin: auto;
+             }
+        .user-list 
+        { 
+            height: 200px;
+             overflow-y: auto;
+              gap: 10px;
+               margin-bottom: 15px;
+                padding-bottom: 5px;
+                 border-bottom: 1px solid #ddd; 
+                 }
+
+  
+        .status 
+        {
+             font-size: 10px;
+              margin-top: 2px; 
+              color: #555; 
+              }
+
+        .user 
+        {
+             position: relative;
+              padding: 8px 15px;
+               background: #f0f0f0;
+                border-radius: 10px;
+                margin-top:5px;
+                 cursor: pointer;
+                  white-space: nowrap;
+                   transition: all 0.3s; 
+                }
+        .user:hover
+         {
+             background: #e2e2e2; 
+             }
+
+        .user.active 
+        {
+        background: #0C5097;
+        color: #fff;
+         }
+        .online::before { content: ""; position: absolute; right: 0px; top: 10%; transform: translateY(-50%); width: 10px; height: 10px; background: #28a745; border-radius: 50%; box-shadow: 0 0 0 2px #fff; }
+        .badge
+         { 
+        position: absolute;
+        top: -4px;
+        right: -6px;
+        background: red;
+        color: #fff;
+        border-radius: 50%;
+        font-size: 12px;
+        padding: 2px 6px;
+        display: none; 
+                }
         .user.has-unread .badge { display: inline-block; }
-        .messages { height: 320px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
         .tick { font-size: 12px; margin-left: 5px; }
         .tick.read { color: #0b93f6; }
         .tick.delivered { color: #999; }
@@ -153,99 +158,245 @@ padding: 10px;
         }
     </style>
 
-    <!-- 🔘 Open Chat Button -->
-    <button id="openChatBtn" class="m-5 p-5">
-        💬 Open Chat
-        <span id="mainBadge">0</span>
-    </button>
+<style>
+/* 🔹 Chat input container */
+.chat-input {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 30px;
+    padding: 6px 10px;
+    background: #f9f9f9;
+}
 
-    <!-- 💬 Modal -->
-    <div id="chatModal" class="modal">
-        <div class="modal-content">
-            <span id="closeModal" class="close">&times;</span>
+/* 📎 Attachment button */
+#uploadBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    margin-right: 8px;
+}
 
-            <!-- ✅ Chat Box -->
-            <div class="chat-box">
-                <h3>Laravel + Firebase Chat</h3>
+/* ✏️ Message input field */
+#message {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 6px 10px;
+}
 
-                <div id="userLoader"><em>Loading users...</em></div>
-                <div class="user-list" id="userList"></div>
+/* 🚀 Send button */
+#sendBtn45 {
+    background-color: #0C5097;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
 
-                <div id="messages" class="messages"><em>Select a user to start chatting...</em></div>
+#sendBtn45:hover {
+    background-color: #0C5097;
+}
+</style>
 
-                <div>
-                    <input type="file" id="fileInput" style="display:none;" accept="image/*,application/pdf,application/msword,.docx,.xlsx,.txt">
-                    <input type="text" id="message" placeholder="Type message..." style="width:65%; padding:6px;">
-                    <button id="uploadBtn" style="padding:6px 12px;">📎</button>
-                    <button id="sendBtn45" style="padding:6px 12px;">Send</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
+<style>
+.chat-dropdown {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 550px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    padding: 10px;
+}
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+.user-list {
+    height: 230px;
+    overflow-y: auto;
+    margin-top: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+}
+.user {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+.user:hover {
+    background: #f2f4f7;
+}
+.user.active {
+    background: #0C5097;
+}
+.messages {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+.message {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 12px;
+    max-width: 70%;
+    word-wrap: break-word;
+    display: inline-block;
+    clear: both;
+}
+
+.message.me {
+    background-color: #0C5097; /* red for sender */
+    color: white;
+    float: right;
+    text-align: right;
+}
+
+.message {
+    background-color: #f4f4f4; /* green for receiver */
+    color: black;
+    float: left;
+    text-align: left;
+}
+
+.chat-image {
+    max-width: 200px;
+    border-radius: 8px;
+    display: block;
+}
+.chat-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+.chat-input input[type="text"] {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.chat-input button {
+    background: #0C5097;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.chat-input button:hover {
+    background: #0a3c75;
+}
+.badge {
+    background: red;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    padding: 2px 6px;
+    display: none;
+}
+.chat-topbar {
+    position: sticky;
+    top: 0;
+    background: #0C5097;  /* blue background */
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* name on left */
+    border-radius: 6px 6px 0 0;
+    z-index: 10;
+    font-size: 16px;
+}
+
+
+.chat-topbar i {
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+}
+
+.chat-topbar i:hover {
+    color: #ffdf00; /* hover effect */
+}
+
+
+</style>
+
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 <div class="side-bar">
     
     <ul class="inside-bar">
 <li class="inside-bar-item" id="talk-btn">
-<a href="{{ url('/chat') }}" class="inside-bar-link" style="text-decoration:none; color:inherit;">
-    <img src="{{ asset('svg/talk.svg') }}" alt="">
-    <p class="inside-bar-text">Talk</p>
-</a>
+    <button id="openChatBtn" class="inside-bar-text">
+        <img src="{{ asset('svg/talk.svg') }}" alt="">
+        <br>
+        Talk
+        <span id="mainBadge">0</span>
+    </button>
 
-    <!-- Talk Submenu -->
-    <div class="talk-submenu" id="talk-submenu" style="display: none;">
-        <!-- Header with Categories -->
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <div class="dropdown" style="display: flex; gap: 8px;">
-                <span style="color: #036AB2; font-size: 20px; font-weight: bold;">Talks Chats</span>
-             
-            </div>
+    <!-- 💬 Chat Dropdown -->
+    <div id="chatDropdown" class="chat-dropdown">
+   <div class="chat-header">
+    <p style="color:#0C5097; font-size:18px; font-weight:600; margin:0;">Users</p>
+
+    <div class="header-actions">
+
+        <button id="closeDropdown" class="close-btn">&times;</button>
+    </div>
+</div>
+
+
+        <div id="userLoader"><em>Loading users...</em></div>
+        <div class="user-list" id="userList"></div>
+
+        <!-- Initially Hidden -->
+
+<div class="chat-topbar " id="chatTopbar" style="display: none;">
+    <span id="chatTopbarName" style="font-weight:600;"></span>
+    <i class="bi bi-camera-video" style="color:white; font-size:16px; margin-left:auto"></i>
+</div>
+
+<div id="messages" class="messages" style="display:none;">
+    <em>Select a user to start chatting...</em>
+</div>
+
+
+
+
+
+        <!-- Initially Hidden -->
+        <div class="chat-input" id="chatInput" style="display:none;">
+            <button id="uploadBtn">📎</button>
+            <input type="file" id="fileInput" style="display:none;" accept="image/*,application/pdf,application/msword,.docx,.xlsx,.txt">
+            <input type="text" id="message" placeholder="Type message...">
+            <button id="sendBtn45">Send</button>
         </div>
-
-        <!-- Chat Categories -->
-        <div class="chat-detail-record">
-            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-           
-                <div class="chat-category">
-                    <img src="{{ asset('svg/private-message.svg') }}" alt="">
-                    <p style="font-size:14px; font-weight:600">Private Message</p>
-                </div>
-                <div class="chat-category">
-                    <img src="{{ asset('svg/private-group.svg') }}" alt="">
-                    <p style="font-size:14px; font-weight:600">Private Group</p>
-                </div>
-          
-        
-            </div>
-        </div>
-
-  
     </div>
 </li>
+
         <li class="inside-bar-item" id="video-btn" onclick="window.location.href='{{ route('video.authorize') }}'" style="cursor: pointer">
             <img src="{{ asset('svg/video.svg') }}" alt="">
             <p class="inside-bar-text">Video</p>
@@ -791,7 +942,7 @@ padding: 10px;
                         <div id="imageSection" style="margin-bottom: 10px; text-align: center; width: 100%;">
                             <div id="imageContainer"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px;">
-                                @forelse ($media->where('type', 'image') as $image)
+                                {{--  @forelse ($media->where('type', 'image') as $image)
                                     <div class="media-container"
                                         style="position: relative; width: 155px; height: 100px;">
                                         <img src="{{ asset($image->path) }}" class="image-fluid"
@@ -805,7 +956,7 @@ padding: 10px;
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         images found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 
@@ -813,7 +964,7 @@ padding: 10px;
                         <div id="videoSection" style="display: none; width: 100%; text-align: center;">
                             <div id="videoContainer"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
-                                @forelse ($media->where('type', 'video') as $video)
+                                {{--  @forelse ($media->where('type', 'video') as $video)
                                     <div class="media-container"
                                         style="position: relative; width: 150px; height: 120px;">
                                         <video width="100%" height="100%" controls
@@ -830,14 +981,14 @@ padding: 10px;
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         videos found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 
                         <!-- AUDIO SECTION -->
                         <div id="audioSection" style="display: none; width: 100%; text-align: center;">
                             <div id="audioContainer" style="display: grid; gap: 10px;">
-                                @forelse ($media->where('type', 'audio') as $audio)
+                                {{--  @forelse ($media->where('type', 'audio') as $audio)
                                     <div class="media-container" style="position: relative; display: inline-block;">
                                         <p style="font-size: 12px; font-weight: bold; color: gray; margin-bottom:3px">
                                             {{ $audio->user->name ?? 'Unknown' }} |
@@ -855,7 +1006,7 @@ padding: 10px;
                                 @empty
                                     <p style="grid-column: span 2; font-size: 14px; font-weight: bold; color: gray;">No
                                         audios found</p>
-                                @endforelse
+                                @endforelse  --}}
                             </div>
                         </div>
 
@@ -915,336 +1066,304 @@ padding: 10px;
     </div>
   </div>
 </div>
-
-
 <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        // 🔥 Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyCPhDUFImI8o_8OsD9oNLN6uBTEyOWjQG4",
-            authDomain: "unit-1c26a.firebaseapp.com",
-            databaseURL: "https://unit-1c26a-default-rtdb.firebaseio.com",
-            projectId: "unit-1c26a",
-            storageBucket: "unit-1c26a.appspot.com",
-            messagingSenderId: "365981941063",
-            appId: "1:365981941063:web:0af4eee5ba1542042a2062"
-        };
+document.addEventListener("DOMContentLoaded", function () {
+    // 🔥 Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyCPhDUFImI8o_8OsD9oNLN6uBTEyOWjQG4",
+        authDomain: "unit-1c26a.firebaseapp.com",
+        databaseURL: "https://unit-1c26a-default-rtdb.firebaseio.com",
+        projectId: "unit-1c26a",
+        storageBucket: "unit-1c26a.appspot.com",
+        messagingSenderId: "365981941063",
+        appId: "1:365981941063:web:0af4eee5ba1542042a2062"
+    };
 
-       
-    
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        const sender_id = {{ auth()->id() ?? 1 }};
-        let receiver_id = null;
-        const messagesDiv = document.getElementById("messages");
+    const sender_id = {{ auth()->id() ?? 1 }};
+    let receiver_id = null;
+    const messagesDiv = document.getElementById("messages");
+    const chatInput = document.querySelector(".chat-input");
+    chatInput.style.display = "none"; // hide chat input initially
 
-        // 🟢 Track Online Status
-        const userStatusRef = db.ref(`/status/${sender_id}`);
-        const connectedRef = db.ref(".info/connected");
-        connectedRef.on("value", snapshot => {
-            if (!snapshot.val()) return;
-            userStatusRef.onDisconnect().set(false);
-            userStatusRef.set(true);
-        });
-
-        // 📨 Send Text Message
-        document.getElementById("sendBtn45").addEventListener("click", sendMessage);
-        document.getElementById("message").addEventListener("keypress", e => {
-            if (e.key === "Enter") sendMessage();
-        });
-
-        function sendMessage() {
-    console.log("📝 Send button clicked!");
-    const message = document.getElementById("message").value.trim();
-
-    if (!message || !receiver_id) {
-        alert("Please select a user and type a message!");
-        return;
-    }
-
-    // Push directly to Firebase (instant UI)
-    const newMsgRef = db.ref("messages").push();
-    newMsgRef.set({
-        sender_id,
-        receiver_id,
-        message,
-        type: "text",
-        read: false,
-        delivered: false,
-        timestamp: Date.now()
-    })
-    .then(() => {
-        document.getElementById("message").value = "";
-        console.log("✅ Message sent to Firebase");
-    })
-    .catch(err => {
-        console.error("🚨 Error sending message:", err);
-        alert("Failed to send message!");
+    // 🟢 Track Online Status
+    const userStatusRef = db.ref(`/status/${sender_id}`);
+    const connectedRef = db.ref(".info/connected");
+    connectedRef.on("value", snap => {
+        if (!snap.val()) return;
+        userStatusRef.onDisconnect().set(false);
+        userStatusRef.set(true);
     });
-}
 
+    // 🟢 Dropdown Elements
+    const chatDropdown = document.getElementById("chatDropdown");
+    const openBtn = document.getElementById("openChatBtn");
+    const closeBtn = document.getElementById("closeDropdown");
 
-        // 📎 File Upload
-        document.getElementById("uploadBtn").addEventListener("click", () => {
-            document.getElementById("fileInput").click();
-        });
+    // 🟢 Toggle Dropdown
+    openBtn.addEventListener("click", () => {
+        chatDropdown.style.display = chatDropdown.style.display === "block" ? "none" : "block";
+        loadUsers();
+    });
+    closeBtn.addEventListener("click", () => chatDropdown.style.display = "none");
 
-        document.getElementById("fileInput").addEventListener("change", function(e) {
-            const file = e.target.files[0];
-            if (!file || !receiver_id) {
-                alert("Please select a user before sending a file!");
-                return;
-            }
+    // 📨 Send Message
+    document.getElementById("sendBtn45").addEventListener("click", sendMessage);
+    document.getElementById("message").addEventListener("keypress", e => {
+        if (e.key === "Enter") sendMessage();
+    });
 
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("sender_id", sender_id);
-            formData.append("receiver_id", receiver_id);
-
-            const tempKey = "temp_" + Date.now();
-            renderMessage({ sender_id, receiver_id, message: "Uploading file...", key: tempKey, type: "file", local: true });
-
-            fetch("/chat/send", {
-                method: "POST",
-                headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    document.querySelector(`[data-key='${tempKey}']`)?.remove();
-                } else {
-                    alert("Upload failed!");
-                }
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                alert("Error uploading file");
-            });
-        });
-
-        // 🟣 Listen for new messages
-        db.ref("messages").on("child_added", snapshot => {
-            const msg = snapshot.val();
-            const key = snapshot.key;
-
-            if (
-                (msg.sender_id == sender_id && msg.receiver_id == receiver_id) ||
-                (msg.sender_id == receiver_id && msg.receiver_id == sender_id)
-            ) {
-                renderMessage({ ...msg, key });
-            }
-
-            if (msg.receiver_id == sender_id && !msg.read) {
-                const badge = document.getElementById("badge-" + msg.sender_id);
-                const userDiv = document.querySelector(`.user[data-id='${msg.sender_id}']`);
-                if (badge) {
-                    badge.textContent = (parseInt(badge.textContent) || 0) + 1;
-                    badge.style.display = "inline-block";
-                    userDiv.classList.add("has-unread");
-                    updateMainBadge(); 
-                }
-            }
-
-            if (receiver_id == msg.sender_id) {
-                db.ref("messages/" + key).update({ read: true, delivered: true });
-                clearUnreadBadge(msg.sender_id);
-            }
-        });
-
-        // 🟣 Modal open/close logic
-        const modal = document.getElementById("chatModal");
-        const btn = document.getElementById("openChatBtn");
-        const span = document.getElementById("closeModal");
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-            loadUsers(); // 🟢 Load users when modal opens
-        }
-
-        span.onclick = function() { modal.style.display = "none"; }
-        window.onclick = function(event) {
-            if (event.target == modal) modal.style.display = "none";
-        }
-
-        // ✅ AJAX load users
-        // ✅ AJAX load users (debug-enabled)
-function loadUsers() {
-    const loader = document.getElementById("userLoader");
-    loader.style.display = "block";
-
-    console.log("🟡 [loadUsers] Sending request to:", "{{ route('chat.users') }}");
-
-    fetch("{{ route('chat.users') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(async res => {
-        console.log("🟢 [loadUsers] Response status:", res.status);
-        const text = await res.text();
-        console.log("📦 [loadUsers] Raw response text:", text);
-        try {
-            return JSON.parse(text);
-        } catch (err) {
-            console.error("❌ [loadUsers] JSON parse error:", err);
-            throw err;
-        }
-    })
-    .then(users => {
-        console.log("✅ [loadUsers] Parsed users:", users);
-
-        const userList = document.getElementById("userList");
-        userList.innerHTML = "";
-        loader.style.display = "none";
-
-        if (!Array.isArray(users) || users.length === 0) {
-            userList.innerHTML = "<em>No users found</em>";
-            console.warn("⚠️ [loadUsers] No users returned from API");
+    function sendMessage() {
+        const message = document.getElementById("message").value.trim();
+        if (!message || !receiver_id) {
+            alert("Please select a user and type a message!");
             return;
         }
 
-        users.forEach(user => {
-            console.log("👤 [loadUsers] Adding user:", user.name, "ID:", user.id);
+        const newMsgRef = db.ref("messages").push();
+        newMsgRef.set({
+            sender_id,
+            receiver_id,
+            message,
+            type: "text",
+            read: false,
+            delivered: false,
+            timestamp: Date.now()
+        }).then(() => document.getElementById("message").value = "")
+          .catch(err => alert("Failed to send message!"));
+    }
 
-            const userDiv = document.createElement("div");
-            userDiv.className = "user";
-            userDiv.setAttribute("data-id", user.id);
-            userDiv.innerHTML = `
-                <span class="name">${user.name}</span>
-                <span class="badge" id="badge-${user.id}">0</span>
-            `;
-            userDiv.addEventListener("click", function() {
-                document.querySelectorAll(".user").forEach(u => u.classList.remove("active"));
-                this.classList.add("active");
-                receiver_id = this.getAttribute("data-id");
-                messagesDiv.innerHTML = "<em>Loading chat...</em>";
-                clearUnreadBadge(receiver_id);
-                loadMessages();
-            });
-            userList.appendChild(userDiv);
-        });
+    // 📎 File Upload
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+        document.getElementById("fileInput").click();
+    });
 
-        updateUserOnlineStatus();
+fileInput.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file || !receiver_id) {
+        alert("Select a user first!");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("sender_id", sender_id);
+    formData.append("receiver_id", receiver_id);
+
+    // Temporary "Uploading..." message
+    const tempKey = "temp_" + Date.now();
+    renderMessage({ sender_id, receiver_id, message: "Uploading file...", key: tempKey, type: "file", local: true });
+
+    fetch("/chat/send", {
+        method: "POST",
+        headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Remove temp message
+        document.querySelector(`[data-key='${tempKey}']`)?.remove();
+
+        if (!data.success) {
+            alert("Upload failed!");
+        }
+        // **Do NOT call renderMessage here for the uploaded file**
+        // Firebase will push it and render automatically
     })
     .catch(err => {
-        console.error("🔥 [loadUsers] Fetch error:", err);
-        loader.innerHTML = "<em>Error loading users</em>";
+        document.querySelector(`[data-key='${tempKey}']`)?.remove();
+        alert("Error uploading file");
+    });
+
+    fileInput.value = ""; // reset input
+});
+
+
+    // 🟣 Listen Firebase for new messages
+db.ref("messages").on("child_added", snapshot => {
+    const msg = snapshot.val();
+    const key = snapshot.key;
+
+    if ((msg.sender_id == sender_id && msg.receiver_id == receiver_id) ||
+        (msg.sender_id == receiver_id && msg.receiver_id == sender_id)) {
+        renderMessage({ ...msg, key });
+    }
+
+    // Mark messages as read/delivered if I am the receiver
+    if (msg.receiver_id == sender_id && !msg.read) {
+        db.ref("messages/" + key).update({ read: true, delivered: true });
+    }
+
+    // Update badges
+    if (msg.receiver_id == sender_id && !msg.read) {
+        const badge = document.getElementById("badge-" + msg.sender_id);
+        const userDiv = document.querySelector(`.user[data-id='${msg.sender_id}']`);
+        if (badge) {
+            badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+            badge.style.display = "inline-block";
+            userDiv.classList.add("has-unread");
+            updateMainBadge();
+        }
+    }
+});
+
+
+    // ✅ AJAX Load Users
+    function loadUsers() {
+        const loader = document.getElementById("userLoader");
+        loader.style.display = "block";
+
+        fetch("{{ route('chat.users') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(res => res.json())
+        .then(users => {
+            const userList = document.getElementById("userList");
+            userList.innerHTML = "";
+            loader.style.display = "none";
+
+            if (!Array.isArray(users) || users.length === 0) {
+                userList.innerHTML = "<em>No users found</em>";
+                return;
+            }
+
+            users.forEach(user => {
+                const userDiv = document.createElement("div");
+                userDiv.className = "user";
+                userDiv.setAttribute("data-id", user.id);
+                userDiv.innerHTML = `
+                    <span class="name">${user.name}</span>
+                    <span class="badge" id="badge-${user.id}">0</span>
+                `;
+            // Inside user click event
+userDiv.addEventListener("click", function() {
+    document.querySelectorAll(".user").forEach(u => u.classList.remove("active"));
+    this.classList.add("active");
+
+    receiver_id = this.getAttribute("data-id");
+    const userName = this.querySelector(".name").textContent;
+
+    // Show messages and top bar
+    messagesDiv.style.display = "block";                // show messages div
+    chatInput.style.display = "flex";                  // show input
+    document.getElementById("chatTopbar").style.display = "flex"; // show top bar
+    document.getElementById("chatTopbarName").textContent = userName; // set user name
+
+    messagesDiv.innerHTML = "<em>Loading chat...</em>";
+    clearUnreadBadge(receiver_id);
+    loadMessages();
+});
+
+
+                userList.appendChild(userDiv);
+            });
+
+            updateUserOnlineStatus();
+        })
+        .catch(err => loader.innerHTML = "<em>Error loading users</em>");
+    }
+
+    // 🟢 Update online indicators
+    function updateUserOnlineStatus() {
+        db.ref("status").once("value", snapshot => {
+            const statusData = snapshot.val() || {};
+            document.querySelectorAll(".user").forEach(u => {
+                const id = u.getAttribute("data-id");
+                u.classList.toggle("online", !!statusData[id]);
+            });
+        });
+    }
+
+    // 🟢 Load Messages
+function loadMessages() {
+    db.ref("messages").off("value"); // remove old listener
+    db.ref("messages").on("value", snapshot => {
+        messagesDiv.innerHTML = ""; // clear messages
+
+        let lastMessageKey = null; // store the last message key
+
+        snapshot.forEach(childSnap => {
+            const data = childSnap.val();
+            const key = childSnap.key;
+
+            if ((data.sender_id == sender_id && data.receiver_id == receiver_id) ||
+                (data.sender_id == receiver_id && data.receiver_id == sender_id)) {
+                renderMessage({ ...data, key });
+                lastMessageKey = key; // update last message
+            }
+
+            // Mark unread as seen if I am receiver
+            if (data.receiver_id == sender_id && !data.read) {
+                db.ref("messages/" + key).update({ read: true, delivered: true });
+            }
+        });
+
+        // Scroll to last message
+        if (lastMessageKey) {
+            const lastMsgDiv = messagesDiv.querySelector(`[data-key='${lastMessageKey}']`);
+            if (lastMsgDiv) lastMsgDiv.scrollIntoView({ behavior: "smooth" });
+        }
+
+
     });
 }
 
-// 🚀 Call at the end (with logging)
-console.log("📣 [Init] Calling loadUsers() after Firebase setup...");
-loadUsers();
 
 
-        // 🟢 Refresh online indicators
-        function updateUserOnlineStatus() {
-            db.ref("status").once("value", snapshot => {
-                const statusData = snapshot.val() || {};
-                document.querySelectorAll(".user").forEach(u => {
-                    const id = u.getAttribute("data-id");
-                    u.classList.toggle("online", !!statusData[id]);
-                });
-            });
+    // 🟢 Render Message
+function renderMessage(msg) {
+    const isMe = msg.sender_id == sender_id;
+    const msgClass = isMe ? "message me" : "message";
+    let content = "";
+
+    if (msg.type === "file") {
+        if (msg.filetype && msg.filetype.startsWith("image/")) {
+            content = `<img src="${msg.message}" class="chat-image">`;
+        } else {
+            content = `<a href="${msg.message}" target="_blank">${msg.filename || 'Download file'}</a>`;
         }
+    } else {
+        content = `<div class="text">${msg.message}</div>`;
+    }
 
-        // ⬇️ Other helper functions
-        function loadMessages() {
-            db.ref("messages").off("value");
-            db.ref("messages").on("value", snapshot => {
-                messagesDiv.innerHTML = "";
-                snapshot.forEach(childSnap => {
-                    const data = childSnap.val();
-                    const key = childSnap.key;
+    const html = `<div class="${msgClass}" data-key="${msg.key}">${content}</div>`;
+    messagesDiv.insertAdjacentHTML("beforeend", html);
 
-                    if (
-                        (data.sender_id == sender_id && data.receiver_id == receiver_id) ||
-                        (data.sender_id == receiver_id && data.receiver_id == sender_id)
-                    ) {
-                        renderMessage({ ...data, key });
-                    }
+    // Scroll to bottom
+    messagesDiv.lastElementChild?.scrollIntoView({ behavior: "smooth" });
+}
 
-                    if (data.receiver_id == sender_id && !data.read) {
-                        db.ref("messages/" + key).update({ read: true, delivered: true });
-                    }
-                });
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            });
+
+
+    // 🟢 Helpers
+    function clearUnreadBadge(id) {
+        const badge = document.getElementById("badge-" + id);
+        const userDiv = document.querySelector(`.user[data-id='${id}']`);
+        if (badge) {
+            badge.textContent = "0";
+            badge.style.display = "none";
+            userDiv.classList.remove("has-unread");
+            updateMainBadge();
         }
+    }
 
-        function renderMessage(msg) {
-            const isMe = msg.sender_id == sender_id;
-            const msgClass = isMe ? "message me" : "message";
-            const tickHtml = getTickHtml(msg);
-            const statusText = getStatusText(msg);
-
-            let content = "";
-            if (msg.type === "file") {
-                if (msg.filetype && msg.filetype.startsWith("image/")) {
-                    content = `<img src="${msg.message}" class="chat-image" alt="Image">`;
-                } else {
-                    content = `<a href="${msg.message}" target="_blank">${msg.filename || 'Download file'}</a>`;
-                }
-            } else {
-                content = `<div class="text">${msg.message}</div>`;
-            }
-
-            const html = `
-                <div class="${msgClass}" data-key="${msg.key}">
-                    ${content}
-                    <div class="status">${isMe ? `${tickHtml} ${statusText}` : ""}</div>
-                </div>
-            `;
-            messagesDiv.insertAdjacentHTML("beforeend", html);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    function updateMainBadge() {
+        let totalUnread = 0;
+        document.querySelectorAll(".badge").forEach(b => totalUnread += parseInt(b.textContent) || 0);
+        const mainBadge = document.getElementById("mainBadge");
+        if (totalUnread > 0) {
+            mainBadge.textContent = totalUnread;
+            mainBadge.style.display = "inline-block";
+        } else {
+            mainBadge.style.display = "none";
         }
+    }
 
-        function getTickHtml(msg) {
-            if (!msg.delivered) return `<i class='fas fa-clock tick'></i>`;
-            if (msg.delivered && !msg.read) return `<i class='fas fa-check-double tick delivered'></i>`;
-            if (msg.read) return `<i class='fas fa-check-double tick read'></i>`;
-            return `<i class='fas fa-check tick delivered'></i>`;
-        }
-
-        function getStatusText(msg) {
-            if (!msg.delivered) return "<small>Sending...</small>";
-            if (msg.delivered && !msg.read) return "<small>Delivered</small>";
-            if (msg.read) return "<small>Seen</small>";
-            return "";
-        }
-
-        function clearUnreadBadge(id) {
-            const badge = document.getElementById("badge-" + id);
-            const userDiv = document.querySelector(`.user[data-id='${id}']`);
-            if (badge) {
-                badge.textContent = "0";
-                badge.style.display = "none";
-                userDiv.classList.remove("has-unread");
-                updateMainBadge();
-            }
-        }
-
-        function updateMainBadge() {
-            let totalUnread = 0;
-            document.querySelectorAll(".badge").forEach(b => {
-                totalUnread += parseInt(b.textContent) || 0;
-            });
-
-            const mainBadge = document.getElementById("mainBadge");
-            if (totalUnread > 0) {
-                mainBadge.textContent = totalUnread;
-                mainBadge.style.display = "inline-block";
-            } else {
-                mainBadge.style.display = "none";
-            }
-        }
-
-    loadUsers();
-
-
-    });
-    </script>
+});
+</script>
