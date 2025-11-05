@@ -25,6 +25,7 @@ use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\AdminPanelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -118,6 +119,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/social-link', [PostController::class, 'index'])->name('social.link');
     Route::post('posts-create', [PostController::class, 'store'])->name('posts.store');
     Route::get('linkedin/callback', [PostController::class, 'callback']);
+    
+    //AdminPanel
+    Route::get('/admin-panel', [AdminPanelController::class, 'index'])->name('AdminPanel');
+    Route::post('/admin/update-role', [AdminPanelController::class, 'updateRole'])->name('admin.update.role');
+
+    
 
 
     
