@@ -183,7 +183,7 @@
                     align-items: center;
                     padding-left: 0px;">
                     <div>
-                        <p style="margin-bottom: 0px; font-weight: 600; font-size: 14px;">Admin Panel</p>
+                        <p style="margin-bottom: 0px; font-weight: 600; font-size: 14px;"><a href="{{ route('AdminPanel') }}" style="text-decoration: none">Admin Panel</a></p>
                     </div>
                 </div>
             </div>
