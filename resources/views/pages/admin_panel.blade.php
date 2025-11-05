@@ -38,18 +38,7 @@
             font-weight: bold;
         }
 
-        .modal-backdrop {
-    --bs-backdrop-zindex: 1050;
-     --bs-backdrop-bg: white !important; 
-    --bs-backdrop-opacity: 0.5;
-    position: fixed;
-    top: 0;
-    left: 0;
-     z-index:1 !important; 
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--bs-backdrop-bg);
-}
+
     </style>
 
     {{-- ✅ Include Sidebar / Navbar --}}
