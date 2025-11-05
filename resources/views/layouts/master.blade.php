@@ -32,7 +32,18 @@
             z-index: 1050;
             display: none;
         }
-
+.modal-backdrop {
+    --bs-backdrop-zindex: 1 !important;
+    --bs-backdrop-bg: #000;
+    --bs-backdrop-opacity: 0.5;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--bs-backdrop-zindex);
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bs-backdrop-bg);
+}
         .page-loader .spinner {
             position: relative;
             display: flex;
