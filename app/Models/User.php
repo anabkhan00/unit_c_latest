@@ -25,6 +25,7 @@ class User extends Authenticatable
         'profile_image',
         'google_id',
         'slack_id',
+        'google_token',
     ];
 
     /**

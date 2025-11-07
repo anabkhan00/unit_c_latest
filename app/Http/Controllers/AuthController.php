@@ -63,23 +63,47 @@ class AuthController extends Controller
         return redirect()->route('register.index')->with('error', 'Registration failed. Please try again.');
     }
 
+    // public function forgotPassword(Request $request)
+    // {
+    //     // dd($request->all());
+    //     $validatedData = Validator::make($request->all(), [
+    //         'email' => 'required|email|exists:users,email'
+    //     ]);
+
+    //     if ($validatedData->fails()) {
+    //         return back()->withErrors($validatedData)->withInput();
+    //     }
+
+    //     $status = Password::sendResetLink($request->only('email'));
+
+    //     return $status === Password::RESET_LINK_SENT
+    //         ? back()->with(['status' => __($status)])
+    //         : back()->withErrors(['email' => __($status)])->withInput();
+    // }
     public function forgotPassword(Request $request)
-    {
-        // dd($request->all());
-        $validatedData = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email'
-        ]);
+{
+    $validatedData = Validator::make($request->all(), [
+        'email' => 'required|email|exists:users,email'
+    ]);
 
-        if ($validatedData->fails()) {
-            return back()->withErrors($validatedData)->withInput();
-        }
-
-        $status = Password::sendResetLink($request->only('email'));
-
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with(['status' => __($status)])
-            : back()->withErrors(['email' => __($status)])->withInput();
+    if ($validatedData->fails()) {
+        return response()->json([
+            'errors' => $validatedData->errors()
+        ], 422);
     }
+
+    $status = Password::sendResetLink($request->only('email'));
+
+    if ($status === Password::RESET_LINK_SENT) {
+        return response()->json([
+            'message' => __($status)
+        ], 200);
+    }
+
+    return response()->json([
+        'errors' => ['email' => __($status)]
+    ], 400);
+}
 
     public function resetPassword(Request $request)
     {

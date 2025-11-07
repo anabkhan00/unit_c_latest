@@ -83,7 +83,7 @@
                     <div class="col-lg-4 col-md-4 document-item mb-2 p-3 ">
     <div id="document-add-id" 
          class="add-document-btn rounded d-flex flex-column align-items-center justify-content-center p-5"
-         style="background-color: white; border: 1px solid #ddd; cursor: pointer;     height: 200px;"
+         style="background-color: white; border: 1px solid #ddd; cursor: pointer;     height: 215px;"
          data-bs-toggle="modal" 
          data-bs-target="#addDocumentModal">
 
@@ -137,7 +137,7 @@
                 <p class="text-start m-0" style="font-size:16px; font-weight:600; color:black;">
                     {{ $document->document_name ?? $document->document_title }}
                 </p>
-
+                
                 <div class="my-3">
                     <img 
                         src="{{ $icon }}" 
@@ -154,8 +154,14 @@
                    style="background-color:#0C5097; border:none; font-size:13px;">
                     <i class="fa fa-download"></i> Download
                 </a>
-
+                
                 <p class="text-start m-0 mt-3" style="font-size:12px; font-weight:500; color:black;">
+                    Created by :
+                    <span style="font-size:12px; font-weight:500; color:#0C5097;">
+                        {{ $document->addedBy->name }}
+                    </span>
+                </p>
+                <p class="text-start m-0 " style="font-size:12px; font-weight:500; color:black;">
                     Created at :
                     <span style="font-size:12px; font-weight:500; color:#0C5097;">
                         {{ $document->updated_at }}
