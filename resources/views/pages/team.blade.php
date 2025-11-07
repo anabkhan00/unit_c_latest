@@ -56,7 +56,7 @@
                             Total members: {{ $team->users->count() }}
                         </div>
                         <div class="d-flex w-100 align-items-center justify-content-between" style=" gap: 10px;">
-                            <div>
+                            <div id="meetingIcon" style="cursor:pointer;">
                                 <svg width="20" height="36" viewBox="0 0 36 36" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -64,7 +64,7 @@
                                         fill="black" />
                                 </svg>
                             </div>
-                            <div>
+                            <div id="projectIcon" style="cursor:pointer;">
                                 <svg width="20" height="36" viewBox="0 0 36 36" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -72,15 +72,15 @@
                                         fill="black" />
                                 </svg>
                             </div>
-                            <div>
+                            {{--  <div>
                                 <svg width="20" height="29" viewBox="0 0 31 29" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M10.0812 1.11719L0.720459 7.66183V27.8411L10.0812 22.9327M10.0812 1.11719L20.5432 6.57106M10.0812 1.11719V22.9327M20.5432 6.57106L29.3533 1.11719V22.9327L20.5432 27.8411M20.5432 6.57106V27.8411M20.5432 27.8411L10.0812 22.9327"
                                         stroke="black" stroke-width="1.43164" stroke-linejoin="round" />
                                 </svg>
-                            </div>
-                            <div>
+                            </div>  --}}
+                            <div id="noteIcon" style="cursor:pointer;">
                                 <svg width="20" height="36" viewBox="0 0 31 36" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
@@ -271,4 +271,20 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{{ asset('js/team.js') }}"></script>
+    <script>
+        document.getElementById('meetingIcon').addEventListener('click', function() {
+            window.location.href = '/meetings/index';
+        });
+    </script>
+    <script>
+        document.getElementById('projectIcon').addEventListener('click', function() {
+            window.location.href = '/project';
+        });
+    </script>
+    <script>
+        document.getElementById('noteIcon').addEventListener('click', function() {
+            window.location.href = '/note';
+        });
+    </script>
+
 @endpush

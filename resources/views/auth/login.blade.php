@@ -200,7 +200,7 @@
                         <p class="leftpara">The passage experienced a surge in popularity during the 1960s when Letraset
                             used it on their dry-transfer sheets, and again during the 90s as desktop publishers bundled
                             the text with their software.</p>
-                        <p class="leftpara">Hassan</p>
+                        {{--  <p class="leftpara">Hassan</p>  --}}
                     </div>
                     <div class="col-12 d-flex justify-content-end">
                         <img src="./images/Vector 1.svg" class="coma mb-3" alt="...">

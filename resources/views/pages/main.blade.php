@@ -26,7 +26,7 @@
         </div>
     </a>
 
-    <a href="{{ route('meetings.index') }}" style="color:inherit;font-weight:bold">
+    <a href="{{ route('google.index') }}" style="color:inherit;font-weight:bold">
         <div class="notification">
             <div class="main-first">
                 <div class="main-second" id="meeting-btn" style="background: #FF8E1D;">

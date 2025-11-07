@@ -116,7 +116,7 @@
                 <div class="modal fade" id="scheduleMeetingModal" tabindex="-1" aria-labelledby="scheduleMeetingModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
-                        <form action="{{ route('meetings.store') }}" method="POST">
+                        <form id="meetForm" action="{{ route('meetings.create') }}" method="POST">
                             @csrf
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -490,4 +490,63 @@ function copyLink(link) {
   });
 }
 </script>
+<!-- Axios CDN -->
+<!-- Axios CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('meetForm');
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Handle multiple select for users
+        const selectedUsers = [];
+        form.querySelectorAll('select[name="user_ids[]"] option:checked').forEach(opt => selectedUsers.push(opt.value));
+        data.user_ids = selectedUsers;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true; // prevent double submit
+
+        try {
+            const res = await axios.post("{{ route('meetings.create') }}", data, {
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            });
+
+            // Redirect to Google OAuth if token missing
+            if (res.data.redirect) {
+                window.location.href = res.data.redirect;
+                return;
+            }
+
+            // Show Meet link if created
+            if (res.data.meetLink) {
+                alert('✅ Google Meet created successfully!\n\nLink: ' + res.data.meetLink);
+                window.open(res.data.meetLink, '_blank');
+            } else {
+                alert('Meeting created but no Meet link returned.');
+            }
+
+            // Close the modal
+            const modalEl = document.getElementById('scheduleMeetingModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if(modal) modal.hide();
+
+            form.reset(); // Reset form after success
+
+        } catch (err) {
+            console.error(err);
+            alert('❌ Error creating meeting. Check console for details.');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+});
+</script>
+
+
 @endsection

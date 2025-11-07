@@ -26,6 +26,7 @@ use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\AdminPanelController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -224,20 +225,31 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     });
 
     //Zoom Meeting
-    Route::get('zoom/authorize', [MeetingController::class, 'authorizeZoom'])->name('zoom.authorize');
-    Route::get('/zoom-meeting-create', [MeetingController::class, 'handleCallback'])->name('zoom.callback');
-    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
-    Route::get('zoom/meetings/create', [MeetingController::class, 'showCreateForm'])->name('zoom.meetings.create');
-    Route::post('zoom/meetings/store', [MeetingController::class, 'store'])->name('zoom.meetings.store');
-    Route::get('/meetings/{id}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
-    Route::post('/meetings/{id}/update', [MeetingController::class, 'update'])->name('meetings.update');
+    // Route::get('zoom/authorize', [MeetingController::class, 'authorizeZoom'])->name('zoom.authorize');
+    // Route::get('/zoom-meeting-create', [MeetingController::class, 'handleCallback'])->name('zoom.callback');
+    // Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+    // Route::get('zoom/meetings/create', [MeetingController::class, 'showCreateForm'])->name('zoom.meetings.create');
+    // Route::post('zoom/meetings/store', [MeetingController::class, 'store'])->name('zoom.meetings.store');
+    // Route::get('/meetings/{id}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
+    // Route::post('/meetings/{id}/update', [MeetingController::class, 'update'])->name('meetings.update');
+
+    // Google-Meet Routes
+    Route::get('/meetings/index', [GoogleController::class, 'index'])->name('google.index');
+    Route::get('/google/oauth/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('/google/oauth/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+    Route::post('/meetings/create', [GoogleController::class, 'createMeeting'])->name('meetings.create');
+    Route::post('/meetings/delete', [GoogleController::class, 'destroy'])->name('meetings.destroy');
+    Route::post('/meetings/update', [GoogleController::class, 'destroy'])->name('meetings.update');
+    
+
+    
 
 
     // Google Meet Routes
-    Route::get('google/authorize', [MeetingController::class, 'authorizeGoogle'])->name('google.authorize');
-    Route::get('/google-meet-callback', [MeetingController::class, 'handleCallback'])->name('google.callback');
-    Route::resource('meetings', MeetingController::class)->except(['show', 'create']);
-    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+    // Route::get('google/authorize', [MeetingController::class, 'authorizeGoogle'])->name('google.authorize');
+    // Route::get('/google-meet-callback', [MeetingController::class, 'handleCallback'])->name('google.callback');
+    // Route::resource('meetings', MeetingController::class)->except(['show', 'create']);
+    // Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
 
     //Video Meeting
     Route::get('video/authorize', [VideoController::class, 'authorizeZoom'])->name('video.authorize');
@@ -258,3 +270,7 @@ Route::fallback(function () {
     ], 404);
 });
 
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return 'Storage link created successfully!';
+});

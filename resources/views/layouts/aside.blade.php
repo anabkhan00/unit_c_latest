@@ -350,6 +350,17 @@
     
     <ul class="inside-bar">
 <li class="inside-bar-item" id="talk-btn">
+ <button class="inside-bar-text" onclick="window.location.href='/dashboard'" style="background:none; border:none; outline:none;">
+    <img src="./images/Vector (2).svg" class="img-fluid" alt="..." style="width:140px;">
+    <br>
+    Dashboard
+    <span id="mainBadge">0</span>
+</button>
+
+
+
+    
+
     <button id="openChatBtn" class="inside-bar-text">
         <img src="{{ asset('svg/talk.svg') }}" alt="">
         <br>
@@ -1143,7 +1154,7 @@ document.addEventListener("DOMContentLoaded", function () {
 fileInput.addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file || !receiver_id) {
-        alert("Select a user first!");
+        {{--  alert("Select a user first!");  --}}
         return;
     }
 

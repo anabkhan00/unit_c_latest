@@ -55,89 +55,7 @@ class MeetingController extends Controller
         return redirect()->route('meetings.index')->with('error', 'Google authorization failed.');
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $userId = auth()->id();
 
-        $emails = Email::with('receiver')->where('receiver_id', $userId)->get();
-        $media = Media::where('user_id', $userId)->get();
-        $users = User::get();
-
-        $accessToken = Session::get('google_access_token');
-        $refreshToken = Session::get('google_refresh_token');
-
-        // If not authorized, redirect to Google authorization
-        if (!$accessToken) {
-            return redirect()->route('google.authorize')->with('error', 'Google not authorized.');
-        }
-
-        $meetings = [];
-
-        try {
-            // Set the access token
-            $this->client->setAccessToken($accessToken);
-
-            // Create Calendar service
-            $this->calendarService = new GoogleCalendar($this->client);
-
-            // Get meetings from Google Calendar
-            $calendarId = 'primary';
-            $optParams = array(
-                'maxResults' => 20,
-                'orderBy' => 'startTime',
-                'singleEvents' => true,
-                'timeMin' => date('c', strtotime('-1 month')),
-                'timeMax' => date('c', strtotime('+3 months')),
-            );
-
-            $results = $this->calendarService->events->listEvents($calendarId, $optParams);
-            $googleEvents = $results->getItems();
-
-            // foreach ($googleEvents as $googleEvent) {
-            //     if ($this->isGoogleMeetEvent($googleEvent)) {
-            //         $meetings[] = $this->formatGoogleEvent($googleEvent);
-            //     }
-            // }
-
-            // Also get meetings from database
-            $dbMeetings = Meeting::with(['user', 'participants'])
-                ->where('user_id', $userId)
-                ->orWhereHas('participants', function($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                })
-                ->get();
-
-            foreach ($dbMeetings as $dbMeeting) {
-                $meetings[] = $this->formatDatabaseMeeting($dbMeeting);
-            }
-
-        } catch (\Exception $e) {
-            // Token might be expired, try to refresh
-            if ($refreshToken) {
-                try {
-                    $newToken = $this->client->refreshToken($refreshToken);
-                    Session::put('google_access_token', $newToken['access_token']);
-                    Session::put('google_refresh_token', $newToken['refresh_token'] ?? $refreshToken);
-
-                    // Retry the request
-                    return $this->index();
-                } catch (\Exception $refreshException) {
-                    return redirect()->route('google.authorize')->with('error', 'Session expired. Please reauthorize.');
-                }
-            } else {
-                return redirect()->route('google.authorize')->with('error', 'Google authorization required.');
-            }
-        }
-
-        return view('pages.meeting', compact('emails', 'media', 'meetings', 'users'));
-    }
-
-    /**
-     * Check if event is a Google Meet event
-     */
     private function isGoogleMeetEvent($event)
     {
         return !empty($event->getHangoutLink()) ||
@@ -147,40 +65,7 @@ class MeetingController extends Controller
     /**
      * Format Google Calendar event for display
      */
-    private function formatGoogleEvent($googleEvent)
-    {
-        $start = $googleEvent->getStart();
-        $end = $googleEvent->getEnd();
 
-        $startTime = $start->getDateTime() ? Carbon::parse($start->getDateTime()) : Carbon::parse($start->getDate());
-        $endTime = $end->getDateTime() ? Carbon::parse($end->getDateTime()) : Carbon::parse($end->getDate());
-
-        $duration = $startTime->diffInMinutes($endTime);
-
-        $now = Carbon::now(config('app.timezone', 'Asia/Karachi'));
-
-        if ($googleEvent->getStatus() === 'cancelled') {
-            $status = 'cancelled';
-        } elseif ($now->lt($startTime)) {
-            $status = 'waiting';
-        } elseif ($now->between($startTime, $endTime)) {
-            $status = 'started';
-        } else {
-            $status = 'ended';
-        }
-
-        return [
-            'id' => $googleEvent->getId(),
-            'topic' => $googleEvent->getSummary(),
-            'start_time' => $startTime,
-            'duration' => $duration,
-            'agenda' => $googleEvent->getDescription(),
-            'join_url' => $googleEvent->getHangoutLink(),
-            'status' => $status,
-            'type' => 'google',
-            'host' => $googleEvent->getCreator() ? $googleEvent->getCreator()->getEmail() : 'Unknown'
-        ];
-    }
 
     /**
      * Format database meeting for display

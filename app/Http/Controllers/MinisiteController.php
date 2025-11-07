@@ -21,7 +21,7 @@ class MinisiteController extends Controller
         $emails = Email::with('receiver')->where('receiver_id', auth()->id())->get();
         $media = Media::where('user_id', auth()->id())->get();
         $teams =  Team::with('users')->get();
-        $documents = MinisiteDocument::get();
+        $documents = MinisiteDocument::with('addedBy')->get();
         return view('pages.minisite', compact('emails', 'media', 'teams','documents'));
     }
 
