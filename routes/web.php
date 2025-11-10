@@ -233,7 +233,7 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     // Route::get('/meetings/{id}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
     // Route::post('/meetings/{id}/update', [MeetingController::class, 'update'])->name('meetings.update');
 
-    // Google-Meet Routes
+    // Google-Meet Routes test 
     Route::get('/meetings/index', [GoogleController::class, 'index'])->name('google.index');
     Route::get('/google/oauth/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
     Route::get('/google/oauth/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
