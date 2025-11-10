@@ -318,4 +318,15 @@ class MeetingController extends Controller
             return redirect()->route('meetings.index')->with('success', 'Meeting deleted from local database.');
         }
     }
+     public function getNotifications()
+    {
+        $now = Carbon::now();
+$meetings = Meeting::where('start_time', '>=', $now->copy()->second(0))
+                   ->where('start_time', '<', $now->copy()->addMinute()->second(0))
+                   ->get();
+
+    // dd($meetings);
+
+        return response()->json($meetings);
+    }
 }
