@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SubTask;
+use App\Models\TasksDocument;
 
 class Task extends Model
 {
@@ -33,4 +34,9 @@ class Task extends Model
     {
         return $this->hasMany(TaskStatus::class, 'task_id');
     }
+    public function tasks_document()
+    {
+        return $this->hasMany(TasksDocument::class, 'task_id');
+    }
+    
 }

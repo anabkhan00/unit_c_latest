@@ -116,7 +116,9 @@
                 <div class="modal fade" id="scheduleMeetingModal" tabindex="-1" aria-labelledby="scheduleMeetingModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog">
-                        <form id="meetForm" action="{{ route('meetings.create') }}" method="POST">
+                        {{--  <form id="meetForm" action="{{ route('meetings.create') }}" method="POST">  --}}
+                          <form id="meetForm" action="{{ route('meetings.create') }}" method="POST" enctype="multipart/form-data">
+
                             @csrf
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -140,10 +142,22 @@
                                         <label for="topic" class="form-label">Meeting Topic</label>
                                         <input type="text" class="form-control" name="topic" required>
                                     </div>
-                                    <div class="mb-3">
+                                    {{--  <div class="mb-3">
                                         <label for="start_time" class="form-label">Start Time</label>
                                         <input type="datetime-local" class="form-control" name="start_time" required>
+                                    </div>  --}}
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="meeting_date" class="form-label">Meeting Date</label>
+                                            <input type="date" name="meeting_date" id="meeting_date" class="form-control" required>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label for="meeting_time" class="form-label">Meeting Time</label>
+                                            <input type="time" name="meeting_time" id="meeting_time" class="form-control" required>
+                                        </div>
                                     </div>
+
                                     <div class="mb-3">
                                         <label for="duration" class="form-label">Duration (minutes)</label>
                                         <input type="number" class="form-control" name="duration" required>
@@ -151,6 +165,10 @@
                                     <div class="mb-3">
                                         <label for="agenda" class="form-label">Agenda</label>
                                         <textarea class="form-control" name="agenda" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="document" class="form-label">Attach Document (optional)</label>
+                                        <input type="file" name="document" class="form-control" >
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -321,12 +339,54 @@
           </div>
 
           <!-- Document Tab -->
-          <div id="document{{ $meeting['id'] }}" class="tab-pane-content d-none d-flex justify-content-center align-items-center" style="height:350px;">
-            <div>
-              <p class="text-center m-0"><i class="bi bi-folder-fill"></i></p>
-              <p class="m-0 twelve">No Attachment</p>
+          <!--<div id="document{{ $meeting['id'] }}" class="tab-pane-content d-none d-flex justify-content-center align-items-center" style="height:350px;">-->
+          <!--  <div>-->
+          <!--    <p class="text-center m-0"><i class="bi bi-folder-fill"></i></p>-->
+          <!--    <p class="m-0 twelve">No Attachment</p>-->
+          <!--  </div>-->
+          <!--</div>-->
+          <!-- Document Tab -->
+<div id="document{{ $meeting['id'] }}" class="tab-pane-content d-none d-flex justify-content-center align-items-center" style="height:350px;">
+    @if(!empty($meeting['document']))
+        @php 
+            $fileName = basename($meeting['document']);
+            $fileUrl = asset('storage/' . $meeting['document']);
+            $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
+        @endphp
+
+        <a href="{{ $fileUrl }}" download="{{ $fileName }}" style="text-decoration: none; color: inherit; width: 100%;">
+            <div class="text-center p-3" style="border: 1px solid #0C5097; border-radius: 10px; background-color: #f5f8ff; max-width: 300px; margin: auto; cursor: pointer; transition: 0.2s;">
+                
+                <!-- Fancy icon -->
+                <div style="font-size: 40px; color: #0C5097; margin-bottom: 10px;">
+                    <i class="bi bi-file-earmark-fill"></i>
+                </div>
+
+                <!-- Attached by -->
+                <p class="m-0 twelve" style="font-weight: 500; color: #0C5097;">
+                    Attached by: {{ $meeting['host'] ?? 'Unknown' }}
+                </p>
+
+                <!-- File name -->
+                <p class="m-0 twelve" style="margin-top: 5px;">
+                    {{ $fileName }}
+                </p>
+
+                <!-- Image preview if file is an image -->
+                @if(in_array(strtolower($fileExt), ['png','jpg','jpeg','gif']))
+                    <img src="{{ $fileUrl }}" alt="Attachment" style="max-width: 100%; margin-top: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                @endif
             </div>
-          </div>
+        </a>
+    @else
+        <div>
+            <p class="text-center m-0"><i class="bi bi-folder-fill"></i></p>
+            <p class="m-0 twelve">No Attachment</p>
+        </div>
+    @endif
+</div>
+
+
 
           <!-- Minutes Tab -->
           <div id="minutes{{ $meeting['id'] }}" class="tab-pane-content d-none" style="height:350px;">
@@ -514,7 +574,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const res = await axios.post("{{ route('meetings.create') }}", data, {
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' ,
+                'Content-Type': 'multipart/form-data' },
+
             });
 
             // Redirect to Google OAuth if token missing

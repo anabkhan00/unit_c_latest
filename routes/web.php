@@ -24,6 +24,7 @@ use App\Http\Controllers\SocialiteController;
 use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\GoogleController;
 
 /*
 |--------------------------------------------------------------------------

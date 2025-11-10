@@ -51,12 +51,22 @@
 <button type="button"
     id="editMainButton"
     class="btn btn-edit-project"
-    style="background:#0C5097; color:white"
+    style="background:#0C5097; color:white; display:none;"
     data-bs-toggle="modal"
     data-bs-target="#editMainProjectModal"
     data-project="">
     Edit Selected Project
 </button>
+<button type="button"
+    id="viewMainButton"
+    class="btn btn-edit-project"
+    style="background:#0C5097; color:white; display:none;"
+    data-bs-toggle="modal"
+    data-bs-target="#viewMainProjectModal"
+    data-project="">
+    view Selected Project
+</button>
+
 
                         </div>
                         <div class="row my-3">
@@ -637,6 +647,55 @@
 </div>
 
 
+<div class="modal fade" id="viewMainProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(90deg,#0C5097,#1A73E8);color:white;">
+                <h5 class="modal-title">Project Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">Project Name:</label>
+                        <input type="text" id="view_project_name" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Project Owner:</label>
+                        <input type="text" id="view_project_owner" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <label class="form-label mt-2">Project Description:</label>
+                <textarea id="view_description" class="form-control" rows="3" readonly></textarea>
+
+                <div class="row mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Start Date:</label>
+                        <input type="date" id="view_start_date" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">End Date:</label>
+                        <input type="date" id="view_end_date" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Status:</label>
+                        <input type="text" id="view_status" class="form-control" readonly>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+                <h5>Tasks</h5>
+                <div id="view-tasks-section"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
         <div class="modal fade" id="editMainProjectModal" tabindex="-1" aria-labelledby="editMainProjectLabel" aria-hidden="true">
@@ -1614,7 +1673,9 @@ function renderChart(tasks) {
 document.addEventListener('DOMContentLoaded', function () {
     const projectButtons = document.querySelectorAll('.btn-project');
     const editButton = document.getElementById('editMainButton');
+    const viewMainButton = document.getElementById('viewMainButton');
     const projectFilter = document.getElementById('projectFilter');
+    const authId = @json(auth()->id());
 
     // 🔹 Dropdown change par active button highlight karna
     projectFilter.addEventListener('change', function () {
@@ -1642,9 +1703,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const project = JSON.parse(this.getAttribute('data-project'));
 
             // Set data on edit button
-            editButton.setAttribute('data-project', JSON.stringify(project));
-            editButton.textContent = `Edit: ${project.name}`;
+            console.log('Project Data:', project.created_by);
+            if (project.created_by === authId) {
+                editButton.style.display = 'inline-block';
+                viewMainButton.style.display = 'inline-block';
 
+                editButton.setAttribute('data-project', JSON.stringify(project));
+                editButton.textContent = `Edit: ${project.name}`;
+
+                viewMainButton.setAttribute('data-project', JSON.stringify(project));
+                viewMainButton.textContent = `View: ${project.name}`;
+            } else {
+                editButton.style.display = 'none';
+                viewMainButton.style.display = 'none';
+            }
             // ✅ Dropdown select update
             projectFilter.value = project.id?.toString();
 
@@ -1652,13 +1724,171 @@ document.addEventListener('DOMContentLoaded', function () {
             projectFilter.dispatchEvent(new Event('change'));
         });
     });
+    
+viewMainButton.addEventListener('click', function () {
+    const project = JSON.parse(this.getAttribute('data-project') || '{}');
+    if (project.id) {
+        $.ajax({
+            url: '/project/' + project.id,
+            type: 'GET',
+            success: function (response) {
+
+                // ✅ Fill readonly project fields
+                $('#view_project_name').val(response.name);
+                $('#view_description').val(response.description);
+                $('#view_status').val(response.status);
+
+                // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
+                if (response.start_date) {
+                    let parts = response.start_date.split('-');
+                    $('#view_start_date').val(parts.reverse().join('-'));
+                }
+                if (response.end_date) {
+                    let parts = response.end_date.split('-');
+                    $('#view_end_date').val(parts.reverse().join('-'));
+                }
+
+                // ✅ Creator / Owner
+                $('#view_project_owner').val(response.created_by?.name || 'Unknown');
+
+                // ✅ Tasks in readonly mode with documents
+                let tasksHTML = '';
+                if (response.tasks && response.tasks.length > 0) {
+                    response.tasks.forEach(task => {
+                        let documentsHTML = '';
+                        if (task.documents && task.documents.length > 0) {
+                            documentsHTML = '<ul class="list-group mt-2">';
+                            task.documents.forEach(doc => {
+                                const fileName = doc.path.split('/').pop(); // extract file name
+                                documentsHTML += `<li class="list-group-item">
+                                    <a href="/${doc.path}" download="${fileName}">${fileName}</a> 
+                                    <small class="text-muted">uploaded by ${doc.uploaded_by}</small>
+                                </li>`;
+                            });
+                            documentsHTML += '</ul>';
+                        } else {
+                            documentsHTML = '<p class="text-muted mt-2">No documents uploaded for this task.</p>';
+                        }
+
+                        tasksHTML += `
+                            <div class="border rounded p-2 mb-2">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Title:</label>
+                                        <input type="text" class="form-control form-control-sm" value="${task.title}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Status:</label>
+                                        <input type="text" class="form-control form-control-sm" value="${task.status}" readonly>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Description:</label>
+                                        <textarea class="form-control form-control-sm" rows="2" readonly>${task.description ?? ''}</textarea>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Documents:</label>
+                                        ${documentsHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    tasksHTML = `<p class="text-muted">No tasks found for this project.</p>`;
+                }
+
+                $('#view-tasks-section').html(tasksHTML);
+
+                // ✅ Show the readonly modal
+                $('#viewMainProjectModal').modal('show');
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert('Error loading project details.');
+            }
+        });
+    }
+});
+
 
     // 🔹 Edit button modal open par data set karna
     editButton.addEventListener('click', function () {
         const project = JSON.parse(this.getAttribute('data-project') || '{}');
         if (project.id) {
-            document.getElementById('editProjectId').value = project.id;
-            document.getElementById('editProjectName').value = project.name;
+            $.ajax({
+        url: '/project/' + project.id,
+        type: 'GET',
+        success: function (response) {
+
+            // ✅ Fill basic project fields
+            $('#edit_project_id').val(response.id);
+            $('#edit_project_name').val(response.name);
+            $('#edit_description').val(response.description);
+            $('#edit_description').val(response.description);
+            $('#edit_status').val(response.status.toLowerCase().replace(' ', '_')); // normalize back to option value
+
+            // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
+            if (response.start_date) {
+                let parts = response.start_date.split('-');
+                $('#edit_start_date').val(parts.reverse().join('-'));
+            }
+            if (response.end_date) {
+                let parts = response.end_date.split('-');
+                $('#edit_end_date').val(parts.reverse().join('-'));
+            }
+
+            // ✅ Creator (handle nested object)
+            if (response.created_by && response.created_by.id) {
+                $('#edit_created_by').val(response.created_by.id);
+            } else {
+                $('#edit_created_by').val('');
+            }
+
+            // ✅ Tasks
+            let tasksHTML = '';
+            if (response.tasks && response.tasks.length > 0) {
+                response.tasks.forEach(task => {
+                    tasksHTML += `
+                        <div class="border rounded p-2 mb-2">
+                            <input type="hidden" name="tasks[${task.id}][id]" value="${task.id}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Title:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][title]" value="${task.title}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Status:</label>
+                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][status]" value="${task.status}">
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <label class="form-label">Description:</label>
+                                    <textarea class="form-control form-control-sm" name="tasks[${task.id}][description]">${task.description ?? ''}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                tasksHTML = `<p class="text-muted">No tasks found for this project.</p>`;
+            }
+
+            $('#edit-tasks-section').html(tasksHTML);
+
+            // ✅ Finally, show modal
+            $('#editMainProjectModal').modal('show');
+        },
+        error: function (xhr) {
+            console.error(xhr);
+            alert('Error loading project details.');
+        }
+    });
+            
         }
     });
 });
