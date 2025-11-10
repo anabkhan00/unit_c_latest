@@ -17,7 +17,8 @@ class Meeting extends Model
         'duration',
         'agenda',
         'meeting_url',
-        'cancelled_at'
+        'cancelled_at',
+        'document',
     ];
 
     protected $casts = [

@@ -103,7 +103,7 @@ class MeetingController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
+    {   
         $accessToken = Session::get('google_access_token');
         $refreshToken = Session::get('google_refresh_token');
 

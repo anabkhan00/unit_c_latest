@@ -107,35 +107,79 @@ class ProjectController extends Controller
     }
 
     public function show(Project $project)
-    {
-        $project->load(['creator', 'tasks.assignee']);
-        return response()->json([
-            'id' => $project->id,
-            'name' => $project->name,
-            'description' => $project->description,
-            'start_date' => $project->start_date ? Carbon::parse($project->start_date)->format('d-m-Y') : null,
-            'end_date' => $project->end_date ? Carbon::parse($project->end_date)->format('d-m-Y') : null,
-            'status' => ucfirst($project->status),
-            'created_by' => $project->creator ? ['id' => $project->creator->id, 'name' => $project->creator->name] : null,
-            'tasks' => $project->tasks->map(function ($task) {
-                return [
-                    'id' => $task->id,
-                    'title' => $task->title,
-                    'description' => $task->description,
-                    'status' => ucfirst(str_replace('_', ' ', $task->status)),
-                    'priority' => ucfirst($task->priority),
-                    'due_date' => $task->due_date ? Carbon::parse($task->due_date)->format('d-m-Y') : null,
-                    'completed_at' => $task->completed_at ? Carbon::parse($task->completed_at)->format('d-m-Y') : null,
-                    'assignee' => $task->assignee ? ['id' => $task->assignee->id, 'name' => $task->assignee->name] : null,
-                    'expected_days' => $task->due_date && $task->project->start_date
-                        ? Carbon::parse($task->project->start_date)->diffInDays($task->due_date)
-                        : null,
-                    'days_used' => $task->project->start_date
-                        ? Carbon::parse($task->project->start_date)->diffInDays($task->completed_at ?? now())
-                        : null,
-                ];
-            }),
-        ]);
+    {   
+    // ✅ Load related models
+    $project->load(['creator', 'tasks.assignee', 'tasks.tasks_document']);
+
+    return response()->json([
+        'id' => $project->id,
+        'name' => $project->name,
+        'description' => $project->description,
+        'start_date' => $project->start_date ? Carbon::parse($project->start_date)->format('d-m-Y') : null,
+        'end_date' => $project->end_date ? Carbon::parse($project->end_date)->format('d-m-Y') : null,
+        'status' => ucfirst($project->status),
+        'created_by' => $project->creator ? [
+            'id' => $project->creator->id, 
+            'name' => $project->creator->name
+        ] : null,
+        'tasks' => $project->tasks->map(function ($task) use ($project) {
+            return [
+                'id' => $task->id,
+                'title' => $task->title,
+                'description' => $task->description,
+                'status' => ucfirst(str_replace('_', ' ', $task->status)),
+                'priority' => ucfirst($task->priority),
+                'due_date' => $task->due_date ? Carbon::parse($task->due_date)->format('d-m-Y') : null,
+                'completed_at' => $task->completed_at ? Carbon::parse($task->completed_at)->format('d-m-Y') : null,
+                'assignee' => $task->assignee ? [
+                    'id' => $task->assignee->id, 
+                    'name' => $task->assignee->name
+                ] : null,
+                'expected_days' => $task->due_date && $project->start_date
+                    ? Carbon::parse($project->start_date)->diffInDays($task->due_date)
+                    : null,
+                'days_used' => $project->start_date
+                    ? Carbon::parse($project->start_date)->diffInDays($task->completed_at ?? now())
+                    : null,
+                'documents' => $task->tasks_document->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'path' => $doc->document_path,
+                        'uploaded_by' => $doc->uploaded_by
+                    ];
+                }),
+            ];
+        }),
+    ]);
+        // $project->load(['creator', 'tasks.assignee', 'tasks.tasks_document']);
+        // dd($project);
+        // return response()->json([
+        //     'id' => $project->id,
+        //     'name' => $project->name,
+        //     'description' => $project->description,
+        //     'start_date' => $project->start_date ? Carbon::parse($project->start_date)->format('d-m-Y') : null,
+        //     'end_date' => $project->end_date ? Carbon::parse($project->end_date)->format('d-m-Y') : null,
+        //     'status' => ucfirst($project->status),
+        //     'created_by' => $project->creator ? ['id' => $project->creator->id, 'name' => $project->creator->name] : null,
+        //     'tasks' => $project->tasks->map(function ($task) {
+        //         return [
+        //             'id' => $task->id,
+        //             'title' => $task->title,
+        //             'description' => $task->description,
+        //             'status' => ucfirst(str_replace('_', ' ', $task->status)),
+        //             'priority' => ucfirst($task->priority),
+        //             'due_date' => $task->due_date ? Carbon::parse($task->due_date)->format('d-m-Y') : null,
+        //             'completed_at' => $task->completed_at ? Carbon::parse($task->completed_at)->format('d-m-Y') : null,
+        //             'assignee' => $task->assignee ? ['id' => $task->assignee->id, 'name' => $task->assignee->name] : null,
+        //             'expected_days' => $task->due_date && $task->project->start_date
+        //                 ? Carbon::parse($task->project->start_date)->diffInDays($task->due_date)
+        //                 : null,
+        //             'days_used' => $task->project->start_date
+        //                 ? Carbon::parse($task->project->start_date)->diffInDays($task->completed_at ?? now())
+        //                 : null,
+        //         ];
+        //     }),
+        // ]);
     }
 
     public function edit(Project $project)

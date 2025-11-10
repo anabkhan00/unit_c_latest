@@ -51,9 +51,9 @@ class GoogleController extends Controller
 
         // ✅ Hardcoded credentials (for now) set
 
-        $client->setClientId(config('services.google.client_id'));
-        $client->setClientSecret(config('services.google.client_secret'));
-        $client->setRedirectUri(config('services.google.redirect_uri'));
+        $client->setClientId(config('services.google_meet.client_id_meet'));
+        $client->setClientSecret(config('services.google_meet.client_secret_meet'));
+        $client->setRedirectUri(config('services.google_meet.redirect_uri_meet'));
 
         // ✅ Required settings
         $client->setAccessType('offline');
@@ -112,22 +112,37 @@ class GoogleController extends Controller
 
         return redirect()->route('dashboard')->with('success', 'Google connected successfully!');
     }
+
     public function createMeeting(Request $request)
 {
-    // Map the incoming request to the expected data structure
+    // Merge date + time into start_time before validation
+    if ($request->filled('meeting_date') && $request->filled('meeting_time')) {
+        $request->merge([
+            'start_time' => $request->meeting_date . ' ' . $request->meeting_time
+        ]);
+    }
+
+    // Validate incoming request
     $data = $request->validate([
         'topic' => 'required|string',
         'start_time' => 'required|date',
         'duration' => 'required|integer',
         'user_ids' => 'nullable|array',
-        'agenda' => 'required|string',
+        'agenda' => 'nullable|string',
+        'document' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg,zip|max:5120', // optional file
     ]);
 
-    // Calculate end time from start_time + duration (minutes)
+    // Handle uploaded file
+    $filePath = null;
+    if ($request->hasFile('document')) {
+        $filePath = $request->file('document')->store('meetings', 'public');
+    }
+
+    // Calculate end time
     $start = new \DateTime($data['start_time']);
     $end = (clone $start)->modify("+{$data['duration']} minutes");
 
-    // Map attendees emails from user_ids
+    // Map attendees emails
     $attendees = [];
     if (!empty($data['user_ids'])) {
         $attendees = \App\Models\User::whereIn('id', $data['user_ids'])->pluck('email')->toArray();
@@ -138,24 +153,21 @@ class GoogleController extends Controller
         'start' => $start->format('Y-m-d\TH:i:s'),
         'end' => $end->format('Y-m-d\TH:i:s'),
         'attendees' => $attendees,
-        "duration" => $data['duration'],
-        "agenda" => $data['agenda'] ?? 'No Agenda',
+        'duration' => $data['duration'],
+        'agenda' => $data['agenda'] ?? 'No Agenda',
+        'document' => $filePath, // save path in DB
     ];
 
-
-
-    $token = json_decode(auth()->user()->google_token ?? '', true);
-
-    if (!$token) {
+    // --- Google Meet logic here ---
+    $rawToken = auth()->user()->google_token;
+    $token = json_decode($rawToken, true);
+    if (!is_array($token) || !isset($token['access_token'])) {
         session(['meeting_data' => $meetingData]);
-        return response()->json([
-            'redirect' => route('google.redirect')
-        ]);
+        return response()->json(['redirect' => route('google.redirect')]);
     }
 
     $client = $this->getClient();
     $client->setAccessToken($token);
-
     if ($client->isAccessTokenExpired() && isset($token['refresh_token'])) {
         $newToken = $client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
         $newToken['refresh_token'] = $token['refresh_token'];
@@ -163,18 +175,12 @@ class GoogleController extends Controller
         $client->setAccessToken($newToken);
     }
 
-    $service = new Calendar($client);
+    $service = new \Google\Service\Calendar($client);
 
-    $event = new Event([
+    $event = new \Google\Service\Calendar\Event([
         'summary' => $meetingData['title'],
-        'start' => [
-            'dateTime' => $meetingData['start'],
-            'timeZone' => config('app.timezone', 'Asia/Karachi'),
-        ],
-        'end' => [
-            'dateTime' => $meetingData['end'],
-            'timeZone' => config('app.timezone', 'Asia/Karachi'),
-        ],
+        'start' => ['dateTime' => $meetingData['start'], 'timeZone' => config('app.timezone', 'Asia/Karachi')],
+        'end' => ['dateTime' => $meetingData['end'], 'timeZone' => config('app.timezone', 'Asia/Karachi')],
     ]);
 
     if (!empty($meetingData['attendees'])) {
@@ -199,7 +205,6 @@ class GoogleController extends Controller
             }
         }
     }
-    
 
     // Save meeting in DB
     $meeting = Meeting::create([
@@ -208,9 +213,9 @@ class GoogleController extends Controller
         'topic' => $meetingData['title'],
         'start_time' => $meetingData['start'],
         'duration' => $meetingData['duration'],
-
-        "agenda" => $meetingData['agenda'],
+        'agenda' => $meetingData['agenda'],
         'meeting_url' => $meetLink,
+        'document' => $filePath, // save file path
     ]);
 
     // Attach participants
@@ -223,6 +228,131 @@ class GoogleController extends Controller
         'meetLink' => $meetLink ?? 'Generating...',
     ]);
 }
+
+
+//     public function createMeeting(Request $request)
+// {
+    
+//     // Map the incoming request to the expected data structure
+//     $data = $request->validate([
+//         'topic' => 'required|string',
+//         'start_time' => 'required|date',
+//         'duration' => 'required|integer',
+//         'user_ids' => 'nullable|array',
+//         'agenda' => 'required|string',
+//     ]);
+
+//     // Calculate end time from start_time + duration (minutes)
+//     $start = new \DateTime($data['start_time']);
+//     $end = (clone $start)->modify("+{$data['duration']} minutes");
+
+//     // Map attendees emails from user_ids
+//     $attendees = [];
+//     if (!empty($data['user_ids'])) {
+//         $attendees = \App\Models\User::whereIn('id', $data['user_ids'])->pluck('email')->toArray();
+//     }
+
+//     $meetingData = [
+//         'title' => $data['topic'],
+//         'start' => $start->format('Y-m-d\TH:i:s'),
+//         'end' => $end->format('Y-m-d\TH:i:s'),
+//         'attendees' => $attendees,
+//         "duration" => $data['duration'],
+//         "agenda" => $data['agenda'] ?? 'No Agenda',
+//     ];
+
+//     $rawToken = auth()->user()->google_token;
+//     $token = json_decode($rawToken, true);
+
+//     // 🔒 Validate token format
+//     if (!is_array($token) || !isset($token['access_token'])) {
+//         session(['meeting_data' => $meetingData]);
+//         return response()->json([
+//             'redirect' => route('google.redirect')
+//         ]);
+//     }
+
+//     $client = $this->getClient();
+
+//     // $token = json_decode(auth()->user()->google_token ?? '', true);
+
+//     // if (!$token) {
+//     //     session(['meeting_data' => $meetingData]);
+//     //     return response()->json([
+//     //         'redirect' => route('google.redirect')
+//     //     ]);
+//     // }
+
+//     // $client = $this->getClient();
+//     $client->setAccessToken($token);
+
+//     if ($client->isAccessTokenExpired() && isset($token['refresh_token'])) {
+//         $newToken = $client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
+//         $newToken['refresh_token'] = $token['refresh_token'];
+//         auth()->user()->update(['google_token' => json_encode($newToken)]);
+//         $client->setAccessToken($newToken);
+//     }
+
+//     $service = new Calendar($client);
+
+//     $event = new Event([
+//         'summary' => $meetingData['title'],
+//         'start' => [
+//             'dateTime' => $meetingData['start'],
+//             'timeZone' => config('app.timezone', 'Asia/Karachi'),
+//         ],
+//         'end' => [
+//             'dateTime' => $meetingData['end'],
+//             'timeZone' => config('app.timezone', 'Asia/Karachi'),
+//         ],
+//     ]);
+
+//     if (!empty($meetingData['attendees'])) {
+//         $event->setAttendees(array_map(fn($email) => ['email' => $email], $meetingData['attendees']));
+//     }
+
+//     $conferenceData = new \Google\Service\Calendar\ConferenceData();
+//     $createRequest = new \Google\Service\Calendar\CreateConferenceRequest();
+//     $createRequest->setRequestId(uniqid('meet_', true));
+//     $conferenceData->setCreateRequest($createRequest);
+//     $event->setConferenceData($conferenceData);
+
+//     $createdEvent = $service->events->insert('primary', $event, ['conferenceDataVersion' => 1]);
+
+//     $meetLink = null;
+//     $conf = $createdEvent->getConferenceData();
+//     if ($conf && $conf->getEntryPoints()) {
+//         foreach ($conf->getEntryPoints() as $ep) {
+//             if ($ep->getEntryPointType() === 'video') {
+//                 $meetLink = $ep->getUri();
+//                 break;
+//             }
+//         }
+//     }
+    
+
+//     // Save meeting in DB
+//     $meeting = Meeting::create([
+//         'user_id' => auth()->id(),
+//         'google_event_id' => $createdEvent->getId(),
+//         'topic' => $meetingData['title'],
+//         'start_time' => $meetingData['start'],
+//         'duration' => $meetingData['duration'],
+
+//         "agenda" => $meetingData['agenda'],
+//         'meeting_url' => $meetLink,
+//     ]);
+
+//     // Attach participants
+//     if (!empty($data['user_ids'])) {
+//         $meeting->participants()->attach($data['user_ids']);
+//     }
+
+//     return response()->json([
+//         'eventId' => $createdEvent->getId(),
+//         'meetLink' => $meetLink ?? 'Generating...',
+//     ]);
+// }
 
         private function formatDatabaseMeeting($meeting)
     {
@@ -249,7 +379,8 @@ class GoogleController extends Controller
             'join_url' => $meeting->meeting_url,
             'status' => $status,
             'type' => 'database',
-            'host' => $meeting->user->name
+            'host' => $meeting->user->name,
+            'document' => $meeting->document,
         ];
     }
 

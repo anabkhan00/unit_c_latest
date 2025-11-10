@@ -37,11 +37,11 @@ return [
     'redirect' => env('GOOGLE_CALLBACK_REDIRECTS'),
 ],
 
-    // 'google' => [
-    //     'client_id' => env('GOOGLE_CLIENT_ID'),
-    //     'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-    //     'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
-    // ],
+    'google_meet' => [
+        'client_id_meet' => env('GOOGLE_CLIENT_ID_meet'),
+        'client_secret_meet' => env('GOOGLE_CLIENT_SECRET_meet'),
+        'redirect_uri_meet' => env('GOOGLE_REDIRECT_URI_meet'),
+    ],
     'slack' => [
         'client_id' => env('SLACK_CLIENT_ID'),
         'client_secret' => env('SLACK_CLIENT_SECRET'),
