@@ -50,7 +50,7 @@ class GoogleController extends Controller
         $client = new \Google\Client();
 
         // ✅ Hardcoded credentials (for now) set
-        
+
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
         $client->setRedirectUri(config('services.google.redirect_uri'));
@@ -64,7 +64,7 @@ class GoogleController extends Controller
     }
 
     /**
-     * Step 1: Redirect user to Google OAuth
+     * Step 1: Redirect user to Google OAuth fsdfsfs
      */
     public function redirectToGoogle(Request $request)
     {
