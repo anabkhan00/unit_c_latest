@@ -49,7 +49,8 @@ class GoogleController extends Controller
     {
         $client = new \Google\Client();
 
-        // ✅ Hardcoded credentials (for now)
+        // ✅ Hardcoded credentials (for now) set
+        
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
         $client->setRedirectUri(config('services.google.redirect_uri'));
