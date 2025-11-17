@@ -100,17 +100,43 @@
             <div style="display: flex; align-items: end; gap: 10px;">
                 <div class="d-flex">
                     <p style="color: #0C5097;font-size: 20px;font-weight: 700;" class="me-2">Meeting</p>
-                     <button class="nav-btn active" data-bs-target="#home">Meetings</button>
+                     {{--  <button class="nav-btn active" data-bs-target="#home">Meetings</button>
   <button class="nav-btn" data-bs-target="#profile">Resolutions</button>
-  <button class="nav-btn" data-bs-target="#messages">Noticeboard</button>
+  <button class="nav-btn" data-bs-target="#messages">Noticeboard</button>  --}}
                 </div>
             </div>
             <div>
                 <!-- Button to trigger modal -->
-                <button type="button" data-bs-toggle="modal" data-bs-target="#scheduleMeetingModal"
+                @php
+    $user = auth()->user();
+    $hasToken = false;
+
+    if ($user && $user->google_token) {
+        $token = json_decode($user->google_token, true);
+        $hasToken = is_array($token) && isset($token['access_token']);
+    }
+@endphp
+
+@if ($hasToken)
+    {{-- ✅ If user is authenticated and has token --}}
+    <button type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#scheduleMeetingModal"
+        style="border: none; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background: #0C5097; color: white;">
+        Schedule Meeting
+    </button>
+@else
+    {{-- ❌ If user is not authenticated or doesn’t have a Google token --}}
+    <a href="{{ route('google.redirect') }}"
+        style="display: inline-block; text-align: center; border: none; width: 150px; height: 35px; padding: 5px 10px; border-radius: 5px; background: #0C5097; color: white; text-decoration: none;">
+        Connect 
+    </a>
+@endif
+
+                {{--  <button type="button" data-bs-toggle="modal" data-bs-target="#scheduleMeetingModal"
                     style="border: none; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background: #0C5097; color: white;">
                     Schedule Meeting
-                </button>
+                </button>  --}}
 
                 <!-- Modal -->
                 <div class="modal fade" id="scheduleMeetingModal" tabindex="-1" aria-labelledby="scheduleMeetingModalLabel"
@@ -167,9 +193,11 @@
                                         <textarea class="form-control" name="agenda" rows="3"></textarea>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="document" class="form-label">Attach Document (optional)</label>
-                                        <input type="file" name="document" class="form-control" >
-                                    </div>
+    <label for="documents" class="form-label">Attach Documents (optional)</label>
+    <input type="file" name="documents[]" class="form-control" id="documents" multiple>
+</div>
+<div id="documentsPreview" class="mt-2"></div>
+
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"  style="border: 1px solid #0C5097; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background: white; color: #0C5097;">Cancel</button>
@@ -214,9 +242,10 @@
                             $joinUrl = $meeting['join_url'] ?? '#';
 
                             // For Google Meet events, we don't have participant info from API
-                            $assignedUsers = isset($meeting['type']) && $meeting['type'] === 'database' ?
-                                \App\Models\Meeting::find($meeting['id'])->participants :
-                                collect([]);
+                            $assignedUsers = isset($meeting['type']) && $meeting['type'] === 'database' 
+    ? \App\Models\Meeting::with(['participants'])->find($meeting['id'])->participants 
+    : collect([]);
+
                         @endphp
 
                         <tr style="opacity: {{ $opacity }}; {{ $disabledRow }}">
@@ -302,9 +331,9 @@
               <p class="twelve">Duration: {{ $meeting['duration'] }} minutes</p>
             </div>
             <div class="divs mt-auto d-flex justify-content-end gap-2">
-              <button class="btnblue">Yes</button>
-              <button class="btnblack">Maybe</button>
-  <button class="btnblack" data-bs-dismiss="modal">No</button>
+  <!--            <button class="btnblue">Yes</button>-->
+  <!--            <button class="btnblack">Maybe</button>-->
+  <!--<button class="btnblack" data-bs-dismiss="modal">No</button>-->
 
             </div>
           </div>
@@ -314,6 +343,7 @@
             @if($assignedUsers->count() > 0)
               <div>
                 @foreach($assignedUsers as $user)
+                
                   <div class="row d-flex align-items-center mb-3 borderr">
                     <div class="col-md-10 d-flex align-items-center">
                       <div>
@@ -325,7 +355,7 @@
                       </div>
                     </div>
                     <div class="col-md-2 text-end">
-                      <button class="btnblue">Yes</button>
+                      <button class="btnblue">{{$user->pivot->decision}}</button>
                     </div>
                   </div>
                 @endforeach
@@ -346,38 +376,40 @@
           <!--  </div>-->
           <!--</div>-->
           <!-- Document Tab -->
-<div id="document{{ $meeting['id'] }}" class="tab-pane-content d-none d-flex justify-content-center align-items-center" style="height:350px;">
-    @if(!empty($meeting['document']))
-        @php 
-            $fileName = basename($meeting['document']);
-            $fileUrl = asset('storage/' . $meeting['document']);
-            $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
-        @endphp
+<div id="document{{ $meeting['id'] }}" class="tab-pane-content d-none d-flex justify-content-center align-items-center" style="height:350px; gap:10px; flex-wrap: wrap;">
+    @php
+        $documents = !empty($meeting['document']) ? json_decode($meeting['document'], true) : [];
+    @endphp
 
-        <a href="{{ $fileUrl }}" download="{{ $fileName }}" style="text-decoration: none; color: inherit; width: 100%;">
-            <div class="text-center p-3" style="border: 1px solid #0C5097; border-radius: 10px; background-color: #f5f8ff; max-width: 300px; margin: auto; cursor: pointer; transition: 0.2s;">
-                
-                <!-- Fancy icon -->
-                <div style="font-size: 40px; color: #0C5097; margin-bottom: 10px;">
-                    <i class="bi bi-file-earmark-fill"></i>
+    @if(!empty($documents))
+        @foreach($documents as $doc)
+            @php 
+                $fileName = basename($doc);
+                $fileUrl = asset('storage/' . $doc);
+                $fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
+            @endphp
+
+            <a href="{{ $fileUrl }}" download="{{ $fileName }}" style="text-decoration: none; color: inherit; width: 250px;">
+                <div class="text-center p-3" style="border: 1px solid #0C5097; border-radius: 10px; background-color: #f5f8ff; cursor: pointer; transition: 0.2s; margin-bottom:10px;">
+                    
+                    <div style="font-size: 40px; color: #0C5097; margin-bottom: 10px;">
+                        <i class="bi bi-file-earmark-fill"></i>
+                    </div>
+
+                    <p class="m-0 twelve" style="font-weight: 500; color: #0C5097;">
+                        Attached by: {{ $meeting['host'] ?? 'Unknown' }}
+                    </p>
+
+                    <p class="m-0 twelve" style="margin-top: 5px;">
+                        {{ $fileName }}
+                    </p>
+
+                    @if(in_array(strtolower($fileExt), ['png','jpg','jpeg','gif']))
+                        <img src="{{ $fileUrl }}" alt="Attachment" style="max-width: 100%; margin-top: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+                    @endif
                 </div>
-
-                <!-- Attached by -->
-                <p class="m-0 twelve" style="font-weight: 500; color: #0C5097;">
-                    Attached by: {{ $meeting['host'] ?? 'Unknown' }}
-                </p>
-
-                <!-- File name -->
-                <p class="m-0 twelve" style="margin-top: 5px;">
-                    {{ $fileName }}
-                </p>
-
-                <!-- Image preview if file is an image -->
-                @if(in_array(strtolower($fileExt), ['png','jpg','jpeg','gif']))
-                    <img src="{{ $fileUrl }}" alt="Attachment" style="max-width: 100%; margin-top: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2);">
-                @endif
-            </div>
-        </a>
+            </a>
+        @endforeach
     @else
         <div>
             <p class="text-center m-0"><i class="bi bi-folder-fill"></i></p>
@@ -388,10 +420,43 @@
 
 
 
+
           <!-- Minutes Tab -->
           <div id="minutes{{ $meeting['id'] }}" class="tab-pane-content d-none" style="height:350px;">
-            <p class="twelve">1 - Meeting Minute has been created</p>
-            <p class="twelve">2 - Meeting Minute has been created 2</p>
+                    
+            @php
+        $existingMinutes = \App\Models\MeetingMinute::where('meeting_id', $meeting['id'])->get();
+    @endphp
+
+    @if($existingMinutes->count() > 0)
+        <div class="mb-3">
+            <h6>Existing Minutes:</h6>
+            <ul class="list-group mb-3">
+                @foreach($existingMinutes as $minute)
+                    <li class="list-group-item">
+                        {{ $minute->minute }}
+                        <span class="text-muted" style="font-size: 12px;">
+                            — by {{ optional($minute->user)->name ?? 'Unknown User' }}
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+            <form action="{{ route('meetings.saveMinutes', $meeting['id']) }}" method="POST">
+    @csrf
+
+    <div id="minutesContainer">
+        <div class="mb-3">
+            <label for="minutes0" class="form-label">Minute 1</label>
+            <input class="form-control" name="minutes" id="minutes" rows="3" required>
+        </div>
+
+    <button type="submit" class="btn btn-success mt-2">
+        Save 
+    </button>
+    </div>
+</form>
           </div>
         </div>
       </div>
@@ -555,7 +620,94 @@ function copyLink(link) {
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('documents');
+    const previewDiv = document.getElementById('documentsPreview');
+
+    // Array to hold all selected files
+    let allFiles = [];
+
+    fileInput.addEventListener('change', function () {
+        const files = Array.from(this.files);
+
+        // Add new files to allFiles array
+        files.forEach(file => {
+            // Avoid duplicate files (optional)
+            if (!allFiles.some(f => f.name === file.name && f.size === file.size)) {
+                allFiles.push(file);
+            }
+        });
+
+        // Show preview
+        previewDiv.innerHTML = ''; // Clear preview
+        allFiles.forEach((file, index) => {
+            const fileDiv = document.createElement('div');
+            fileDiv.style.display = 'flex';
+            fileDiv.style.alignItems = 'center';
+            fileDiv.style.marginBottom = '5px';
+            fileDiv.innerHTML = `
+                <span style="flex:1;">${file.name}</span>
+                <button type="button" data-index="${index}" style="margin-left: 10px;">Remove</button>
+            `;
+            previewDiv.appendChild(fileDiv);
+
+            // Remove button
+            fileDiv.querySelector('button').addEventListener('click', function () {
+                const idx = parseInt(this.dataset.index);
+                allFiles.splice(idx, 1);
+                fileDiv.remove();
+            });
+        });
+
+        // Clear the original file input so selecting new files doesn't overwrite
+        fileInput.value = '';
+    });
+
+    // On form submit, append allFiles to FormData
+    const form = document.getElementById('meetForm');
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        allFiles.forEach(file => {
+            formData.append('documents[]', file);
+        });
+
+        try {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+
+            const res = await axios.post("{{ route('meetings.create') }}", formData, {
+                headers: { 
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            if (res.data.redirect) {
+                window.location.href = res.data.redirect;
+                return;
+            }
+
+            alert('Meeting created successfully!');
+            const modalEl = document.getElementById('scheduleMeetingModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if(modal) modal.hide();
+            form.reset();
+            allFiles = [];
+            previewDiv.innerHTML = '';
+
+        } catch (err) {
+            console.error(err);
+            alert('Error creating meeting.');
+        } finally {
+            form.querySelector('button[type="submit"]').disabled = false;
+        }
+    });
+});
+
+{{--  document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('meetForm');
 
     form.addEventListener('submit', async function (e) {
@@ -607,7 +759,7 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.disabled = false;
         }
     });
-});
+});  --}}
 </script>
 
 

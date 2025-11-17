@@ -15,6 +15,7 @@ class Post extends Model
         'description',
         'image',
         'user_id',
+        'linkedin_post_urn'
     ];
 }
 

@@ -58,9 +58,9 @@
                             <a href="#" class="text-decoration-none text-dark">
                                 <div class="col-12 p-2 border-bottom d-flex align-items-center p-0 m-0">
                                     <i class="fas fa-share-alt " style="color:white;"></i>
-                                    <p class="ms-1 p-0 m-0"><a
+                                    <p class="ms-1 p-0 m-0"><a  id="show-shared-files"
                                             style="text-decoration: none; color: inherit; padding-left: 10px;"
-                                            class="filter-type" href="#" data-type="shared">Shared</a></p>
+                                            class="filter-type" href="" data-type="shared">Shared</a></p>
                                 </div>
                             </a>
                             <div class="col-12 position-relative">
@@ -602,6 +602,222 @@
                     console.error('Error fetching files:', error);
                 });
         });
+        document.getElementById('show-shared-files').addEventListener('click', function(e) {
+            document.getElementById('pageLoader').style.display = 'flex';
+            e.preventDefault();
+            // Clear uploaded files/cards section before fetching all files
+            const filteredContent = document.getElementById('filtered-content');
+            if (filteredContent) filteredContent.innerHTML = '';
+            // Hide upload dropdown
+            const uploadDropdownDiv = document.querySelector('.dropdown.py-2');
+            if (uploadDropdownDiv) uploadDropdownDiv.style.display = 'none';
+            fetch('/file-sync-share', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('pageLoader').style.display = 'none';
+                    // Replace welcome section with filtered content
+                    const welcomeSection = document.getElementById('welcome-section');
+                    const filteredContentSection = document.getElementById('filtered-content-section');
+                    if (welcomeSection) welcomeSection.style.display = 'none';
+                    filteredContentSection.style.display = 'flex';
+                    filteredContentSection.innerHTML = '';
+
+                    // Add Back button
+                    const backBtnContainer = document.createElement('div');
+                    backBtnContainer.className = 'd-flex justify-content-end mb-2';
+                    const backBtn = document.createElement('button');
+                    backBtn.className = 'btn btn-sm btn-outline-secondary';
+                    backBtn.innerText = 'Back';
+                    backBtn.onclick = function() {
+                        if (welcomeSection) welcomeSection.style.display = '';
+                        if (uploadDropdownDiv) uploadDropdownDiv.style.display = '';
+                        filteredContentSection.style.display = 'none';
+                        filteredContentSection.innerHTML = '';
+                    };
+                    backBtnContainer.appendChild(backBtn);
+                    filteredContentSection.appendChild(backBtnContainer);
+
+                    // Support both array and {success, files} response
+                    let files = Array.isArray(data) ? data : (data.files || []);
+                    // Show only folders and files not inside any folder (loose files)
+                    const visibleItems = files.filter(file => file.type === 'folder' || (file.type !== 'folder' && (!file.parent_folder_id || file.parent_folder_id === null)));
+                    if (visibleItems.length > 0) {
+                        visibleItems.forEach(file => {
+                            const fileCard = `
+                <div class="col-md-2 col-sm-3 col-4 mb-3">
+                    <div class="file-card border rounded p-2 shadow-sm h-100 d-flex flex-column align-items-center justify-content-between"
+                        data-path="${file.path}"
+                        data-type="${file.type}"
+                        id="file-${file.id}"
+                        ondblclick="handleDoubleClick('${file.path}', '${file.type}')"
+                        style="background-color: #fff; position: relative;">
+
+                        ${(file.type === 'image') ? `<img src="${file.path}" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">` :
+                        (file.type === 'folder') ? `<img src="/files/folder.png" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">` :
+                        `<img src="/files/file.png" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">`}
+
+                        <p class="text-center text-truncate mb-1" title="${file.name}" style="font-size: 13px; width: 100%;">
+                            ${file.name}
+                        </p>
+                        <div class="dropdown position-absolute" style="top: 5px; right: 10px;">
+                            <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                                <svg width="14" height="4" viewBox="0 0 20 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="2" cy="2" r="2" fill="black"></circle>
+                                    <circle cx="10" cy="2" r="2" fill="black"></circle>
+                                    <circle cx="18" cy="2" r="2" fill="black"></circle>
+                                </svg>
+                            </div>
+                            <div class="dropdown-menu">
+                                <button class="dropdown-item file" data-path="${file.path}" data-type="${file.type}"><i class="fas fa-folder-open me-1"></i> ${file.type === 'folder' ? 'Open Folder' : 'Open'}</button>
+                                <button class="dropdown-item" onclick="renameFile('${file.id}')"><i class="fas fa-edit me-1"></i> Rename</button>
+                                <button class="dropdown-item" onclick="downloadFile('${file.path}', '${file.type}')"><i class="fas fa-download me-1"></i> Download</button>
+                                <button class="dropdown-item" onclick="openShareModal('${file.id}', '${file.path}')"><i class="fas fa-share me-1"></i> Share</button>
+                                <button class="dropdown-item delete-file" data-id="${file.id}"><i class="fas fa-trash-alt me-1"></i> Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                            filteredContentSection.insertAdjacentHTML('beforeend', fileCard);
+                        });
+                        document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(element => {
+                            new bootstrap.Dropdown(element);
+                        });
+                    } else {
+                        // Append message after back button container
+                        const noFilesMsg = document.createElement('p');
+                        noFilesMsg.textContent = 'No files found.';
+                        filteredContentSection.appendChild(noFilesMsg);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('pageLoader').style.display = 'none';
+                    const filteredContentSection = document.getElementById('filtered-content-section');
+                    filteredContentSection.innerHTML = '<p>Error loading files.</p>';
+                    console.error('Error fetching files:', error);
+                });
+        });
+        document.querySelectorAll('.filter-type').forEach(item => {
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        const type = item.getAttribute('data-type');
+        const filteredContentSection = document.getElementById('filtered-content-section');
+        const uploadDropdownDiv = document.querySelector('.dropdown.py-2');
+        const welcomeSection = document.getElementById('welcome-section');
+
+        document.getElementById('pageLoader').style.display = 'flex';
+        filteredContentSection.innerHTML = '';
+        if (uploadDropdownDiv) uploadDropdownDiv.style.display = 'none';
+        if (welcomeSection) welcomeSection.style.display = 'none';
+
+        let url = '/file-syncs/all'; // default
+
+        if (type === 'shared') {
+            url = '/file-sync-share';
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('pageLoader').style.display = 'none';
+            const files = Array.isArray(data) ? data : (data.files || []);
+
+            // Apply type filter
+            let visibleItems = files.filter(file => {
+                // Only top-level files/folders
+                if (file.parent_folder_id) return false;
+
+                if (type === 'all' || type === 'shared') return true;
+
+                if (type === 'folder') return file.type === 'folder';
+                if (type === 'image') return file.type !== 'folder' && !['pdf','word','ppt','xlsx','zip'].includes(file.extension);
+                return file.extension === type;
+            });
+
+            // Add Back button
+            const backBtnContainer = document.createElement('div');
+            backBtnContainer.className = 'd-flex justify-content-end mb-2';
+            const backBtn = document.createElement('button');
+            backBtn.className = 'btn btn-sm btn-outline-secondary';
+            backBtn.innerText = 'Back';
+            backBtn.onclick = function() {
+                if (welcomeSection) welcomeSection.style.display = '';
+                if (uploadDropdownDiv) uploadDropdownDiv.style.display = '';
+                filteredContentSection.style.display = 'none';
+                filteredContentSection.innerHTML = '';
+            };
+            backBtnContainer.appendChild(backBtn);
+            filteredContentSection.appendChild(backBtnContainer);
+
+            filteredContentSection.style.display = 'flex';
+            if (visibleItems.length > 0) {
+                visibleItems.forEach(file => {
+                    const fileCard = `
+                        <div class="col-md-2 col-sm-3 col-4 mb-3">
+                            <div class="file-card border rounded p-2 shadow-sm h-100 d-flex flex-column align-items-center justify-content-between"
+                                data-path="${file.path}"
+                                data-type="${file.type}"
+                                id="file-${file.id}"
+                                ondblclick="handleDoubleClick('${file.path}', '${file.type}')"
+                                style="background-color: #fff; position: relative;">
+
+                                ${(file.type === 'image') ? `<img src="${file.path}" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">` :
+                                (file.type === 'folder') ? `<img src="/files/folder.png" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">` :
+                                `<img src="/files/file.png" class="img-fluid mb-2" alt="${file.name}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px;">`}
+
+                                <p class="text-center text-truncate mb-1" title="${file.name}" style="font-size: 13px; width: 100%;">
+                                    ${file.name}
+                                </p>
+                                <div class="dropdown position-absolute" style="top: 5px; right: 10px;">
+                                    <div class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                                        <svg width="14" height="4" viewBox="0 0 20 4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <circle cx="2" cy="2" r="2" fill="black"></circle>
+                                            <circle cx="10" cy="2" r="2" fill="black"></circle>
+                                            <circle cx="18" cy="2" r="2" fill="black"></circle>
+                                        </svg>
+                                    </div>
+                                    <div class="dropdown-menu">
+                                        <button class="dropdown-item file" data-path="${file.path}" data-type="${file.type}"><i class="fas fa-folder-open me-1"></i> ${file.type === 'folder' ? 'Open Folder' : 'Open'}</button>
+                                        <button class="dropdown-item" onclick="renameFile('${file.id}')"><i class="fas fa-edit me-1"></i> Rename</button>
+                                        <button class="dropdown-item" onclick="downloadFile('${file.path}', '${file.type}')"><i class="fas fa-download me-1"></i> Download</button>
+                                        <button class="dropdown-item" onclick="openShareModal('${file.id}', '${file.path}')"><i class="fas fa-share me-1"></i> Share</button>
+                                        <button class="dropdown-item delete-file" data-id="${file.id}"><i class="fas fa-trash-alt me-1"></i> Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    filteredContentSection.insertAdjacentHTML('beforeend', fileCard);
+                });
+                document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(element => {
+                    new bootstrap.Dropdown(element);
+                });
+            } else {
+                const noFilesMsg = document.createElement('p');
+                noFilesMsg.textContent = 'No files found.';
+                filteredContentSection.appendChild(noFilesMsg);
+            }
+
+        })
+        .catch(error => {
+            document.getElementById('pageLoader').style.display = 'none';
+            filteredContentSection.innerHTML = '<p>Error loading files.</p>';
+            console.error('Error fetching files:', error);
+        });
+    });
+});
+
     </script>
+    
     <script src="{{ asset('js/dashboard.js') }}"></script>
 @endpush

@@ -25,6 +25,9 @@ use App\Http\Controllers\TasksDocumentController;
 use App\Http\Controllers\SubTaskController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GoogleController;
+use App\Http\Controllers\AdminPanelController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\FileSyncShareController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,16 +106,10 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['exists' => $exists]);
     });
 
-    //post
-    Route::get('posts-create', [PostController::class, 'create']);
-    Route::post('posts-create', [PostController::class, 'store'])->name('posts.store');
-    Route::get('linkedin/callback', [PostController::class, 'callback']);
-    
-
-
     Route::prefix('emails')->name('email.')->controller(EmailController::class)->group(function () {
         Route::post('/star/{id}', 'toggleStar')->name('star');
         Route::post('/delete/{id}', 'deleteEmail')->name('delete');
+        Route::post('/restore/{id}', 'restoreEmail')->name('restore.delete');
         Route::post('/mark-read/{id}', 'markAsRead')->name('markRead');
         Route::post('/toggle-draft', 'toggleDraft')->name('toggleDraft');
         Route::post('/{email}/move', 'moveEmail')->name('move');
@@ -130,7 +127,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin-panel', [AdminPanelController::class, 'index'])->name('AdminPanel');
     Route::post('/admin/update-role', [AdminPanelController::class, 'updateRole'])->name('admin.update.role');
 
-    
+    //post
+    Route::get('posts-create', [PostController::class, 'create']);
+    Route::post('posts-create', [PostController::class, 'store'])->name('posts.store');
+    Route::get('linkedin/callback', [PostController::class, 'callback']);
+    Route::delete('/post/{id}', [PostController::class, 'delete'])->name('post.delete');
 
 
     
@@ -171,6 +172,8 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
 
     //Teams
     Route::resource('team', TeamController::class);
+    Route::get('/team-project/{teamId}', [TeamController::class, 'team_project']);
+
 
     //News Feed
     Route::resource('news-feed', NewsFeedController::class);
@@ -186,6 +189,10 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::get('/file-sync/download/{id}', [FileSyncController::class, 'downloadFile'])->name('file-sync.download');
     Route::get('/file-syncs/all', [FileSyncController::class, 'all'])->name('file-syncs.all');
 
+
+    // File Sync Share
+    Route::get('/file-sync-share', [FileSyncShareController::class, 'index']);
+
     //Minisite
     Route::controller(MinisiteController::class)->group(function () {
         Route::get('/minisites',  'index')->name('minisites.index');
@@ -196,6 +203,7 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
         Route::get('/get-page-record/{id}',  'edit');
         Route::post('/update-page/{id}',  'update');
         Route::delete('/delete-page/{id}',  'destroy');
+        Route::get('/team-activities',  'teamActivities')->name('minisites.teamActivities');
     });
 
     //chat
@@ -243,9 +251,11 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::get('/google/oauth/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
     Route::get('/google/oauth/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
     Route::post('/meetings/create', [GoogleController::class, 'createMeeting'])->name('meetings.create');
-    Route::post('/meetings/delete', [GoogleController::class, 'destroy'])->name('meetings.destroy');
+    Route::delete('/meetings/delete/{id}', [GoogleController::class, 'deleteMeeting'])->name('meetings.destroy');
     Route::post('/meetings/update', [GoogleController::class, 'destroy'])->name('meetings.update');
-    
+    Route::get('/meeting/decision/{meeting_id}/{user_id}/{decision}', [GoogleController::class, 'storeDecision'])->name('meeting.decision');
+    Route::post('/meetings/{meeting}/save-minutes', [GoogleController::class, 'storeMinutes'])->name('meetings.saveMinutes');
+
 
     
     Route::get('zoom/authorize', [MeetingController::class, 'authorizeZoom'])->name('zoom.authorize');

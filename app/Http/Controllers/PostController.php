@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use GuzzleHttp\Client;
@@ -14,8 +15,10 @@ class PostController extends Controller
     // List all posts for logged-in user
     public function create()
     {
-        $posts = Auth::user()->posts()->latest()->get();
-        return view('posts.index', compact('posts'));
+        $posts = Post::where('user_id', auth()->id())->get();
+
+    // Pass posts to the view
+    return view('pages.social-link', compact('posts'));
     }
 
     // Show form to create new post
@@ -155,7 +158,10 @@ public function store(Request $request)
         ]);
 
         $responseData = json_decode($response->getBody(), true);
-
+if (isset($responseData['id'])) {
+    $post->linkedin_post_urn = $responseData['id'];
+    $post->save();
+}
             return redirect()->route('social.link')->with('success', 'Posted successfully on LinkedIn!');
 
     } catch (\Exception $e) {
@@ -222,6 +228,40 @@ public function callback(Request $request)
         return redirect()->route('posts.store')->with('error', 'LinkedIn callback failed: ' . $e->getMessage());
     }
 }
+public function delete($id)
+{
+    // dd($id);
+    try {
+        // Step 1: Database se post nikaalo
+        $post = Post::findOrFail($id);
+
+        // Step 2: LinkedIn Access Token lo (jo aap pehle store karte ho)
+        $accessToken = Auth::user()->linkedin_access_token;
+
+        // Step 3: LinkedIn API call to delete post
+        $client = new \GuzzleHttp\Client();
+        $linkedinPostUrn = $post->linkedin_post_urn; // e.g. urn:li:share:7393960776526376960
+
+        // LinkedIn DELETE API request
+        $response = $client->request('DELETE', "https://api.linkedin.com/v2/ugcPosts/$linkedinPostUrn", [
+            'headers' => [
+                'Authorization' => "Bearer {$accessToken}",
+            ],
+        ]);
+
+        // Step 4: Agar successful response mila, to DB se delete kar do
+        if ($response->getStatusCode() == 204) {
+            $post->delete();
+            return redirect()->route('social.link')->with('success', 'Post deleted successfully from LinkedIn and database!');
+        } else {
+            return redirect()->back()->with('error', 'Failed to delete from LinkedIn.');
+        }
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Error deleting post: ' . $e->getMessage());
+    }
+}
+
 
 }
 

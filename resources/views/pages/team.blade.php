@@ -2,6 +2,11 @@
 
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/team.css') }}">
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
     .team-container {
@@ -19,6 +24,121 @@
 }
 
 </style>
+  <style>
+    .tab-btn {
+      background-color: #DDDDDD;
+      border: none;
+      padding: 8px 18px;
+      margin-right: 5px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      background-color: #0C5097;
+      color: white;
+    }
+    .bluemeting{
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0C5097;
+    }
+    .smalll{
+        font-size: 10px;
+        color: black;
+        font-weight: 700;
+    }
+    .fouirteen {
+        font-size: 14px;
+        font-weight: 700;
+    }
+    .twenty{
+        font-size: 20px !important;
+        font-weight: 700;
+        color: black;
+    }
+    .twelve {
+        font-size: 12px;
+        color: black;
+        font-weight: 500;
+    }
+        .twelvebold {
+        font-size: 12px;
+        color: black;
+        font-weight: 700;
+    }
+    .btnblue {
+        background-color: #077cbb;
+        color: white;
+        border-radius: 6px;
+        padding: 5px 20px;
+        font-weight: 400;
+        border: none;
+    }
+    .borderr {
+        border-bottom: 1px solid #DDDDDD;
+        padding-bottom: 10px;
+    }
+    .btnblack{
+           background-color: white;
+        color: black;
+        border-radius: 6px;
+        padding: 5px 20px;
+        font-weight: 400;
+        border: 1px solid black;
+    }
+    .mutedd{
+        color: #DEDEDE;
+    }
+    .redd{
+         color: #de2020 !important;
+    }
+    .bluee{
+            color: #42a5f6 !important;
+    }
+  </style>
+  <style>
+    .thisbtn{
+              background-color: #0C5097;
+      color: white;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-weight: 400;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+.form-control {
+    display: block;
+    width: 100%;
+    padding: -0.325rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color:black;
+    -webkit-appearance: none;
+    border-right: none !important;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: 0px;
+    transition: border-color .15s 
+ease-in-out, box-shadow .15s 
+ease-in-out;
+}
+.heading1{
+        font-weight: 700;
+        font-size: 14px;
+}
+.dropdown-item{
+    font-weight: 700;
+            font-size: 12px;
+}
+ .dropdown-menu {
+    min-width: 100px !important;
+  }
+  </style>
     @include('pages.main', ['emails' => $emails])
 
     <div class="container" id="team-content" style="position: absolute; top: 175px; left: 120px;">
@@ -39,8 +159,14 @@
                     </div>
                 </div>
             </div>
+            <!-- Button to open modal -->
+{{--  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">
+  Open Create Project Modal
+</button>  --}}
+
             @foreach ($teams as $team)
-                <div class="col-lg-3 mt-3 col-md-3 position-relative">
+                <div class="col-lg-3 mt-3 col-md-3 edit-icon position-relative">
+
                     <div class="team-card team-container rounded" style="background-color:white">
                         <div style="display: flex; gap: 10px;    text-align: center; " >
                             @foreach ($team->users as $user)
@@ -64,13 +190,14 @@
                                         fill="black" />
                                 </svg>
                             </div>
-                            <div id="projectIcon" style="cursor:pointer;">
+                            <div class="projectIcon" data-id="{{ $team->id }}" style="cursor:pointer;">
                                 <svg width="20" height="36" viewBox="0 0 36 36" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M29.5759 17.5026L29.3285 16.8309L29.0357 16.9387L28.9154 17.2266L29.5759 17.5026ZM32.5156 15.6201L33.0145 16.1334L33.0276 16.1206L33.0401 16.1073L32.5156 15.6201ZM19.6672 24.7647L19.5939 24.0527L18.9514 24.1188V24.7647H19.6672ZM19.6672 28.6132H18.9514V29.329H19.6672V28.6132ZM27.0166 32.3951H26.3008V33.1109H27.0166V32.3951ZM9.72392 32.3951V33.1109H10.4397V32.3951H9.72392ZM17.0733 28.6132V29.329H17.7891V28.6132H17.0733ZM17.0733 24.7647H17.7891V24.1189L17.1466 24.0527L17.0733 24.7647ZM7.16459 17.5026L7.82504 17.2266L7.70472 16.9387L7.41191 16.8309L7.16459 17.5026ZM4.22484 15.6201L3.70038 16.1073L3.71281 16.1206L3.72591 16.1334L4.22484 15.6201ZM6.97437 5.08121V5.79703H7.41566L7.6139 5.40277L6.97437 5.08121ZM29.7661 5.08121L29.1266 5.40277L29.3248 5.79703H29.7661V5.08121ZM17.1294 24.7704L17.1995 24.058L17.0511 25.4819L17.1294 24.7704ZM19.6115 24.7703L19.6898 25.4819L19.5413 24.058L19.6115 24.7703ZM23.2813 12.1407L22.7418 11.6701L22.733 11.6806L23.2813 12.1407ZM22.2092 13.4182L22.732 13.9071L22.7451 13.8931L22.7575 13.8784L22.2092 13.4182ZM22.6588 10.2582L22.8333 9.56397L22.8295 9.56303L22.6588 10.2582ZM21.016 9.8548L20.8364 10.5478L20.8453 10.55L21.016 9.8548ZM20.307 9.33374L20.9118 8.95083L20.9075 8.94406L20.9031 8.93738L20.307 9.33374ZM19.3905 7.95545L19.9866 7.55908L19.9864 7.55878L19.3905 7.95545ZM17.35 7.95545L16.7541 7.55878L16.7539 7.55909L17.35 7.95545ZM16.4334 9.33374L15.8374 8.93738L15.8329 8.94405L15.8287 8.95083L16.4334 9.33374ZM15.7245 9.8548L15.8952 10.55L15.9041 10.5477L15.7245 9.8548ZM14.0816 10.2582L13.9109 9.56302L13.9071 9.56398L14.0816 10.2582ZM13.4591 12.1407L14.0075 11.6805L13.9986 11.6702L13.4591 12.1407ZM14.5313 13.4182L13.983 13.8784L13.9953 13.8931L14.0085 13.9071L14.5313 13.4182ZM14.8079 14.225L14.0938 14.176L14.0935 14.18L14.8079 14.225ZM14.7042 15.8722L15.4183 15.9212L15.4186 15.9172L14.7042 15.8722ZM16.347 17.032L16.6023 17.7007L16.6039 17.7001L16.347 17.032ZM17.9206 16.4269L17.6859 15.7507L17.6747 15.7545L17.6637 15.7588L17.9206 16.4269ZM18.8198 16.4269L19.0767 15.7588L19.0657 15.7545L19.0546 15.7507L18.8198 16.4269ZM20.3935 17.032L20.1366 17.7001L20.1381 17.7007L20.3935 17.032ZM22.0363 15.8722L21.3219 15.9172L21.3221 15.9212L22.0363 15.8722ZM21.9325 14.225L22.6469 14.18L22.6467 14.176L21.9325 14.225ZM29.8232 18.1744C31.0726 17.7143 32.1588 16.9651 33.0145 16.1334L32.0167 15.1068C31.2815 15.8214 30.3617 16.4505 29.3285 16.8309L29.8232 18.1744ZM19.7405 25.4768C24.5142 24.9851 28.4915 21.9533 30.2363 17.7787L28.9154 17.2266C27.3735 20.9158 23.8478 23.6146 19.5939 24.0527L19.7405 25.4768ZM20.383 28.6132V24.7647H18.9514V28.6132H20.383ZM23.558 27.8973H19.6672V29.329H23.558V27.8973ZM27.7324 31.9748C27.7324 29.7115 25.8363 27.8973 23.558 27.8973V29.329C25.0842 29.329 26.3008 30.5403 26.3008 31.9748H27.7324ZM27.7324 32.3951V31.9748H26.3008V32.3951H27.7324ZM28.7458 31.6792H27.0166V33.1109H28.7458V31.6792ZM30.7586 33.6557C30.7586 32.5522 29.8309 31.6792 28.7458 31.6792V33.1109C29.0788 33.1109 29.327 33.3809 29.327 33.6557H30.7586ZM28.7458 35.6321C29.8309 35.6321 30.7586 34.7592 30.7586 33.6557H29.327C29.327 33.9305 29.0788 34.2005 28.7458 34.2005V35.6321ZM7.99466 35.6321H28.7458V34.2005H7.99466V35.6321ZM5.98189 33.6557C5.98189 34.7592 6.90963 35.6321 7.99466 35.6321V34.2005C7.66169 34.2005 7.41353 33.9305 7.41353 33.6557H5.98189ZM7.99466 31.6792C6.90962 31.6792 5.98189 32.5522 5.98189 33.6557H7.41353C7.41353 33.3809 7.66169 33.1109 7.99466 33.1109V31.6792ZM9.72392 31.6792H7.99466V33.1109H9.72392V31.6792ZM9.0081 31.9748V32.3951H10.4397V31.9748H9.0081ZM13.1825 27.8973C10.9042 27.8973 9.0081 29.7115 9.0081 31.9748H10.4397C10.4397 30.5403 11.6563 29.329 13.1825 29.329V27.8973ZM17.0733 27.8973H13.1825V29.329H17.0733V27.8973ZM16.3575 24.7647V28.6132H17.7891V24.7647H16.3575ZM6.50413 17.7787C8.24895 21.9533 12.2262 24.9852 17 25.4768L17.1466 24.0527C12.8927 23.6146 9.36698 20.9158 7.82504 17.2266L6.50413 17.7787ZM3.72591 16.1334C4.58163 16.9651 5.66784 17.7143 6.91727 18.1744L7.41191 16.8309C6.3787 16.4505 5.45896 15.8214 4.72376 15.1068L3.72591 16.1334ZM0.845947 9.40097C0.845947 12.0478 2.00427 14.2814 3.70038 16.1073L4.74929 15.1329C3.22896 13.4963 2.27759 11.5949 2.27759 9.40097H0.845947ZM6.00598 4.36539C3.1398 4.36539 0.845947 6.56619 0.845947 9.40097H2.27759C2.27759 7.39493 3.89187 5.79703 6.00598 5.79703V4.36539ZM6.97437 4.36539H6.00598V5.79703H6.97437V4.36539ZM13.1824 0.583496C10.1748 0.583496 7.57821 2.28676 6.33484 4.75965L7.6139 5.40277C8.61857 3.40462 10.7256 2.01514 13.1824 2.01514V0.583496ZM23.558 0.583496H13.1824V2.01514H23.558V0.583496ZM30.4056 4.75965C29.1622 2.28676 26.5656 0.583496 23.558 0.583496V2.01514C26.0149 2.01514 28.1219 3.40462 29.1266 5.40277L30.4056 4.75965ZM30.7345 4.36539H29.7661V5.79703H30.7345V4.36539ZM35.8945 9.40097C35.8945 6.56619 33.6006 4.36539 30.7345 4.36539V5.79703C32.8486 5.79703 34.4629 7.39493 34.4629 9.40097H35.8945ZM33.0401 16.1073C34.7362 14.2814 35.8945 12.0478 35.8945 9.40097H34.4629C34.4629 11.5949 33.5115 13.4963 31.9912 15.1329L33.0401 16.1073ZM18.3702 24.1154C17.9738 24.1154 17.5877 24.1007 17.2077 24.0589L17.0511 25.4819C17.4984 25.5311 17.9395 25.5471 18.3702 25.5471V24.1154ZM19.5332 24.0588C19.1531 24.1006 18.7668 24.1154 18.3702 24.1154V25.5471C18.8012 25.5471 19.2424 25.5311 19.6898 25.4819L19.5332 24.0588ZM18.3702 25.5469C18.8129 25.5469 19.2504 25.5252 19.6816 25.4827L19.5413 24.058C19.1567 24.0958 18.766 24.1153 18.3702 24.1153V25.5469ZM17.0593 25.4828C17.4904 25.5252 17.9277 25.5469 18.3702 25.5469V24.1153C17.9745 24.1153 17.584 24.0959 17.1995 24.058L17.0593 25.4828ZM22.733 11.6806L21.6609 12.958L22.7575 13.8784L23.8296 12.6009L22.733 11.6806ZM22.4843 10.9524C22.8238 11.0378 22.9048 11.1849 22.9202 11.2312C22.9332 11.2698 22.961 11.419 22.7419 11.6702L23.8208 12.6113C24.2761 12.0893 24.4941 11.4233 24.2779 10.777C24.0643 10.1383 23.4968 9.73077 22.8333 9.56398L22.4843 10.9524ZM20.8453 10.55L22.4881 10.9534L22.8295 9.56303L21.1867 9.15963L20.8453 10.55ZM19.7022 9.71664C19.8311 9.9202 20.0131 10.095 20.1898 10.226C20.3662 10.3568 20.5917 10.4843 20.8364 10.5477L21.1956 9.16188C21.1809 9.15806 21.1211 9.13432 21.0424 9.07596C20.964 9.01786 20.9213 8.96579 20.9118 8.95083L19.7022 9.71664ZM18.7944 8.35181L19.7109 9.7301L20.9031 8.93738L19.9866 7.55908L18.7944 8.35181ZM17.9458 8.35211C18.1375 8.06418 18.3051 8.02835 18.3702 8.02835C18.4354 8.02835 18.603 8.06418 18.7946 8.35211L19.9864 7.55878C19.6074 6.98948 19.04 6.59671 18.3702 6.59671C17.7004 6.59671 17.1331 6.98948 16.7541 7.55878L17.9458 8.35211ZM17.0295 9.7301L17.946 8.35181L16.7539 7.55909L15.8374 8.93738L17.0295 9.7301ZM15.9041 10.5477C16.1487 10.4843 16.3743 10.3568 16.5506 10.226C16.7273 10.095 16.9094 9.9202 17.0382 9.71664L15.8287 8.95083C15.8192 8.96579 15.7764 9.01786 15.698 9.07596C15.6193 9.13432 15.5596 9.15806 15.5448 9.16188L15.9041 10.5477ZM14.2524 10.9534L15.8952 10.55L15.5537 9.15963L13.9109 9.56303L14.2524 10.9534ZM13.9986 11.6702C13.7794 11.419 13.8073 11.2698 13.8202 11.2312C13.8357 11.1849 13.9167 11.0378 14.2562 10.9524L13.9071 9.56398C13.2436 9.73077 12.6762 10.1383 12.4625 10.777C12.2463 11.4233 12.4644 12.0893 12.9197 12.6113L13.9986 11.6702ZM15.0796 12.958L14.0074 11.6806L12.9108 12.6009L13.983 13.8784L15.0796 12.958ZM15.5221 14.274C15.539 14.0275 15.4893 13.7749 15.4191 13.5671C15.3495 13.3614 15.2332 13.1208 15.0541 12.9292L14.0085 13.9071C14.0012 13.8994 14.0079 13.9048 14.0221 13.9307C14.0354 13.955 14.05 13.9876 14.0628 14.0256C14.0756 14.0635 14.0845 14.1001 14.0894 14.131C14.0946 14.1636 14.0936 14.1785 14.0938 14.176L15.5221 14.274ZM15.4186 15.9172L15.5223 14.27L14.0935 14.18L13.9898 15.8272L15.4186 15.9172ZM16.0916 16.3633C15.7627 16.4889 15.5999 16.4198 15.5487 16.3837C15.5046 16.3527 15.3963 16.2429 15.4183 15.9212L13.99 15.8232C13.9429 16.51 14.1718 17.1651 14.7243 17.5542C15.2697 17.9383 15.9629 17.9449 16.6023 17.7007L16.0916 16.3633ZM17.6637 15.7588L16.0901 16.3639L16.6039 17.7001L18.1775 17.095L17.6637 15.7588ZM19.0546 15.7507C18.8323 15.6735 18.5817 15.648 18.3702 15.648C18.1588 15.648 17.9081 15.6735 17.6859 15.7507L18.1554 17.1031C18.1752 17.0962 18.2531 17.0797 18.3702 17.0797C18.4874 17.0797 18.5653 17.0962 18.5851 17.1031L19.0546 15.7507ZM20.6504 16.3639L19.0767 15.7588L18.5629 17.095L20.1366 17.7001L20.6504 16.3639ZM21.3221 15.9212C21.3442 16.2429 21.2359 16.3527 21.1918 16.3837C21.1405 16.4198 20.9778 16.4889 20.6488 16.3633L20.1381 17.7007C20.7775 17.9449 21.4708 17.9383 22.0162 17.5542C22.5686 17.1651 22.7975 16.51 22.7504 15.8232L21.3221 15.9212ZM21.2181 14.27L21.3219 15.9172L22.7507 15.8272L22.6469 14.18L21.2181 14.27ZM21.6864 12.9292C21.5073 13.1208 21.3909 13.3614 21.3214 13.5671C21.2512 13.7749 21.2015 14.0275 21.2184 14.274L22.6467 14.176C22.6468 14.1785 22.6459 14.1636 22.6511 14.1311C22.656 14.1001 22.6648 14.0635 22.6776 14.0256C22.6905 13.9876 22.705 13.955 22.7184 13.9307C22.7326 13.9048 22.7392 13.8994 22.732 13.9071L21.6864 12.9292Z"
                                         fill="black" />
                                 </svg>
+                                
                             </div>
                             {{--  <div>
                                 <svg width="20" height="29" viewBox="0 0 31 29" fill="none"
@@ -96,15 +223,15 @@
                                         stroke="black" stroke-width="1.43164" />
                                 </svg>     
                             </div>
-                            <div>
-<a href="#" class="view-icon" title="View" data-bs-toggle="modal"
+                            {{--  <div>
+                            <a href="#" class="view-icon" title="View" data-bs-toggle="modal"
                                     data-bs-target="#viewModal" data-id="{{ $team->id }}"
                                     data-title="{{ $team->team_name }}" data-description="{{ $team->team_description }}"
                                     data-users="{{ $team->users->pluck('name')->join(', ') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                            </div>
-                            <div>
+                            </div>  --}}
+                            {{--  <div>
                                       <a href="javascript:void(0)" class="edit-icon" title="Edit" data-bs-toggle="modal"
                                     data-bs-target="#editModal"
                                     data-id="{{ $team->id }}"
@@ -116,13 +243,8 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
 
-                            </div>
-                            <div>
-                                        <a href="javascript:void(0)" class="delete-icon " title="Delete"
-                                    data-id="{{ $team->id }}">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
+                            </div>  --}}
+                            
                         </div>
                         <div style="    width: 100%;">
                           <button  class="rounded py-3"
@@ -135,7 +257,17 @@
                                 font-weight: 700;
                             
                             
-                         ">  {{ Str::ucfirst($team->team_name) }}</button>
+                         "> <a href="javascript:void(0)" class="edit-icon" title="Edit" data-bs-toggle="modal"
+                                    data-bs-target="#editModal"
+                                    data-id="{{ $team->id }}"
+                                    data-team_name="{{ $team->team_name }}"
+                                    data-team_description="{{ $team->team_description }}"
+                                    data-users="{{ json_encode($team->users->pluck('id')->toArray()) }}"
+                                    data-all-users="{{ json_encode($users) }}"
+                                    >
+                                    {{ Str::ucfirst($team->team_name) }}
+                                </a> </button>
+                         
                         </div>
                         <div class="overlay">
                             <div class="icon-container">
@@ -230,6 +362,81 @@
         </div>
     </div>
 
+
+
+
+{{--  <div class="modal fade" id="projectModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content rounded-3 shadow">
+
+      <!-- Header -->
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" style="color: #077cbb;">Create Team</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+
+        <!-- Team Name -->
+        <div class="mb-3">
+          <input type="text" class="form-control" placeholder="Team Name">
+        </div>
+
+        <!-- Add Members -->
+        <p class="heading1 mb-2">Add Team Members</p>
+        <div class="input-group mb-3 position-relative">
+          <input type="text" id="inviteInput" class="form-control" placeholder="Invite someone...">
+
+          <!-- Default role dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="defaultRoleBtn" data-bs-toggle="dropdown" aria-expanded="false">
+              Can view
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="defaultRoleBtn">
+              <li><a class="dropdown-item" href="#">Can view</a></li>
+              <li><a class="dropdown-item" href="#">Can edit</a></li>
+              <li><a class="dropdown-item" href="#">Admin</a></li>
+            </ul>
+          </div>
+
+          <!-- Suggestions -->
+          <ul id="suggestions" class="list-group position-absolute w-100" style="z-index:1000; top:100%; display:none; max-height:150px; overflow-y:auto;"></ul>
+        </div>
+
+        <!-- Member List -->
+        <div class="member-list" id="memberList" style="max-height:300px; overflow-y:auto;"></div>
+      </div>
+
+      <!-- Footer -->
+      <div class="row mb-2 d-flex justify-content-center">
+        <div class="col-md-7">
+          <button type="button" class="thisbtn w-100">Create Team</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>  --}}
+
+
+    <!-- Modal -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="projectModalLabel">Project Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="projectModalBody">
+        Loading...
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     <!-- Edit teams Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -262,6 +469,14 @@
                             <button type="submit" class="btn btn-primary" id="updateteamButton">Update team</button>
                         </div>
                     </form>
+
+
+                    <div>
+                                        <a href="javascript:void(0)" class="delete-icon " title="Delete"
+                                    data-id="{{ $team->id }}">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
                 </div>
             </div>
         </div>
@@ -270,21 +485,244 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('js/team.js') }}"></script>
-    <script>
-        document.getElementById('meetingIcon').addEventListener('click', function() {
-            window.location.href = '/meetings/index';
+    <script >
+
+        // Delete Button
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.delete-icon')) {
+        const teamId = e.target.closest('.delete-icon').getAttribute('data-id');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/team/${teamId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Deleted!', data.message, 'success');
+                            location.reload();
+                        } else {
+                            Swal.fire('Error!', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error!', 'Something went wrong!', 'error');
+                    });
+            }
         });
+    }
+});
+
+// Detail Team modal
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.view-icon')) {
+        const teamTitle = e.target.closest('.view-icon').getAttribute('data-title');
+        const teamDescription = e.target.closest('.view-icon').getAttribute('data-description');
+        const teamUsers = e.target.closest('.view-icon').getAttribute('data-users');
+
+        document.getElementById('teamTitle').textContent = teamTitle;
+        document.getElementById('teamDescription').innerHTML = teamDescription;
+        document.getElementById('teamUsers').textContent = teamUsers;
+    }
+});
+
+//Edit Team modal 
+document.addEventListener('click', function (e) {
+    if (e.target.closest('.edit-icon')) {
+        const teamId = e.target.closest('.edit-icon').getAttribute('data-id');
+        const teamTitle = e.target.closest('.edit-icon').getAttribute('data-team_name');
+        const teamDescription = e.target.closest('.edit-icon').getAttribute('data-team_description');
+        const assignedUsers = JSON.parse(e.target.closest('.edit-icon').getAttribute('data-users'));
+        const allUsers = JSON.parse(e.target.closest('.edit-icon').getAttribute('data-all-users'));
+
+        document.getElementById('teamId').value = teamId;
+        document.getElementById('teamTitleInput').value = teamTitle;
+        document.getElementById('teamDescriptionInput').value = teamDescription;
+
+        const formAction = document.getElementById('editTeamForm').getAttribute('action').replace('__id__', teamId);
+        document.getElementById('editTeamForm').setAttribute('action', formAction);
+
+        const usersSelect = document.getElementById('teamUsersInput');
+        usersSelect.innerHTML = '';
+
+        allUsers.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.textContent = user.name;
+
+            if (assignedUsers.includes(user.id)) {
+                option.selected = true;
+            }
+
+            usersSelect.appendChild(option);
+        });
+    }
+});
+
+
     </script>
     <script>
-        document.getElementById('projectIcon').addEventListener('click', function() {
-            window.location.href = '/project';
+        
+    </script>
+    <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const projectIcons = document.querySelectorAll('.projectIcon');
+    const modalBody = document.getElementById('projectModalBody');
+
+    projectIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+            const teamId = this.getAttribute('data-id'); // ✅ get ID here
+
+            const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+            projectModal.show();
+
+            modalBody.innerHTML = 'Loading...';
+
+            // Fetch projects for the team
+            fetch(`/team-project/${teamId}`) // ✅ use teamId here
+                .then(response => response.json())
+                .then(res => {
+                    if(res.success && res.data.length > 0){
+                        modalBody.innerHTML = ''; // clear loading
+
+                        // Loop through all projects and show
+                        res.data.forEach(project => {
+                            const projectHtml = `
+                                <div class="project-item mb-3 p-2 border rounded">
+                                    <p><strong>Name:</strong> ${project.name}</p>
+                                    <p><strong>Description:</strong> ${project.description}</p>
+                                    <p><strong>Start Date:</strong> ${new Date(project.start_date).toLocaleDateString()}</p>
+                                    <p><strong>End Date:</strong> ${new Date(project.end_date).toLocaleDateString()}</p>
+                                    <p><strong>Status:</strong> ${project.status}</p>
+                                    <hr>
+                                </div>
+                            `;
+                            modalBody.innerHTML += projectHtml;
+                        });
+
+                    } else {
+                        modalBody.innerHTML = 'No projects found for this team.';
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    modalBody.innerHTML = 'Failed to load data.';
+                });
         });
+    });
+});
+
+
+
+
     </script>
     <script>
         document.getElementById('noteIcon').addEventListener('click', function() {
             window.location.href = '/note';
         });
     </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.dropdown').forEach(dropdown => {
+    const button = dropdown.querySelector('.dropdown-toggle');
+    const items = dropdown.querySelectorAll('.dropdown-item');
 
+    items.forEach(item => {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        button.textContent = this.textContent.trim(); // change button text
+      });
+    });
+  });
+});
+</script>
+
+<script>
+const users = @json($users->pluck('name'));
+const inviteInput = document.getElementById("inviteInput");
+const suggestions = document.getElementById("suggestions");
+const memberList = document.getElementById("memberList");
+let selectedRole = "Can view";
+
+// Default role dropdown selection
+document.querySelectorAll('#defaultRoleBtn ~ .dropdown-menu .dropdown-item').forEach(item => {
+    item.addEventListener('click', function(e){
+        e.preventDefault();
+        selectedRole = this.textContent;
+        document.getElementById('defaultRoleBtn').textContent = selectedRole;
+    });
+});
+
+// Autocomplete suggestions
+inviteInput.addEventListener("input", function() {
+    const value = this.value.toLowerCase();
+    suggestions.innerHTML = "";
+    if (!value) { suggestions.style.display = "none"; return; }
+
+    const filtered = users.filter(u => u.toLowerCase().includes(value));
+
+    filtered.forEach(u => {
+        const li = document.createElement("li");
+        li.classList.add("list-group-item", "list-group-item-action");
+        li.textContent = u;
+        li.style.cursor = "pointer";
+        li.addEventListener("click", function() {
+            addMember(u, selectedRole);
+            inviteInput.value = "";
+            suggestions.style.display = "none";
+        });
+        suggestions.appendChild(li);
+    });
+
+    suggestions.style.display = filtered.length ? "block" : "none";
+});
+
+// Close suggestions on outside click
+document.addEventListener("click", function(e){
+    if(!inviteInput.contains(e.target) && !suggestions.contains(e.target)){
+        suggestions.style.display = "none";
+    }
+});
+
+// Add member function
+function addMember(name, role){
+    if ([...memberList.querySelectorAll(".member-name")].some(el => el.textContent === name)) return;
+
+    const memberItem = document.createElement("div");
+    memberItem.classList.add("d-flex", "align-items-center", "justify-content-between", "mb-3");
+
+    memberItem.innerHTML = `
+        <div class="d-flex align-items-center">
+            <img src="https://randomuser.me/api/portraits/men/12.jpg" class="rounded-circle me-3" width="45" height="45" alt="">
+            <div>
+                <strong class="heading1 member-name">${name}</strong><br>
+                <small class="text-dark">Member</small>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">${role}</button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#">Can view</a></li>
+                <li><a class="dropdown-item" href="#">Can edit</a></li>
+                <li><a class="dropdown-item" href="#">Admin</a></li>
+            </ul>
+        </div>
+    `;
+    memberList.appendChild(memberItem);
+}
+</script>
 @endpush

@@ -71,11 +71,30 @@
                 <th style="width: 33%; text-align: left; vertical-align: middle;">Title</th>
                 <th style="width: 33%; text-align: left; vertical-align: middle;">Image</th>
                 <th style="width: 33%; text-align: left; vertical-align: middle;">Description</th>
+                <th style="width: 33%; text-align: left; vertical-align: middle;">Action</th>
             </tr>
         </thead>
         <tbody>
 
-        @foreach($posts as $post)
+        <!--@foreach($posts as $post)-->
+        <!--    <tr>-->
+        <!--        <td style="vertical-align: middle;">{{ $post->title }}</td>-->
+        <!--        <td style="vertical-align: middle;">-->
+        <!--            @if($post->image)-->
+        <!--                <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid"-->
+        <!--                     style="height: 40px; width: 40px;" alt="Post Image">-->
+        <!--            @else-->
+        <!--                {{--  <img src="{{ asset('images/default-image.svg') }}" class="img-fluid"-->
+        <!--                     style="height: 40px; width: 40px;" alt="Default Image">  --}}-->
+        <!--                     NA-->
+        <!--            @endif-->
+        <!--        </td>-->
+        <!--        <td style="vertical-align: middle;">{!! $post->description !!}</td>-->
+                
+        <!--    </tr>-->
+        <!--@endforeach-->
+            
+             @foreach($posts as $post)
             <tr>
                 <td style="vertical-align: middle;">{{ $post->title }}</td>
                 <td style="vertical-align: middle;">
@@ -83,16 +102,29 @@
                         <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid"
                              style="height: 40px; width: 40px;" alt="Post Image">
                     @else
-                        {{--  <img src="{{ asset('images/default-image.svg') }}" class="img-fluid"
-                             style="height: 40px; width: 40px;" alt="Default Image">  --}}
-                             NA
+                        NA
                     @endif
                 </td>
                 <td style="vertical-align: middle;">{!! $post->description !!}</td>
-                
+
+                {{-- ✅ Delete Button --}}
+                <td style="vertical-align: middle;">
+                    @if(Auth::user()->linkedin_access_token)
+            <form action="{{ route('post.delete', $post->id) }}" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this LinkedIn post?')">
+                    Delete
+                </button>
+            </form>
+        @else
+            <button class="btn btn-sm btn-secondary" disabled title="Connect LinkedIn to delete posts">
+                Delete
+            </button>
+        @endif
+                </td>
             </tr>
         @endforeach
-
         </tbody>
     </table>
 </div>

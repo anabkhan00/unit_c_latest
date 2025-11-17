@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
+use App\Models\TeamActivity;
 use App\Models\Email;
 use App\Models\Media;
 use App\Models\Minisite;
@@ -77,11 +78,18 @@ class MinisiteController extends Controller
             $documentPath = null;
         }
 
-        MinisiteDocument::create([
+        $doc = MinisiteDocument::create([
             'document' => $documentPath,
             'document_title' => $request->document_title,
             'document_added_by' => Auth::id(),
             'team_id' => $request->team_id,
+        ]);
+
+        TeamActivity::create([
+            'team_id' => $request->team_id,
+            'activity_name' => 'added a document : ' . $request->document_title,
+            'description' => $request->document_title,
+            'user_id' => Auth::id(),
         ]);
 
         return redirect()->back()->with('success', 'Document added successfully!');
@@ -184,4 +192,21 @@ class MinisiteController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Page deleted successfully.']);
     }
+
+public function teamActivities()
+{
+    $teams = Team::with(['activities' => function ($query) {
+    $query->select('id','team_id','activity_name','user_id','created_at')
+          ->orderBy('created_at','desc');
+}, 'activities.user:id,name'])
+->get();
+
+
+    return response()->json([
+        'status' => true,
+        'data' => $teams
+    ]);
+}
+
+
 }

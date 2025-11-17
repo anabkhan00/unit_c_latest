@@ -284,20 +284,22 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="#" style="text-decoration: none" class="edit-btn"
-                                            data-id="{{ $task->id }}" data-bs-toggle="modal"
-                                            data-bs-target="#editProjectModal">
-                                            <i class="fas fa-edit" style="font-size: 16px; color: #ffc107;"></i>
-                                        </a>
                                         <a href="#" style="text-decoration: none" class="view-btn"
                                             data-id="{{ $task->id }}" data-bs-toggle="modal"
                                             data-bs-target="#viewProjectModal">
                                             <i class="fas fa-eye" style="font-size: 16px; color: #0C5097;"></i>
                                         </a>
-                                        <a href="#" style="text-decoration: none" class="delete-btn"
-                                            data-id="{{ $task->id }}">
-                                            <i class="fas fa-trash-alt" style="font-size: 16px; color: #dc3545;"></i>
-                                        </a>
+                                        @if ($task->project->created_by == auth()->id())
+                                            <a href="#" style="text-decoration: none" class="edit-btn"
+                                                data-id="{{ $task->id }}" data-bs-toggle="modal"
+                                                data-bs-target="#editProjectModal">
+                                                <i class="fas fa-edit" style="font-size: 16px; color: #ffc107;"></i>
+                                            </a>
+                                            <a href="#" style="text-decoration: none" class="delete-btn"
+                                                data-id="{{ $task->id }}">
+                                                <i class="fas fa-trash-alt" style="font-size: 16px; color: #dc3545;"></i>
+                                            </a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

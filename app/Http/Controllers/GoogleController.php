@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Email;
 use App\Models\Media;
 use App\Models\Meeting;
+use App\Models\MeetingMinute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +33,7 @@ class GoogleController extends Controller
 
 
             // Also get meetings from database
-            $dbMeetings = Meeting::with(['user', 'participants'])
+            $dbMeetings = Meeting::with(['user', 'participants', 'meeting_minute'])
                 ->where('user_id', $userId)
                 ->orWhereHas('participants', function($query) use ($userId) {
                     $query->where('user_id', $userId);
@@ -49,7 +50,7 @@ class GoogleController extends Controller
     {
         $client = new \Google\Client();
 
-        // ✅ Hardcoded credentials (for now) set
+        
 
         $client->setClientId(config('services.google_meet.client_id_meet'));
         $client->setClientSecret(config('services.google_meet.client_secret_meet'));
@@ -113,32 +114,38 @@ class GoogleController extends Controller
         return redirect()->route('dashboard')->with('success', 'Google connected successfully!');
     }
 
-    public function createMeeting(Request $request)
+
+public function createMeeting(Request $request)
 {
-    // Merge date + time into start_time before validation
+    // Merge date + time into start_time
     if ($request->filled('meeting_date') && $request->filled('meeting_time')) {
         $request->merge([
             'start_time' => $request->meeting_date . ' ' . $request->meeting_time
         ]);
     }
 
-    // Validate incoming request
+    // Validate
     $data = $request->validate([
         'topic' => 'required|string',
         'start_time' => 'required|date',
         'duration' => 'required|integer',
         'user_ids' => 'nullable|array',
         'agenda' => 'nullable|string',
-        'document' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg,zip|max:5120', // optional file
+        'documents.*' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg,zip|max:5120', // multiple files
     ]);
 
-    // Handle uploaded file
-    $filePath = null;
-    if ($request->hasFile('document')) {
-        $filePath = $request->file('document')->store('meetings', 'public');
+    // Handle multiple files
+    $filePaths = [];
+    if ($request->hasFile('documents')) {
+        foreach ($request->file('documents') as $file) {
+            $filePaths[] = $file->store('meetings', 'public');
+        }
     }
 
-    // Calculate end time
+    // Combine all file names in one column as JSON
+    $documentsJson = !empty($filePaths) ? json_encode($filePaths) : null;
+
+    // Calculate start & end time
     $start = new \DateTime($data['start_time']);
     $end = (clone $start)->modify("+{$data['duration']} minutes");
 
@@ -155,10 +162,10 @@ class GoogleController extends Controller
         'attendees' => $attendees,
         'duration' => $data['duration'],
         'agenda' => $data['agenda'] ?? 'No Agenda',
-        'document' => $filePath, // save path in DB
+        'documents' => $documentsJson, // save all files
     ];
 
-    // --- Google Meet logic here ---
+    // --- Google Meet logic ---
     $rawToken = auth()->user()->google_token;
     $token = json_decode($rawToken, true);
     if (!is_array($token) || !isset($token['access_token'])) {
@@ -193,7 +200,8 @@ class GoogleController extends Controller
     $conferenceData->setCreateRequest($createRequest);
     $event->setConferenceData($conferenceData);
 
-    $createdEvent = $service->events->insert('primary', $event, ['conferenceDataVersion' => 1]);
+    $createdEvent = $service->events->insert('primary', $event, ['conferenceDataVersion' => 1,
+    'sendUpdates' => 'none' ]);
 
     $meetLink = null;
     $conf = $createdEvent->getConferenceData();
@@ -215,19 +223,75 @@ class GoogleController extends Controller
         'duration' => $meetingData['duration'],
         'agenda' => $meetingData['agenda'],
         'meeting_url' => $meetLink,
-        'document' => $filePath, // save file path
+        'document' => $documentsJson, // save all file paths as JSON
     ]);
 
     // Attach participants
-    if (!empty($data['user_ids'])) {
-        $meeting->participants()->attach($data['user_ids']);
+    // if (!empty($data['user_ids'])) {
+    //     $meeting->participants()->attach($data['user_ids']);
+    // }
+    // Send meeting email to each participant
+    
+    // Attach participants (create relation in DB)
+// if (!empty($data['user_ids'])) {
+//     $meeting->participants()->attach($data['user_ids']); // ✅ This creates DB records
+
+//     // Send meeting email to each participant
+//     $participants = \App\Models\User::whereIn('id', $data['user_ids'])->get();
+
+//     foreach ($participants as $user) {
+//         \Mail::send('emails.meeting_invite', [
+//             'topic' => $meeting->topic,
+//             'agenda' => $meeting->agenda,
+//             'start_time' => $meeting->start_time,
+//             'duration' => $meeting->duration,
+//             'meet_link' => $meeting->meeting_url,
+//             'meeting_id' => $meeting->id,
+//             'user_id' => $user->id,
+//         ], function($message) use ($user, $meeting) {
+//             $message->to($user->email)
+//                     ->subject('Meeting Invitation: ' . $meeting->topic);
+//         });
+//     }
+// }
+if (!empty($data['user_ids'])) {
+    // 1️⃣ Attach participants in DB
+    $meeting->participants()->attach($data['user_ids']); 
+
+    // 2️⃣ Get all participants
+    $participants = \App\Models\User::whereIn('id', $data['user_ids'])->get();
+
+    // 3️⃣ Collect names of all participants
+    $participantNames = $participants->pluck('name')->toArray(); // array of names
+    $participantNamesString = implode(', ', $participantNames); // convert to string
+
+    // 4️⃣ Send meeting email to each participant
+    foreach ($participants as $user) {
+        \Mail::send('emails.meeting_invite', [
+            'user_name' => $user->name,
+            'topic' => $meeting->topic,
+            'agenda' => $meeting->agenda,
+            'start_time' => $meeting->start_time,
+            'duration' => $meeting->duration,
+            'meet_link' => $meeting->meeting_url,
+            'meeting_id' => $meeting->id,
+            'user_id' => $user->id,
+            'all_participants' => $participantNamesString, // ✅ Pass all participants
+        ], function($message) use ($user, $meeting) {
+            $message->to($user->email)
+                    ->subject('Meeting Invitation: ' . $meeting->topic);
+        });
     }
+}
+
+
 
     return response()->json([
         'eventId' => $createdEvent->getId(),
         'meetLink' => $meetLink ?? 'Generating...',
     ]);
 }
+
 
 
 //     public function createMeeting(Request $request)
@@ -354,35 +418,91 @@ class GoogleController extends Controller
 //     ]);
 // }
 
-        private function formatDatabaseMeeting($meeting)
-    {
-        $startTime = Carbon::parse($meeting->start_time);
-        $endTime = $startTime->copy()->addMinutes($meeting->duration);
-        $now = Carbon::now(config('app.timezone', 'Asia/Karachi'));
 
-        if ($meeting->cancelled_at) {
-            $status = 'cancelled';
-        } elseif ($now->lt($startTime)) {
-            $status = 'waiting';
-        } elseif ($now->between($startTime, $endTime)) {
-            $status = 'started';
-        } else {
-            $status = 'ended';
-        }
+    public function deleteMeeting($id)
+{
+    // dd("there");
+    // Find meeting in DB
+    $meeting = Meeting::findOrFail($id);
 
-        return [
-            'id' => $meeting->id,
-            'topic' => $meeting->topic,
-            'start_time' => $startTime,
-            'duration' => $meeting->duration,
-            'agenda' => $meeting->agenda,
-            'join_url' => $meeting->meeting_url,
-            'status' => $status,
-            'type' => 'database',
-            'host' => $meeting->user->name,
-            'document' => $meeting->document,
-        ];
+    // --- Google Calendar deletion ---
+    $rawToken = auth()->user()->google_token;
+    $token = json_decode($rawToken, true);
+
+    if (!is_array($token) || !isset($token['access_token'])) {
+        return response()->json(['error' => 'Google account not connected'], 400);
     }
+
+    $client = $this->getClient();
+    $client->setAccessToken($token);
+
+    // Refresh token if expired
+    if ($client->isAccessTokenExpired() && isset($token['refresh_token'])) {
+        $newToken = $client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
+        $newToken['refresh_token'] = $token['refresh_token'];
+        auth()->user()->update(['google_token' => json_encode($newToken)]);
+        $client->setAccessToken($newToken);
+    }
+
+    $service = new \Google\Service\Calendar($client);
+
+    try {
+        $service->events->delete('primary', $meeting->google_event_id);
+    } catch (\Google\Service\Exception $e) {
+        // Handle error if event already deleted or invalid
+        \Log::error("Google Calendar delete error: " . $e->getMessage());
+    }
+
+    // --- Delete from DB ---
+    $meeting->participants()->detach(); // remove participants relation if exists
+    $meeting->delete();
+
+    return redirect()->back()->with('success', 'Meeting deleted successfully.');
+}
+
+
+private function formatDatabaseMeeting($meeting)
+{
+    $startTime = Carbon::parse($meeting->start_time);
+    $endTime = $startTime->copy()->addMinutes($meeting->duration);
+    $now = Carbon::now(config('app.timezone', 'Asia/Karachi'));
+
+    if ($meeting->cancelled_at) {
+        $status = 'cancelled';
+    } elseif ($now->lt($startTime)) {
+        $status = 'waiting';
+    } elseif ($now->between($startTime, $endTime)) {
+        $status = 'started';
+    } else {
+        $status = 'ended';
+    }
+
+    // ✅ Format meeting minutes
+    $minutes = $meeting->meeting_minute->map(function ($minute) {
+        return [
+            'id' => $minute->id,
+            'meeting_id' => $minute->meeting_id,
+            'title' => $minute->title ?? null,
+            'description' => $minute->description ?? null,
+            'created_at' => $minute->created_at?->format('Y-m-d H:i:s'),
+        ];
+    });
+
+    return [
+        'id' => $meeting->id,
+        'topic' => $meeting->topic,
+        'start_time' => $startTime,
+        'duration' => $meeting->duration,
+        'agenda' => $meeting->agenda,
+        'join_url' => $meeting->meeting_url,
+        'status' => $status,
+        'type' => 'database',
+        'host' => $meeting->user->name ?? null,
+        'document' => $meeting->document,
+        'meeting_minutes' => $minutes, // ✅ Added minutes here
+    ];
+}
+
 
 //     public function createMeeting(Request $request)
 // {
@@ -471,5 +591,42 @@ class GoogleController extends Controller
 //         'meetLink' => $meetLink ?? 'Generating...',
 //     ]);
 // }
+
+    public function storeDecision($meeting_id, $user_id, $decision)
+{
+    
+    // Validate decision
+    if (!in_array($decision, ['yes', 'no', 'maybe'])) {
+        abort(400, 'Invalid decision');
+    }
+
+    // Find record
+    $record = DB::table('meeting_user')
+        ->where('meeting_id', $meeting_id)
+        ->where('user_id', $user_id)
+        ->first();
+    // dd($meeting_id,$user_id);
+    if (!$record) {
+        abort(404, 'Record not found');
+    }
+
+    // Update decision
+    DB::table('meeting_user')
+        ->where('meeting_id', $meeting_id)
+        ->where('user_id', $user_id)
+        ->update(['decision' => $decision]);
+
+    return view('emails.thankyou', compact('decision'));
+}
+    public function storeMinutes(Request $request, $meeting){
+        // dd($request->all());
+        MeetingMinute::create([
+            'meeting_id' => $meeting,
+            'user_id' => auth()->id(),
+            'minute' => $request->minutes,
+        ]);
+        return redirect()->back()->with('success', 'Meeting minutes saved successfully.');
+}
+
 
 }

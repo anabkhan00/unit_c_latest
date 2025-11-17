@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Team;
+use App\Models\Project;
 use App\Models\User;
 use App\Models\Email;
 use App\Models\Media;
@@ -110,6 +111,16 @@ class TeamController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Team deleted successfully.'
+        ]);
+    }
+    public function team_project(Request $request, $teamId)
+    {   
+        
+        $projects = Project::where('team_id',$teamId)->get();
+        // dd($projects);
+        return response()->json([
+            'success' => true,
+            'data' => $projects
         ]);
     }
 }

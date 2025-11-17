@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Project;
 use App\Models\ProjectStatus;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Minisite;
+use App\Observers\MinisiteObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,5 +30,11 @@ class AppServiceProvider extends ServiceProvider
                 'updated_by' => auth()->id(),
             ]);
         });
+
+
+
+
+        Minisite::observe(MinisiteObserver::class);
+        
     }
 }

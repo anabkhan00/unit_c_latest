@@ -16,7 +16,8 @@ class EmailController extends Controller
      * Display a listing of the resource.
      */
     public function index($type = 'inbox')
-    {
+    {   
+        // dd($type);
         $emails = [];
         $media = Media::where('user_id', auth()->id())->get();
         $folders = Folder::get();
@@ -55,6 +56,7 @@ class EmailController extends Controller
                 break;
         }
 
+        // dd($emails);
         return view('pages.email', compact('emails', 'type', 'folders', 'media'));
     }
 
@@ -176,6 +178,13 @@ class EmailController extends Controller
     {
         $folder = Folder::find($id);
 
+        $emails = Email::where('receiver_id', auth()->id())
+                     ->where('folder_id', $id)
+                    ->take(4)->get();
+        if($emails->count() > 0){
+            return response()->json(['success' => true, 'message' => 'Folder is not empty. Please move or delete emails inside the folder before deleting it.']);
+        }
+
         if ($folder) {
             $folder->delete();
             return response()->json(['success' => true, 'message' => 'Folder deleted successfully!']);
@@ -258,9 +267,24 @@ class EmailController extends Controller
 
         return response()->json(['success' => true]);
     }
+    
+    public function restoreEmail($id)
+    {
+        $email = Email::onlyTrashed()->find($id); // only looks for soft-deleted emails
+
+        if ($email) {
+            $email->restore(); // restores the email
+            return response()->json(['success' => true]); // success response
+        }
+
+        // fallback if email not found in trash
+        return response()->json(['success' => false, 'message' => 'Email not found in trash.']);
+    }
+
 
     public function moveEmail(Request $request, $emailId)
     {
+        // dd($request->all(), $emailId);
         $email = Email::findOrFail($emailId);
 
         $email->folder_id = $request->input('folder_id');
@@ -270,12 +294,22 @@ class EmailController extends Controller
     }
 
     public function getFolderEmails($folderId)
-    {
-        $emails = Email::where('receiver_id', auth()->id())
-            ->where('folder_id', $folderId)
-            ->get();
+    {   
+        $emails = [];
+        $media = Media::where('user_id', auth()->id())->get();
+        $folders = Folder::get();
 
-        return response()->json(['emails' => $emails]);
+                $emails = Email::where('receiver_id', auth()->id())
+                     ->where('folder_id', $folderId)
+                    ->take(4)->get();
+   
+        return view('pages.email', compact('emails', 'folders', 'media'));
+
+        // $emails = Email::where('receiver_id', auth()->id())
+        //     ->where('folder_id', $folderId)
+        //     ->get();
+
+        // return response()->json(['emails' => $emails]);
     }
 
     public function getEmailDetails($emailId)
