@@ -19,6 +19,7 @@ class Meeting extends Model
         'meeting_url',
         'cancelled_at',
         'document',
+        
     ];
 
     protected $casts = [
@@ -33,6 +34,13 @@ class Meeting extends Model
 
     public function participants()
     {
-        return $this->belongsToMany(User::class, 'meeting_user');
+        return $this->belongsToMany(User::class, 'meeting_user')
+                ->withPivot('decision', 'created_at', 'updated_at');
     }
+
+    public function meeting_minute()
+    {
+        return $this->hasMany(MeetingMinute::class, 'meeting_id');
+    }
+    
 }

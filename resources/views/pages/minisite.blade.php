@@ -303,6 +303,16 @@
                                 team name to</span><span style="color: #036AB2;"> Risk Management</span></p>
                     </div>
                     <div style="background-color: white;">
+                        <p style="margin-bottom: 0px; font-size: 12px;">2nd August, 2021 - 01:30pm</p>
+                        <p style="font-size: 13px; font-weight: bold">Yaqoob Abubakar<span style="color: #A2A2A2;"> Changed
+                                team name to</span><span style="color: #036AB2;"> Risk Management</span></p>
+                    </div>
+                    <div style="background-color: white;">
+                        <p style="margin-bottom: 0px; font-size: 12px;">2nd August, 2021 - 01:30pm</p>
+                        <p style="font-size: 13px; font-weight: bold">Yaqoob Abubakar<span style="color: #A2A2A2;"> Changed
+                                team name to</span><span style="color: #036AB2;"> Risk Management</span></p>
+                    </div>
+                    <div style="background-color: white;">
                         <p style="margin-bottom: 0px; font-size: 12px;">1st August, 2021 - 04:57pm</p>
                         <p style="font-size: 13px; font-weight: bold">Yaqoob Abubakar <span style="color: #A2A2A2;">added
                                 Aalya Asani</span></p>
@@ -679,8 +689,9 @@ document.getElementById('activity').addEventListener('click', function () {
     let container = document.getElementById('teamActivityContainer');
 
     if (content.style.height === '0px' || content.style.height === '') {
-        content.style.height = '200px'; // Smoothly expand
-        container.style.bottom = '200px'; // Move up smoothly
+        content.style.height = '700px'; // Smoothly expand
+        container.style.bottom = '700px'; // Move up smoothly
+        
     } else {
         content.style.height = '0px';
         container.style.bottom = '0';
@@ -844,6 +855,44 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "{{ route('minisites.teamActivities') }}",
+        type: "GET",
+        success: function(res) {
+            if(res.status) {
+                let html = '';
+                // Loop over each team
+                res.data.forEach(function(team) {
+                    // Loop over each activity inside the team
+                    team.activities.forEach(function(activity) {
+                        html += `
+                            <div style="padding:10px 0; border-bottom:1px solid #eee;">
+                                <p style="margin:0; font-size:12px; color:#555;"> </p>
+                                <p style="margin:0; font-size:14px; font-weight:bold;">${activity.user.name} ${activity.activity_name}</p>
+                                <p style="margin:0; font-size:12px; color:#777;">Team: ${team.team_name}</p>
+                                {{--  <p style="margin:0; font-size:12px; color:#777;">${team.team_description}</p>  --}}
+                                <p style="margin:0; font-size:11px; color:#999;">${activity.created_at}</p>
+                            </div>
+                        `;
+                    });
+                });
+                
+                if(html === '') {
+                    html = '<p style="color:red;">No activities found</p>';
+                }
+                
+                $('#activityContent').html(html);
+            } else {
+                $('#activityContent').html('<p style="color:red;">No activities found</p>');
+            }
+        },
+        error: function() {
+            $('#activityContent').html('<p style="color:red;">Failed to load activities</p>');
+        }
+    });
+});
+</script>
 
 @endpush

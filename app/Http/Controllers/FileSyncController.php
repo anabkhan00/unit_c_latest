@@ -17,6 +17,7 @@ class FileSyncController extends Controller
      */
     public function index()
     {
+        // dd('here');
         $media = Media::where('user_id', auth()->id())->get();
         $emails = Email::with('receiver')->where('receiver_id', auth()->id())->get();
         return view('pages.file_sync', compact('emails', 'media'));

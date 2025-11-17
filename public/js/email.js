@@ -62,6 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteEmail(emailId);
         });
     });
+    document.querySelectorAll('.restore-email').forEach(button => {
+        button.addEventListener('click', function () {
+            const emailId = this.dataset.id;
+            restoreEmail(emailId);
+        });
+    });
+    
 });
 
 function toggleStarEmail(emailId, isStarred) {
@@ -260,6 +267,45 @@ function deleteEmail(emailId) {
     });
 }
 
+
+
+function restoreEmail(emailId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, revert it!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/emails/restore/${emailId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email_id: emailId })
+            }).then(response => response.json()).then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Retreved!',
+                        'Your email has been Retreved.',
+                        'success'
+                    ).then(() => location.reload());
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an issue retreving the email.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
+    });
+}
 
 function submitCreateFolder() {
     const folderName = document.getElementById('folderNameInput').value.trim();
@@ -478,6 +524,7 @@ function deleteFolder(folderId, folderElement) {
             if (data.success) {
                 // Remove folder from the DOM
                 folderElement.remove();
+                alert(data.message);
                 location.reload();
             } else {
                 alert('An error occurred while deleting the folder.');

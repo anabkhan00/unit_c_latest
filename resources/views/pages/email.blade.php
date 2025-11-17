@@ -67,6 +67,39 @@
                             <p class="mb-0">Trash</p>
                         </a>
                     </div>
+                    {{--  @foreach ($folders as $folder)
+                     <a href="{{ route('email.folder', $folder->id) }}"
+   class="{{ request()->is('emails/folder/'.$folder->id) ? 'active' : '' }} link-item d-flex align-items-center gap-1">
+    <i class="fas fa-file-alt"></i>
+    <p class="mb-0">Draft {{ $folder->name }}</p>
+</a>
+
+                            <div class="folder-container" style="margin-bottom: 5px" data-id="{{ $folder->id }}">
+                                <div class="folder" draggable="true" ondragover="event.preventDefault()"
+                                    ondrop="handleFolderDrop(event, {{ $folder->id }})"
+                                    onclick="loadFolderEmails({{ $folder->id }})"
+                                    style="
+                                    position: relative;
+                                    padding: 5px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 5px;
+                                    background-color: #f8f9fa;
+                                    cursor: pointer;">
+                                    <span style="font-size: 12px">{{ $folder->name }}</span>
+                                    <span
+                                        style="position:absolute; top:12px; right:5px; color: red; cursor: pointer; font-size:8px"
+                                        title="Delete folder"
+                                        onclick="deleteFolder({{ $folder->id }}, this.closest('.folder')); event.stopPropagation();">
+                                        &#10006;
+                                    </span>
+
+                                </div>
+                                
+                                <!-- Emails will load below this folder -->
+                                <ul class="emails-container" style="margin-left: 20px; padding-left: 10px; display:none;">
+                                </ul>
+                            </div>
+                    @endforeach  --}}
 
                     <div class="folder static-folder" onclick="toggleFolders()"
                         style="
@@ -95,7 +128,11 @@
                                     border-radius: 5px;
                                     background-color: #f8f9fa;
                                     cursor: pointer;">
-                                    <span style="font-size: 12px">{{ $folder->name }}</span>
+                                                         <a href="{{ route('email.folder', $folder->id) }}"
+   class="{{ request()->is('emails/folder/'.$folder->id) ? 'active' : '' }} link-item d-flex align-items-center gap-1">
+    <i class="fas fa-file-alt"></i>
+    <p class="mb-0">{{ $folder->name }}</p>
+</a></span>
                                     <span
                                         style="position:absolute; top:12px; right:5px; color: red; cursor: pointer; font-size:8px"
                                         title="Delete folder"
@@ -103,9 +140,9 @@
                                         &#10006;
                                     </span>
                                 </div>
-                                <!-- Emails will load below this folder -->
+                                {{--  <!-- Emails will load below this folder -->
                                 <ul class="emails-container" style="margin-left: 20px; padding-left: 10px; display:none;">
-                                </ul>
+                                </ul>  --}}
                             </div>
                         @endforeach
                     </div>
@@ -180,7 +217,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> 
 
 
             <div class="col-lg-4 col-md-5">
@@ -236,13 +273,44 @@
                                                 fill="#1E1E1E" />
                                         </svg>
                                     </div>
+                                    
                                     <div class="dropdown-menu">
                                         <button class="dropdown-item star-email" data-id="{{ $email->id }}"
                                             data-starred ="{{ $email->is_starred ? 'true' : 'false' }}">{{ $email->is_starred ? 'Unstar' : 'Star' }}</button>
                                         <button class="dropdown-item delete-email"
                                             data-id="{{ $email->id }}">Delete</button>
+                                            @if (str_ends_with(url()->current(), '/email/trash'))
+                                                <button class="dropdown-item restore-email" data-id="{{ $email->id }}">
+                                                    Restore
+                                                </button>
+                                            @endif
+                                                <button class="dropdown-item reply-email"
+                                            data-id="{{ $email->id }}"
+                                            data-subject="{{ $email->subject }}"
+                                            data-body="{{ $email->description }}">Reply</button>
+
+                                        
+                                            @foreach ($folders as $folder)
+                                                <div class="folder-container" style="margin-bottom: 5px" data-id="{{ $folder->id }}">
+                                                    <div class="folder" draggable="true" ondragover="event.preventDefault()"
+                                                        ondrop="handleFolderDrop(event, {{ $folder->id }})"
+                                                        onclick="moveEmailToFolder({{ $email->id }}, {{ $folder->id }})"
+                                                        style="
+                                                        position: relative;
+                                                        padding: 5px;
+                                                        border: 1px solid #ddd;
+                                                        border-radius: 5px;
+                                                        background-color: #f8f9fa;
+                                                        cursor: pointer;">
+                                                        <span style="font-size: 12px">{{ $folder->name }}</span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+
+                                    
                                     </div>
                                 </div>
+                                
                             </div>
                             <div class="email-item {{ $email->is_read ? 'read-email' : '' }} {{ $email->is_draft ? 'draft' : '' }}"
                                 data-id="{{ $email->id }}" data-to="{{ $email->receiver?->email ?? 'Unknown' }}"
@@ -257,10 +325,17 @@
                                         <p style="font-size: 12px; font-weight: 500;">
                                             {{ $email->receiver->email ?? 'Unknown' }}</p>
                                     </div>
-                                    <div>
-                                        <p style="font-size: 12px; font-weight: 500;">
-                                            {{ $email->created_at->format('d M H:i') }}</p>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <p style="font-size: 12px; font-weight: 500; margin: 0;">
+                                            {{ $email->created_at->format('d M H:i') }}
+                                        </p>
+                                        @if($email->is_starred == 1)
+                                            <i class="fas fa-star"></i>
+                                        @endif
+                                        
                                     </div>
+
+                                    
                                 </div>
                                 <div
                                     style="
@@ -457,5 +532,67 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
-    </script>
+let editorInstance;
+
+function loadEditor() {
+    if (editorInstance) {
+        editorInstance.destroy();
+    }
+
+    ClassicEditor.create(document.querySelector('#email_body'))
+        .then(editor => {
+            editorInstance = editor;
+        });
+}
+
+
+$(document).on('click', '.reply-email', function () {
+    let emailId = $(this).data('id');
+    let emailItem = $(`.email-item[data-id='${emailId}']`);
+
+    let to = emailItem.data('to');
+    let subject = emailItem.data('subject');
+    let body = emailItem.data('body');
+
+    $("#email").val(to);
+    $("#subject").val("Re: " + subject);
+
+    // CKEditor 5 setData
+    if (window.editorInstance) {
+        window.editorInstance.setData(
+            "<br><br><hr><b>Previous Message:</b><br>" + body
+        );
+    } else {
+        $("#editor").val(body);
+    }
+
+    $("#sendContent").show();
+});
+</script>
+<script>
+function moveEmailToFolder(emailId, folderId) {
+    fetch(`/emails/${emailId}/move`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            folder_id: folderId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Email moved successfully!');
+            // Optionally, remove the email from current list or reload emails
+            location.reload(); // simple approach
+        } else {
+            alert('Failed to move email.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
 @endpush

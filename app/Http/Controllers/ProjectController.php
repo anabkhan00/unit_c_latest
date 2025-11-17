@@ -16,7 +16,7 @@ class ProjectController extends Controller
 {
     public function index()
     { 
-        $users = User::where('id', '!=', Auth::id())->get();
+        $users = User::get();
         $tasks = Task::with(['project', 'sub_task','assignee'])->get();
 
         $tasks->each(function ($task) {
@@ -38,7 +38,7 @@ class ProjectController extends Controller
         $emails = Email::with('receiver')->where('receiver_id', Auth::id())->get();
         $media = Media::where('user_id', Auth::id())->get();
 
-        // dd($projects);
+        // dd($tasks);
         return view('pages.project', compact(
             'users',
             'tasks',

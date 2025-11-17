@@ -46,7 +46,7 @@
                                                         class="fas fa-trash me-1"></i>Trash</a></li>
                                         </ul>
                                     </div>
-                                </div>
+                                </div> 
                                 <div style="display: flex; align-items: baseline; column-gap: 5px;">
                                     <div>
                                         <button type="button" class="dash-buttones"

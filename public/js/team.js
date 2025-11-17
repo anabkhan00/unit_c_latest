@@ -49,7 +49,7 @@ document.addEventListener('click', function (e) {
     }
 });
 
-//Edit Team modal
+//Edit Team modal 
 document.addEventListener('click', function (e) {
     if (e.target.closest('.edit-icon')) {
         const teamId = e.target.closest('.edit-icon').getAttribute('data-id');
