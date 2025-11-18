@@ -471,12 +471,13 @@ ease-in-out;
                     </form>
 
 
-                    <div>
-                                        <a href="javascript:void(0)" class="delete-icon " title="Delete"
-                                    data-id="{{ $team->id }}">
+                      @isset($team)
+                            <div>
+                                <a href="javascript:void(0)" class="delete-icon" title="Delete" data-id="{{ $team->id }}">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
+                        @endisset
                 </div>
             </div>
         </div>

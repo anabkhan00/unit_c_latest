@@ -226,34 +226,7 @@ public function createMeeting(Request $request)
         'document' => $documentsJson, // save all file paths as JSON
     ]);
 
-    // Attach participants
-    // if (!empty($data['user_ids'])) {
-    //     $meeting->participants()->attach($data['user_ids']);
-    // }
-    // Send meeting email to each participant
-    
-    // Attach participants (create relation in DB)
-// if (!empty($data['user_ids'])) {
-//     $meeting->participants()->attach($data['user_ids']); // ✅ This creates DB records
 
-//     // Send meeting email to each participant
-//     $participants = \App\Models\User::whereIn('id', $data['user_ids'])->get();
-
-//     foreach ($participants as $user) {
-//         \Mail::send('emails.meeting_invite', [
-//             'topic' => $meeting->topic,
-//             'agenda' => $meeting->agenda,
-//             'start_time' => $meeting->start_time,
-//             'duration' => $meeting->duration,
-//             'meet_link' => $meeting->meeting_url,
-//             'meeting_id' => $meeting->id,
-//             'user_id' => $user->id,
-//         ], function($message) use ($user, $meeting) {
-//             $message->to($user->email)
-//                     ->subject('Meeting Invitation: ' . $meeting->topic);
-//         });
-//     }
-// }
 if (!empty($data['user_ids'])) {
     // 1️⃣ Attach participants in DB
     $meeting->participants()->attach($data['user_ids']); 
@@ -502,6 +475,156 @@ private function formatDatabaseMeeting($meeting)
         'meeting_minutes' => $minutes, // ✅ Added minutes here
     ];
 }
+    
+    // public function (Request $request,$id)
+
+// public function update(Request $request, Meeting $meeting)
+public function update(Request $request, $id)
+{   
+     $meeting=Meeting::find($id);
+    // Merge date + time into start_time
+    if ($request->filled('meeting_date') && $request->filled('meeting_time')) {
+        $request->merge([
+            'start_time' => $request->meeting_date . ' ' . $request->meeting_time
+        ]);
+    }
+
+    // Validate
+    $data = $request->validate([
+        'topic' => 'required|string',
+        'start_time' => 'required|date',
+        'duration' => 'required|integer',
+        'user_ids' => 'nullable|array',
+        'agenda' => 'nullable|string',
+        'documents.*' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg,zip|max:5120', // multiple files
+    ]);
+
+    // Handle new uploaded files
+    $filePaths = json_decode($meeting->document, true) ?? [];
+    if ($request->hasFile('documents')) {
+        foreach ($request->file('documents') as $file) {
+            $filePaths[] = $file->store('meetings', 'public');
+        }
+    }
+    $documentsJson = !empty($filePaths) ? json_encode($filePaths) : null;
+
+    // Calculate start & end time
+    $start = new \DateTime($data['start_time']);
+    $end = (clone $start)->modify("+{$data['duration']} minutes");
+
+    // Map attendees emails
+    $attendees = [];
+    if (!empty($data['user_ids'])) {
+        $attendees = \App\Models\User::whereIn('id', $data['user_ids'])->pluck('email')->toArray();
+    }
+
+    $meetingData = [
+        'title' => $data['topic'],
+        'start' => $start->format('Y-m-d\TH:i:s'),
+        'end' => $end->format('Y-m-d\TH:i:s'),
+        'attendees' => $attendees,
+        'duration' => $data['duration'],
+        'agenda' => $data['agenda'] ?? 'No Agenda',
+        'documents' => $documentsJson,
+    ];
+
+    // --- Google Meet logic ---
+    $rawToken = auth()->user()->google_token;
+    $token = json_decode($rawToken, true);
+    if (!is_array($token) || !isset($token['access_token'])) {
+        session(['meeting_data' => $meetingData, 'meeting_id' => $meeting->id]);
+        return response()->json(['redirect' => route('google.redirect')]);
+    }
+
+    $client = $this->getClient();
+    $client->setAccessToken($token);
+    if ($client->isAccessTokenExpired() && isset($token['refresh_token'])) {
+        $newToken = $client->fetchAccessTokenWithRefreshToken($token['refresh_token']);
+        $newToken['refresh_token'] = $token['refresh_token'];
+        auth()->user()->update(['google_token' => json_encode($newToken)]);
+        $client->setAccessToken($newToken);
+    }
+
+    $service = new \Google\Service\Calendar($client);
+    // dd($meeting);
+
+    // Fetch existing Google event
+    $event = $service->events->get('primary', $meeting->google_event_id);
+
+    $event->setSummary($meetingData['title']);
+    $startDateTime = new \Google\Service\Calendar\EventDateTime();
+    $startDateTime->setDateTime($meetingData['start']);
+    $startDateTime->setTimeZone(config('app.timezone', 'Asia/Karachi'));
+    $event->setStart($startDateTime);
+    
+    $endDateTime = new \Google\Service\Calendar\EventDateTime();
+    $endDateTime->setDateTime($meetingData['end']);
+    $endDateTime->setTimeZone(config('app.timezone', 'Asia/Karachi'));
+    $event->setEnd($endDateTime);
+
+    if (!empty($meetingData['attendees'])) {
+        $event->setAttendees(array_map(fn($email) => ['email' => $email], $meetingData['attendees']));
+    }
+
+    $conferenceData = new \Google\Service\Calendar\ConferenceData();
+    $createRequest = new \Google\Service\Calendar\CreateConferenceRequest();
+    $createRequest->setRequestId(uniqid('meet_', true));
+    $conferenceData->setCreateRequest($createRequest);
+    $event->setConferenceData($conferenceData);
+
+    $updatedEvent = $service->events->update('primary', $meeting->google_event_id, $event, ['conferenceDataVersion' => 1]);
+
+    $meetLink = null;
+    $conf = $updatedEvent->getConferenceData();
+    if ($conf && $conf->getEntryPoints()) {
+        foreach ($conf->getEntryPoints() as $ep) {
+            if ($ep->getEntryPointType() === 'video') {
+                $meetLink = $ep->getUri();
+                break;
+            }
+        }
+    }
+
+    // Update meeting in DB
+    $meeting->update([
+        'topic' => $meetingData['title'],
+        'start_time' => $meetingData['start'],
+        'duration' => $meetingData['duration'],
+        'agenda' => $meetingData['agenda'],
+        'meeting_url' => $meetLink,
+        'document' => $documentsJson,
+    ]);
+
+    if (!empty($data['user_ids'])) {
+        // Sync participants
+        $meeting->participants()->sync($data['user_ids']);
+
+        $participants = \App\Models\User::whereIn('id', $data['user_ids'])->get();
+        $participantNamesString = implode(', ', $participants->pluck('name')->toArray());
+
+        foreach ($participants as $user) {
+            \Mail::send('emails.meeting_invite', [
+                'user_name' => $user->name,
+                'topic' => $meeting->topic,
+                'agenda' => $meeting->agenda,
+                'start_time' => $meeting->start_time,
+                'duration' => $meeting->duration,
+                'meet_link' => $meeting->meeting_url,
+                'meeting_id' => $meeting->id,
+                'user_id' => $user->id,
+                'all_participants' => $participantNamesString,
+            ], function($message) use ($user, $meeting) {
+                $message->to($user->email)
+                        ->subject('Updated Meeting: ' . $meeting->topic);
+            });
+        }
+    }
+
+    return redirect()->back()->with('success', 'Meeting updated successfully.');
+}
+
+
+
 
 
 //     public function createMeeting(Request $request)

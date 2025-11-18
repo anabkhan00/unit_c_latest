@@ -252,7 +252,7 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::get('/google/oauth/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
     Route::post('/meetings/create', [GoogleController::class, 'createMeeting'])->name('meetings.create');
     Route::delete('/meetings/delete/{id}', [GoogleController::class, 'deleteMeeting'])->name('meetings.destroy');
-    Route::post('/meetings/update', [GoogleController::class, 'destroy'])->name('meetings.update');
+    Route::put('/meetings/update', [GoogleController::class, 'update'])->name('meetings.update');
     Route::get('/meeting/decision/{meeting_id}/{user_id}/{decision}', [GoogleController::class, 'storeDecision'])->name('meeting.decision');
     Route::post('/meetings/{meeting}/save-minutes', [GoogleController::class, 'storeMinutes'])->name('meetings.saveMinutes');
 
