@@ -492,81 +492,91 @@
 
                             <!-- Edit Modal (only for database meetings) -->
                             @if (isset($meeting['type']) && $meeting['type'] === 'database')
-                                <div class="modal fade" id="editMeetingModal{{ $meeting['id'] }}" tabindex="-1"
-                                    aria-labelledby="editMeetingModalLabel{{ $meeting['id'] }}" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <form method="POST" action="{{ route('meetings.update', $meeting['id']) }}">
-                                            @csrf
-                                            @method('PUT')
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="editMeetingModalLabel{{ $meeting['id'] }}">
-                                                        Edit Meeting</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
+                                   <div class="modal fade" id="editMeetingModal{{ $meeting['id'] }}" tabindex="-1"
+        aria-labelledby="editMeetingModalLabel{{ $meeting['id'] }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ route('meetings.update', $meeting['id']) }}" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editMeetingModalLabel{{ $meeting['id'] }}">Edit Meeting</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-                                                <div class="modal-body">
-                                                    @php
-                                                        $dbMeeting = \App\Models\Meeting::find($meeting['id']);
-                                                        $assignedUserIds = $dbMeeting->participants->pluck('id')->toArray();
-                                                    @endphp
+                    <div class="modal-body">
+                        @php
+                            $dbMeeting = \App\Models\Meeting::find($meeting['id']);
+                            $assignedUserIds = $dbMeeting->participants->pluck('id')->toArray();
+                            $meetingDate = \Carbon\Carbon::parse($meeting['start_time'])->format('Y-m-d');
+                            $meetingTime = \Carbon\Carbon::parse($meeting['start_time'])->format('H:i');
+                        @endphp
 
-                                                    <div class="mb-3">
-                                                        <label for="user_ids{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Invite Users</label>
-                                                        <select name="user_ids[]" id="user_ids{{ $meeting['id'] }}"
-                                                            class="form-control" multiple required>
-                                                            @foreach ($users as $user)
-                                                                <option value="{{ $user->id }}"
-                                                                    {{ in_array($user->id, $assignedUserIds) ? 'selected' : '' }}>
-                                                                    {{ $user->name }} ({{ $user->email }})
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
+                        <div class="mb-3">
+                            <label for="user_ids{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Invite Users</label>
+                            <select name="user_ids[]" id="user_ids{{ $meeting['id'] }}" class="form-control" multiple required>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->id }}" {{ in_array($user->id, $assignedUserIds) ? 'selected' : '' }}>
+                                        {{ $user->name }} ({{ $user->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="topic{{ $meeting['id'] }}"
-                                                            class="form-label" style="font-weight:500">Topic</label>
-                                                        <input type="text" class="form-control" name="topic"
-                                                            id="topic{{ $meeting['id'] }}" value="{{ $meeting['topic'] }}"
-                                                            required>
-                                                    </div>
+                        <div class="mb-3">
+                            <label for="topic{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Topic</label>
+                            <input type="text" class="form-control" name="topic" id="topic{{ $meeting['id'] }}" value="{{ $meeting['topic'] }}" required>
+                        </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="start_time{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Start
-                                                            Time</label>
-                                                        <input type="datetime-local" class="form-control" name="start_time"
-                                                            id="start_time{{ $meeting['id'] }}"
-                                                            value="{{ \Carbon\Carbon::parse($meeting['start_time'])->timezone('Asia/Karachi')->format('Y-m-d\TH:i') }}"
-                                                            required>
-                                                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="meeting_date{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Meeting Date</label>
+                                <input type="date" name="meeting_date" id="meeting_date{{ $meeting['id'] }}" class="form-control" value="{{ $meetingDate }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="meeting_time{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Meeting Time</label>
+                                <input type="time" name="meeting_time" id="meeting_time{{ $meeting['id'] }}" class="form-control" value="{{ $meetingTime }}" required>
+                            </div>
+                        </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="duration{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Duration
-                                                            (minutes)
-                                                        </label>
-                                                        <input type="number" class="form-control" name="duration"
-                                                            id="duration{{ $meeting['id'] }}"
-                                                            value="{{ $meeting['duration'] }}" required>
-                                                    </div>
+                        <div class="mb-3">
+                            <label for="duration{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Duration (minutes)</label>
+                            <input type="number" class="form-control" name="duration" id="duration{{ $meeting['id'] }}" value="{{ $meeting['duration'] }}" required>
+                        </div>
 
-                                                    <div class="mb-3">
-                                                        <label for="agenda{{ $meeting['id'] }}"
-                                                            class="form-label" style="font-weight:500">Agenda</label>
-                                                        <textarea class="form-control" name="agenda" id="agenda{{ $meeting['id'] }}" rows="3">{{ $meeting['agenda'] ?? '' }}</textarea>
-                                                    </div>
-                                                </div>
+                        <div class="mb-3">
+                            <label for="agenda{{ $meeting['id'] }}" class="form-label" style="font-weight:500">Agenda</label>
+                            <textarea class="form-control" name="agenda" id="agenda{{ $meeting['id'] }}" rows="3">{{ $meeting['agenda'] ?? '' }}</textarea>
+                        </div>
 
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-primary" style="border: none; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background: #0C5097; color: white;">Update Meeting</button>
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal" style="border: 1px solid #0C5097; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background:white ; color: #0C5097;">Cancel</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                        <div class="mb-3">
+                            <label for="documents{{ $meeting['id'] }}" class="form-label">Attach Documents (optional)</label>
+                            <input type="file" name="documents[]" class="form-control edit-documents" id="documents{{ $meeting['id'] }}" multiple>
+                        </div>
+                        <div id="documentsPreview{{ $meeting['id'] }}" class="mt-2">
+    @php
+        $existingDocs = !empty($meeting['document']) ? json_decode($meeting['document'], true) : [];
+    @endphp
+    @foreach($existingDocs as $doc)
+        <div class="mb-1 existing-doc" data-doc="{{ $doc }}">
+            <a href="{{ asset('storage/' . $doc) }}" target="_blank">{{ basename($doc) }}</a>
+            <button type="button" class="btn btn-sm btn-danger remove-existing" data-doc="{{ $doc }}">Remove</button>
+        </div>
+    @endforeach
+</div>
+
+
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="border: none; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background: #0C5097; color: white;">Update Meeting</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border: 1px solid #0C5097; width: 150px; height: 35px; padding: 5px 10px; gap: 20px; border-radius: 5px; background:white ; color: #0C5097;">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
                             @endif
                         </tr>
                     @endforeach
@@ -760,6 +770,107 @@ function copyLink(link) {
         }
     });
 });  --}}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.edit-documents').forEach(fileInput => {
+        const meetingId = fileInput.id.replace('documents', '');
+        const previewDiv = document.getElementById(`documentsPreview${meetingId}`);
+        let newFiles = [];
+        let removedExisting = [];
+
+        // Handle new files selection
+        fileInput.addEventListener('change', function () {
+            Array.from(this.files).forEach(file => {
+                if (!newFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    newFiles.push(file);
+                }
+            });
+            this.value = '';
+            renderPreview();
+        });
+
+        // Remove existing documents
+        previewDiv.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-existing')) {
+                const doc = e.target.dataset.doc;
+                removedExisting.push(doc);
+                e.target.parentElement.remove();
+            }
+        });
+
+        // Render preview for new files
+        function renderPreview() {
+            previewDiv.querySelectorAll('.new-file').forEach(el => el.remove());
+            newFiles.forEach((file, idx) => {
+                const div = document.createElement('div');
+                div.classList.add('new-file');
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.marginBottom = '5px';
+                div.innerHTML = `
+                    <span style="flex:1;">${file.name}</span>
+                    <button type="button" data-idx="${idx}" style="margin-left: 10px;">Remove</button>
+                `;
+                previewDiv.appendChild(div);
+
+                div.querySelector('button').addEventListener('click', function () {
+                    const index = parseInt(this.dataset.idx);
+                    newFiles.splice(index, 1);
+                    div.remove();
+                });
+            });
+        }
+
+        // AJAX submit for edit form
+        form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    // Append selected users manually
+    const selectedUsers = Array.from(form.querySelectorAll('select[name="user_ids[]"] option:checked'))
+        .map(opt => opt.value);
+    selectedUsers.forEach(id => formData.append('user_ids[]', id));
+
+    // Append files
+    allFiles.forEach(file => formData.append('documents[]', file));
+
+    try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        const res = await axios.post("{{ route('meetings.create') }}", formData, {
+            headers: { 
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        if (res.data.redirect) {
+            window.location.href = res.data.redirect;
+            return;
+        }
+
+        alert('Meeting created successfully!');
+        const modalEl = document.getElementById('scheduleMeetingModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if(modal) modal.hide();
+        form.reset();
+        allFiles = [];
+        previewDiv.innerHTML = '';
+
+    } catch (err) {
+        console.error(err);
+        alert('Error creating meeting.');
+    } finally {
+        form.querySelector('button[type="submit"]').disabled = false;
+    }
+});
+
+    });
+});
+
+
 </script>
 
 
