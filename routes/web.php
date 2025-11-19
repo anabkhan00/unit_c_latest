@@ -222,7 +222,9 @@ Route::post('/sub-tasks', [SubTaskController::class, 'store'])->name('subtasks.s
     Route::post('/group-chat/send', [ChatController::class, 'sendGroupMessage'])->name('group.chat.send');
     Route::post('/chat/send-group-file', [ChatController::class, 'sendGroupFile'])->name('group.chat.send.file');
 
-
+    Route::post('/chat/teams', [ChatController::class, 'getTeams'])->name('chat.teams');
+    Route::post('/chat/send-group-message', [ChatController::class, 'sendGroupMessage']);
+    Route::post('/chat/send-group-file', [ChatController::class, 'sendGroupFile']);
 
     //Folder
     Route::get('/folders', [FolderController::class, 'index'])->name('folders.index');

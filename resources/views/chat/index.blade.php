@@ -23,7 +23,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            position: relative;
+            position: relative; 
         }
         #openChatBtn:hover { background: #0056b3; }
 

@@ -17,7 +17,7 @@ class TeamController extends Controller
     public function index()
     {
         $users = User::where('id', '!=', auth()->id())->get();
-        $teams = Team::with('users')->where('user_id',auth()->id())->get();
+        $teams = Team::with('users')->get();
 
         $emails = Email::with('receiver')->where('receiver_id', auth()->id())->get();
 

@@ -82,13 +82,43 @@ public function send(Request $request)
     return response()->json(['success' => true, 'url' => $data['message']]);
 }
 
+//  public function getTeams(Request $request)
+//     {
+//         try {
+//             $user = auth()->user();
+            
+//         // Only teams where user is a member
+//         // $teams = Team::with('users')->get();
+//         $teams = $user->teams()::with('users')->get();
+//             return response()->json($teams);
+            
+//         } catch (\Exception $e) {
+//             \Log::error('Error fetching teams: ' . $e->getMessage());
+//             return response()->json([], 500);
+//         }
+//     }
+public function getTeams(Request $request)
+{
+    try {
+        $user = auth()->user();
+
+        // Fetch only teams where the user is a member, including their users
+        $teams = $user->teams()->with('users')->get();
+
+        return response()->json($teams);
+
+    } catch (\Exception $e) {
+        \Log::error('Error fetching teams: ' . $e->getMessage());
+        return response()->json([], 500);
+    }
+}
 
     public function teamList()
     {
         $user = auth()->user();
         // Only teams where user is a member
         $teams = $user->teams()->get();
-        return view('chat.team_chat', compact('teams', 'user'));
+        return view('chat.team_chat',compact('teams'));
     }
 
     // 🧩 View specific team chat
@@ -101,20 +131,23 @@ public function send(Request $request)
 
     // 📨 Send group message
     public function sendGroupMessage(Request $request)
-    {
+    {   
         $request->validate([
             'sender_id' => 'required',
             'team_id' => 'required',
             'message' => 'required|string',
         ]);
-
-        $firebase = (new Factory)
-            ->withServiceAccount(config('firebase.credentials.file'))
-            ->withDatabaseUri(config('firebase.database.url'))
-            ->createDatabase();
-
+        // dd(config('firebase.credentials.file'),config('firebase.database.url'));
+        try {
+            $firebase = (new \Kreait\Firebase\Factory)
+        ->withServiceAccount(config('firebase.credentials.file'))
+        ->withDatabaseUri(config('firebase.database.url'))
+        ->createDatabase();
+$user = User::find($request->sender_id);
+        //  dd($firebase);
         $data = [
             'sender_id' => $request->sender_id,
+            'sender_name' => $user->name,
             'team_id' => $request->team_id,
             'message' => $request->message,
             'type' => 'text',
@@ -125,6 +158,10 @@ public function send(Request $request)
         $ref = $firebase->getReference('group_messages/' . $request->team_id)->push($data);
 
         return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            dd("ERROR: " . $e->getMessage());
+            return response()->json(['success' => false, 'error' => 'Failed to send message'], 500);
+        }
     }
     public function sendGroupFile(Request $request)
 {
