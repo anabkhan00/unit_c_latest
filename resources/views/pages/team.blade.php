@@ -7,7 +7,93 @@
 
 <!-- Bootstrap JS Bundle (includes Popper) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <style>
+        body { font-family: Arial; background: #f5f5f5; padding: 30px; }
+
+        /* Team Buttons Container */
+        #teamButtonsContainer {
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin-bottom: 20px;
+        }
+
+        .team {
+            position: relative; 
+            padding: 10px 20px; 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            white-space: nowrap; 
+            transition: all 0.3s; 
+        }
+        .team:hover { background: #0056b3; }
+        .team.active { background: #28a745; }
+
+        .badge { 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+            background: red; 
+            color: #fff; 
+            border-radius: 50%; 
+            font-size: 12px; 
+            padding: 2px 6px; 
+            display: none; 
+        }
+        .team.has-unread .badge { display: inline-block; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: fit-content;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .close { color: #aaa; float: right; font-size: 24px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+
+        .chat-box { background: #fff; padding: 20px; border-radius: 10px; width: 520px; }
+
+        .messages { 
+            height: 320px; 
+            overflow-y: auto; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            background: #fafafa;
+        }
+
+        .message { display: flex; flex-direction: column; margin-bottom: 8px; }
+        .message.me { align-items: flex-end; }
+        .status { font-size: 10px; margin-top: 2px; color: #555; }
+        img.chat-image { max-width: 180px; border-radius: 6px; display: block; margin: 5px 0; }
+
+        #fileInput { display:none; }
+    </style>
 <style>
     .team-container {
     padding: 12px;
@@ -163,8 +249,7 @@ ease-in-out;
 {{--  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">
   Open Create Project Modal
 </button>  --}}
-
-            @foreach ($teams as $team)
+{{--  @foreach ($teams as $team)
                 <div class="col-lg-3 mt-3 col-md-3 edit-icon position-relative">
 
                     <div class="team-card team-container rounded" style="background-color:white">
@@ -199,14 +284,7 @@ ease-in-out;
                                 </svg>
                                 
                             </div>
-                            {{--  <div>
-                                <svg width="20" height="29" viewBox="0 0 31 29" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M10.0812 1.11719L0.720459 7.66183V27.8411L10.0812 22.9327M10.0812 1.11719L20.5432 6.57106M10.0812 1.11719V22.9327M20.5432 6.57106L29.3533 1.11719V22.9327L20.5432 27.8411M20.5432 6.57106V27.8411M20.5432 27.8411L10.0812 22.9327"
-                                        stroke="black" stroke-width="1.43164" stroke-linejoin="round" />
-                                </svg>
-                            </div>  --}}
+                            
                             <div id="noteIcon" style="cursor:pointer;">
                                 <svg width="20" height="36" viewBox="0 0 31 36" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
@@ -223,28 +301,9 @@ ease-in-out;
                                         stroke="black" stroke-width="1.43164" />
                                 </svg>     
                             </div>
-                            {{--  <div>
-                            <a href="#" class="view-icon" title="View" data-bs-toggle="modal"
-                                    data-bs-target="#viewModal" data-id="{{ $team->id }}"
-                                    data-title="{{ $team->team_name }}" data-description="{{ $team->team_description }}"
-                                    data-users="{{ $team->users->pluck('name')->join(', ') }}">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </div>  --}}
-                            {{--  <div>
-                                      <a href="javascript:void(0)" class="edit-icon" title="Edit" data-bs-toggle="modal"
-                                    data-bs-target="#editModal"
-                                    data-id="{{ $team->id }}"
-                                    data-team_name="{{ $team->team_name }}"
-                                    data-team_description="{{ $team->team_description }}"
-                                    data-users="{{ json_encode($team->users->pluck('id')->toArray()) }}"
-                                    data-all-users="{{ json_encode($users) }}"
-                                    >
-                                    <i class="fas fa-edit"></i>
-                                </a>
-
-                            </div>  --}}
                             
+
+
                         </div>
                         <div style="    width: 100%;">
                           <button  class="rounded py-3"
@@ -276,7 +335,31 @@ ease-in-out;
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @endforeach  --}}
+                                <div id="teamButtonsContainer">
+                                    
+                                </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="modal">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+
+            <div class="chat-box">
+                <h3>Laravel + Firebase Group Chat</h3>
+
+                <div id="messages" class="messages"><em>Select a team to start chatting...</em></div>
+
+                <div>
+                    <input type="file" id="fileInput" accept="image/*,application/pdf,application/msword,.docx,.xlsx,.txt">
+                    <input type="text" id="message" placeholder="Type message..." style="width:65%; padding:6px;">
+                    <button id="uploadBtn" style="padding:6px 12px;">📎</button>
+                    <button id="sendBtn" style="padding:6px 12px;">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+            
         </div>
     </div>
 
@@ -579,51 +662,44 @@ document.addEventListener('click', function (e) {
     </script>
     <script>
 
-document.addEventListener('DOMContentLoaded', function () {
-    const projectIcons = document.querySelectorAll('.projectIcon');
-    const modalBody = document.getElementById('projectModalBody');
+document.addEventListener('click', function(e) {
+    if(e.target.closest('.projectIcon')) {
+        const icon = e.target.closest('.projectIcon');
+        const teamId = icon.getAttribute('data-id');
+        console.log('Team ID:', teamId);
 
-    projectIcons.forEach(icon => {
-        icon.addEventListener('click', function() {
-            const teamId = this.getAttribute('data-id'); // ✅ get ID here
+        const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+        projectModal.show();
 
-            const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
-            projectModal.show();
+        const modalBody = document.getElementById('projectModalBody');
+        modalBody.innerHTML = 'Loading...';
 
-            modalBody.innerHTML = 'Loading...';
-
-            // Fetch projects for the team
-            fetch(`/team-project/${teamId}`) // ✅ use teamId here
-                .then(response => response.json())
-                .then(res => {
-                    if(res.success && res.data.length > 0){
-                        modalBody.innerHTML = ''; // clear loading
-
-                        // Loop through all projects and show
-                        res.data.forEach(project => {
-                            const projectHtml = `
-                                <div class="project-item mb-3 p-2 border rounded">
-                                    <p><strong>Name:</strong> ${project.name}</p>
-                                    <p><strong>Description:</strong> ${project.description}</p>
-                                    <p><strong>Start Date:</strong> ${new Date(project.start_date).toLocaleDateString()}</p>
-                                    <p><strong>End Date:</strong> ${new Date(project.end_date).toLocaleDateString()}</p>
-                                    <p><strong>Status:</strong> ${project.status}</p>
-                                    <hr>
-                                </div>
-                            `;
-                            modalBody.innerHTML += projectHtml;
-                        });
-
-                    } else {
-                        modalBody.innerHTML = 'No projects found for this team.';
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    modalBody.innerHTML = 'Failed to load data.';
-                });
-        });
-    });
+        fetch(`/team-project/${teamId}`)
+            .then(res => res.json())
+            .then(res => {
+                if(res.success && res.data.length > 0){
+                    modalBody.innerHTML = '';
+                    res.data.forEach(project => {
+                        modalBody.innerHTML += `
+                            <div class="project-item mb-3 p-2 border rounded">
+                                <p><strong>Name:</strong> ${project.name}</p>
+                                <p><strong>Description:</strong> ${project.description}</p>
+                                <p><strong>Start Date:</strong> ${new Date(project.start_date).toLocaleDateString()}</p>
+                                <p><strong>End Date:</strong> ${new Date(project.end_date).toLocaleDateString()}</p>
+                                <p><strong>Status:</strong> ${project.status}</p>
+                                <hr>
+                            </div>
+                        `;
+                    });
+                } else {
+                    modalBody.innerHTML = 'No projects found for this team.';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                modalBody.innerHTML = 'Failed to load data.';
+            });
+    }
 });
 
 
@@ -726,4 +802,284 @@ function addMember(name, role){
     memberList.appendChild(memberItem);
 }
 </script>
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPhDUFImI8o_8OsD9oNLN6uBTEyOWjQG4",
+            authDomain: "unit-1c26a.firebaseapp.com",
+            databaseURL: "https://unit-1c26a-default-rtdb.firebaseio.com",
+            projectId: "unit-1c26a",
+            storageBucket: "unit-1c26a.appspot.com",
+            messagingSenderId: "365981941063",
+            appId: "1:365981941063:web:0af4eee5ba1542042a2062"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const sender_id = {{ auth()->id() }};
+        let currentTeamId = null;
+        const messagesDiv = document.getElementById("messages");
+
+        // Online status
+        const userStatusRef = db.ref(`/status/${sender_id}`);
+        const connectedRef = db.ref(".info/connected");
+        connectedRef.on("value", snapshot => {
+            if (!snapshot.val()) return;
+            userStatusRef.onDisconnect().set(false);
+            userStatusRef.set(true);
+        });
+
+        // Modal open/close
+        const modal = document.getElementById("chatModal");
+        const closeModal = document.getElementById("closeModal");
+        closeModal.onclick = () => modal.style.display = "none";
+        window.onclick = e => { if(e.target == modal) modal.style.display = "none"; }
+
+        // Load Teams
+function loadTeams() {
+    fetch("{{ route('chat.teams') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(res => res.json())
+    .then(teams => {
+        const container = document.getElementById("teamButtonsContainer");
+        container.innerHTML = "";
+
+        teams.forEach(team => {
+            // Users HTML
+            let usersHTML = '';
+            if (Array.isArray(team.users) && team.users.length > 0) {
+                team.users.forEach(user => {
+                    usersHTML += `
+                        <div>
+                            <img src="${user.profile_image || '{{ asset('images/avatar.png') }}'}"
+                                 alt="${user.name}"
+                                 style="width:50px; height:50px; border-radius:100px;">
+                        </div>
+                    `;
+                });
+            } else {
+                usersHTML = `<div>No members</div>`;
+            }
+
+            // Team card HTML
+            const teamDiv = document.createElement("div");
+            teamDiv.className = "col-lg-3 mt-3 col-md-3 edit-icon position-relative";
+            teamDiv.innerHTML = `
+                <div class="team-card team-container rounded" style="background-color:white">
+                    <div style="display: flex; gap: 10px; text-align: center;">
+                        ${usersHTML}
+                    </div>
+                    <div style="font-size: 15px;color:#565454; font-weight:500;">
+                        Total members: ${team.users ? team.users.length : 0}
+                    </div>
+                    <div class="d-flex w-100 align-items-center justify-content-between" style="gap: 10px;">
+                        <div id="noteIcon" style="cursor:pointer;">
+                                <svg width="20" height="36" viewBox="0 0 31 36" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M0.895065 22.4443H0.179244V24.0296L1.36843 22.9813L0.895065 22.4443ZM21.0652 0.583496H9.29927V2.01514H21.0652V0.583496ZM30.1852 9.70352C30.1852 6.34696 29.7829 3.96226 28.2947 2.474C26.8064 0.985729 24.4217 0.583496 21.0652 0.583496V2.01514C24.432 2.01514 26.2494 2.45332 27.2824 3.48632C28.3154 4.51931 28.7535 6.33672 28.7535 9.70352H30.1852ZM30.1852 18.9481V9.70352H28.7535V18.9481H30.1852ZM27.7885 21.3448C29.1083 21.3448 30.1852 20.2679 30.1852 18.9481H28.7535C28.7535 19.4773 28.3176 19.9132 27.7885 19.9132V21.3448ZM5.68546 21.3448H27.7885V19.9132H5.68546V21.3448ZM1.36843 22.9813C2.5213 21.9649 4.03571 21.3448 5.68546 21.3448V19.9132C3.67098 19.9132 1.82371 20.6714 0.421696 21.9073L1.36843 22.9813ZM0.179244 9.70352V22.4443H1.61088V9.70352H0.179244ZM9.29927 0.583496C5.9427 0.583496 3.55801 0.985729 2.06974 2.474C0.581477 3.96226 0.179244 6.34696 0.179244 9.70352H1.61088C1.61088 6.33672 2.04907 4.51931 3.08207 3.48632C4.11506 2.45332 5.93247 2.01514 9.29927 2.01514V0.583496ZM16.8631 15.2909H8.45885V16.7225H16.8631V15.2909ZM17.4079 14.746C17.4079 15.0399 17.1569 15.2909 16.8631 15.2909V16.7225C17.9475 16.7225 18.8395 15.8305 18.8395 14.746H17.4079ZM16.8631 14.2012C17.1569 14.2012 17.4079 14.4522 17.4079 14.746H18.8395C18.8395 13.6616 17.9475 12.7696 16.8631 12.7696V14.2012ZM8.45885 14.2012H16.8631V12.7696H8.45885V14.2012ZM7.91404 14.746C7.91404 14.4522 8.16504 14.2012 8.45885 14.2012V12.7696C7.37437 12.7696 6.4824 13.6616 6.4824 14.746H7.91404ZM8.45885 15.2909C8.16504 15.2909 7.91404 15.0399 7.91404 14.746H6.4824C6.4824 15.8305 7.37437 16.7225 8.45885 16.7225V15.2909ZM21.9056 9.40791H8.45885V10.8396H21.9056V9.40791ZM22.4504 8.8631C22.4504 9.15691 22.1994 9.40791 21.9056 9.40791V10.8396C22.9901 10.8396 23.882 9.94758 23.882 8.8631H22.4504ZM21.9056 8.31829C22.1994 8.31829 22.4504 8.56929 22.4504 8.8631H23.882C23.882 7.77862 22.9901 6.88665 21.9056 6.88665V8.31829ZM8.45885 8.31829H21.9056V6.88665H8.45885V8.31829ZM7.91404 8.8631C7.91404 8.56929 8.16504 8.31829 8.45885 8.31829V6.88665C7.37437 6.88665 6.4824 7.77862 6.4824 8.8631H7.91404ZM8.45885 9.40791C8.16504 9.40791 7.91404 9.15691 7.91404 8.8631H6.4824C6.4824 9.94758 7.37437 10.8396 8.45885 10.8396V9.40791ZM28.7535 24.8315V29.0336H30.1851V24.8315H28.7535ZM27.7885 23.8665C28.3176 23.8665 28.7535 24.3024 28.7535 24.8315H30.1851C30.1851 23.5117 29.1083 22.4348 27.7885 22.4348V23.8665ZM5.68542 23.8665H27.7885V22.4348H5.68542V23.8665ZM1.61084 27.941C1.61084 25.6975 3.44183 23.8665 5.68542 23.8665V22.4348C2.65116 22.4348 0.179199 24.9068 0.179199 27.941H1.61084ZM1.61084 29.0336V27.941H0.179199V29.0336H1.61084ZM6.77796 34.2007C3.92928 34.2007 1.61084 31.8823 1.61084 29.0336H0.179199C0.179199 32.6729 3.1386 35.6323 6.77796 35.6323V34.2007ZM23.5864 34.2007H6.77796V35.6323H23.5864V34.2007ZM28.7535 29.0336C28.7535 31.8823 26.4351 34.2007 23.5864 34.2007V35.6323C27.2257 35.6323 30.1851 32.6729 30.1851 29.0336H28.7535Z"
+                                        fill="black" />
+                                </svg>
+                            </div>
+                            <div>
+                                <svg width="20" height="32" viewBox="0 0 31 32" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M22.4854 1.44189H8.16895C4.21762 1.44189 1.01074 4.74252 1.01074 8.8128V17.6638V19.1439C1.01074 23.2142 4.21762 26.5148 8.16895 26.5148H10.3164C10.7029 26.5148 11.2183 26.7812 11.4617 27.1069L13.6092 30.0523C14.5541 31.3548 16.1002 31.3548 17.0451 30.0523L19.1926 27.1069C19.4646 26.7368 19.8941 26.5148 20.3379 26.5148H22.4854C26.4367 26.5148 29.6436 23.2142 29.6436 19.1439V8.8128C29.6436 4.74252 26.4367 1.44189 22.4854 1.44189ZM9.60059 16.2429C8.79887 16.2429 8.16895 15.5769 8.16895 14.7628C8.16895 13.9488 8.81318 13.2827 9.60059 13.2827C10.388 13.2827 11.0322 13.9488 11.0322 14.7628C11.0322 15.5769 10.4023 16.2429 9.60059 16.2429ZM15.3271 16.2429C14.5254 16.2429 13.8955 15.5769 13.8955 14.7628C13.8955 13.9488 14.5397 13.2827 15.3271 13.2827C16.1146 13.2827 16.7588 13.9488 16.7588 14.7628C16.7588 15.5769 16.1289 16.2429 15.3271 16.2429ZM21.0537 16.2429C20.252 16.2429 19.6221 15.5769 19.6221 14.7628C19.6221 13.9488 20.2663 13.2827 21.0537 13.2827C21.8411 13.2827 22.4854 13.9488 22.4854 14.7628C22.4854 15.5769 21.8554 16.2429 21.0537 16.2429Z"
+                                        stroke="black" stroke-width="1.43164" />
+                                </svg>     
+                            </div>
+                        <div class="projectIcon" data-id="${team.id}" style="cursor:pointer;">
+                                <svg width="20" height="36" viewBox="0 0 36 36" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M29.5759 17.5026L29.3285 16.8309L29.0357 16.9387L28.9154 17.2266L29.5759 17.5026ZM32.5156 15.6201L33.0145 16.1334L33.0276 16.1206L33.0401 16.1073L32.5156 15.6201ZM19.6672 24.7647L19.5939 24.0527L18.9514 24.1188V24.7647H19.6672ZM19.6672 28.6132H18.9514V29.329H19.6672V28.6132ZM27.0166 32.3951H26.3008V33.1109H27.0166V32.3951ZM9.72392 32.3951V33.1109H10.4397V32.3951H9.72392ZM17.0733 28.6132V29.329H17.7891V28.6132H17.0733ZM17.0733 24.7647H17.7891V24.1189L17.1466 24.0527L17.0733 24.7647ZM7.16459 17.5026L7.82504 17.2266L7.70472 16.9387L7.41191 16.8309L7.16459 17.5026ZM4.22484 15.6201L3.70038 16.1073L3.71281 16.1206L3.72591 16.1334L4.22484 15.6201ZM6.97437 5.08121V5.79703H7.41566L7.6139 5.40277L6.97437 5.08121ZM29.7661 5.08121L29.1266 5.40277L29.3248 5.79703H29.7661V5.08121ZM17.1294 24.7704L17.1995 24.058L17.0511 25.4819L17.1294 24.7704ZM19.6115 24.7703L19.6898 25.4819L19.5413 24.058L19.6115 24.7703ZM23.2813 12.1407L22.7418 11.6701L22.733 11.6806L23.2813 12.1407ZM22.2092 13.4182L22.732 13.9071L22.7451 13.8931L22.7575 13.8784L22.2092 13.4182ZM22.6588 10.2582L22.8333 9.56397L22.8295 9.56303L22.6588 10.2582ZM21.016 9.8548L20.8364 10.5478L20.8453 10.55L21.016 9.8548ZM20.307 9.33374L20.9118 8.95083L20.9075 8.94406L20.9031 8.93738L20.307 9.33374ZM19.3905 7.95545L19.9866 7.55908L19.9864 7.55878L19.3905 7.95545ZM17.35 7.95545L16.7541 7.55878L16.7539 7.55909L17.35 7.95545ZM16.4334 9.33374L15.8374 8.93738L15.8329 8.94405L15.8287 8.95083L16.4334 9.33374ZM15.7245 9.8548L15.8952 10.55L15.9041 10.5477L15.7245 9.8548ZM14.0816 10.2582L13.9109 9.56302L13.9071 9.56398L14.0816 10.2582ZM13.4591 12.1407L14.0075 11.6805L13.9986 11.6702L13.4591 12.1407ZM14.5313 13.4182L13.983 13.8784L13.9953 13.8931L14.0085 13.9071L14.5313 13.4182ZM14.8079 14.225L14.0938 14.176L14.0935 14.18L14.8079 14.225ZM14.7042 15.8722L15.4183 15.9212L15.4186 15.9172L14.7042 15.8722ZM16.347 17.032L16.6023 17.7007L16.6039 17.7001L16.347 17.032ZM17.9206 16.4269L17.6859 15.7507L17.6747 15.7545L17.6637 15.7588L17.9206 16.4269ZM18.8198 16.4269L19.0767 15.7588L19.0657 15.7545L19.0546 15.7507L18.8198 16.4269ZM20.3935 17.032L20.1366 17.7001L20.1381 17.7007L20.3935 17.032ZM22.0363 15.8722L21.3219 15.9172L21.3221 15.9212L22.0363 15.8722ZM21.9325 14.225L22.6469 14.18L22.6467 14.176L21.9325 14.225ZM29.8232 18.1744C31.0726 17.7143 32.1588 16.9651 33.0145 16.1334L32.0167 15.1068C31.2815 15.8214 30.3617 16.4505 29.3285 16.8309L29.8232 18.1744ZM19.7405 25.4768C24.5142 24.9851 28.4915 21.9533 30.2363 17.7787L28.9154 17.2266C27.3735 20.9158 23.8478 23.6146 19.5939 24.0527L19.7405 25.4768ZM20.383 28.6132V24.7647H18.9514V28.6132H20.383ZM23.558 27.8973H19.6672V29.329H23.558V27.8973ZM27.7324 31.9748C27.7324 29.7115 25.8363 27.8973 23.558 27.8973V29.329C25.0842 29.329 26.3008 30.5403 26.3008 31.9748H27.7324ZM27.7324 32.3951V31.9748H26.3008V32.3951H27.7324ZM28.7458 31.6792H27.0166V33.1109H28.7458V31.6792ZM30.7586 33.6557C30.7586 32.5522 29.8309 31.6792 28.7458 31.6792V33.1109C29.0788 33.1109 29.327 33.3809 29.327 33.6557H30.7586ZM28.7458 35.6321C29.8309 35.6321 30.7586 34.7592 30.7586 33.6557H29.327C29.327 33.9305 29.0788 34.2005 28.7458 34.2005V35.6321ZM7.99466 35.6321H28.7458V34.2005H7.99466V35.6321ZM5.98189 33.6557C5.98189 34.7592 6.90963 35.6321 7.99466 35.6321V34.2005C7.66169 34.2005 7.41353 33.9305 7.41353 33.6557H5.98189ZM7.99466 31.6792C6.90962 31.6792 5.98189 32.5522 5.98189 33.6557H7.41353C7.41353 33.3809 7.66169 33.1109 7.99466 33.1109V31.6792ZM9.72392 31.6792H7.99466V33.1109H9.72392V31.6792ZM9.0081 31.9748V32.3951H10.4397V31.9748H9.0081ZM13.1825 27.8973C10.9042 27.8973 9.0081 29.7115 9.0081 31.9748H10.4397C10.4397 30.5403 11.6563 29.329 13.1825 29.329V27.8973ZM17.0733 27.8973H13.1825V29.329H17.0733V27.8973ZM16.3575 24.7647V28.6132H17.7891V24.7647H16.3575ZM6.50413 17.7787C8.24895 21.9533 12.2262 24.9852 17 25.4768L17.1466 24.0527C12.8927 23.6146 9.36698 20.9158 7.82504 17.2266L6.50413 17.7787ZM3.72591 16.1334C4.58163 16.9651 5.66784 17.7143 6.91727 18.1744L7.41191 16.8309C6.3787 16.4505 5.45896 15.8214 4.72376 15.1068L3.72591 16.1334ZM0.845947 9.40097C0.845947 12.0478 2.00427 14.2814 3.70038 16.1073L4.74929 15.1329C3.22896 13.4963 2.27759 11.5949 2.27759 9.40097H0.845947ZM6.00598 4.36539C3.1398 4.36539 0.845947 6.56619 0.845947 9.40097H2.27759C2.27759 7.39493 3.89187 5.79703 6.00598 5.79703V4.36539ZM6.97437 4.36539H6.00598V5.79703H6.97437V4.36539ZM13.1824 0.583496C10.1748 0.583496 7.57821 2.28676 6.33484 4.75965L7.6139 5.40277C8.61857 3.40462 10.7256 2.01514 13.1824 2.01514V0.583496ZM23.558 0.583496H13.1824V2.01514H23.558V0.583496ZM30.4056 4.75965C29.1622 2.28676 26.5656 0.583496 23.558 0.583496V2.01514C26.0149 2.01514 28.1219 3.40462 29.1266 5.40277L30.4056 4.75965ZM30.7345 4.36539H29.7661V5.79703H30.7345V4.36539ZM35.8945 9.40097C35.8945 6.56619 33.6006 4.36539 30.7345 4.36539V5.79703C32.8486 5.79703 34.4629 7.39493 34.4629 9.40097H35.8945ZM33.0401 16.1073C34.7362 14.2814 35.8945 12.0478 35.8945 9.40097H34.4629C34.4629 11.5949 33.5115 13.4963 31.9912 15.1329L33.0401 16.1073ZM18.3702 24.1154C17.9738 24.1154 17.5877 24.1007 17.2077 24.0589L17.0511 25.4819C17.4984 25.5311 17.9395 25.5471 18.3702 25.5471V24.1154ZM19.5332 24.0588C19.1531 24.1006 18.7668 24.1154 18.3702 24.1154V25.5471C18.8012 25.5471 19.2424 25.5311 19.6898 25.4819L19.5332 24.0588ZM18.3702 25.5469C18.8129 25.5469 19.2504 25.5252 19.6816 25.4827L19.5413 24.058C19.1567 24.0958 18.766 24.1153 18.3702 24.1153V25.5469ZM17.0593 25.4828C17.4904 25.5252 17.9277 25.5469 18.3702 25.5469V24.1153C17.9745 24.1153 17.584 24.0959 17.1995 24.058L17.0593 25.4828ZM22.733 11.6806L21.6609 12.958L22.7575 13.8784L23.8296 12.6009L22.733 11.6806ZM22.4843 10.9524C22.8238 11.0378 22.9048 11.1849 22.9202 11.2312C22.9332 11.2698 22.961 11.419 22.7419 11.6702L23.8208 12.6113C24.2761 12.0893 24.4941 11.4233 24.2779 10.777C24.0643 10.1383 23.4968 9.73077 22.8333 9.56398L22.4843 10.9524ZM20.8453 10.55L22.4881 10.9534L22.8295 9.56303L21.1867 9.15963L20.8453 10.55ZM19.7022 9.71664C19.8311 9.9202 20.0131 10.095 20.1898 10.226C20.3662 10.3568 20.5917 10.4843 20.8364 10.5477L21.1956 9.16188C21.1809 9.15806 21.1211 9.13432 21.0424 9.07596C20.964 9.01786 20.9213 8.96579 20.9118 8.95083L19.7022 9.71664ZM18.7944 8.35181L19.7109 9.7301L20.9031 8.93738L19.9866 7.55908L18.7944 8.35181ZM17.9458 8.35211C18.1375 8.06418 18.3051 8.02835 18.3702 8.02835C18.4354 8.02835 18.603 8.06418 18.7946 8.35211L19.9864 7.55878C19.6074 6.98948 19.04 6.59671 18.3702 6.59671C17.7004 6.59671 17.1331 6.98948 16.7541 7.55878L17.9458 8.35211ZM17.0295 9.7301L17.946 8.35181L16.7539 7.55909L15.8374 8.93738L17.0295 9.7301ZM15.9041 10.5477C16.1487 10.4843 16.3743 10.3568 16.5506 10.226C16.7273 10.095 16.9094 9.9202 17.0382 9.71664L15.8287 8.95083C15.8192 8.96579 15.7764 9.01786 15.698 9.07596C15.6193 9.13432 15.5596 9.15806 15.5448 9.16188L15.9041 10.5477ZM14.2524 10.9534L15.8952 10.55L15.5537 9.15963L13.9109 9.56303L14.2524 10.9534ZM13.9986 11.6702C13.7794 11.419 13.8073 11.2698 13.8202 11.2312C13.8357 11.1849 13.9167 11.0378 14.2562 10.9524L13.9071 9.56398C13.2436 9.73077 12.6762 10.1383 12.4625 10.777C12.2463 11.4233 12.4644 12.0893 12.9197 12.6113L13.9986 11.6702ZM15.0796 12.958L14.0074 11.6806L12.9108 12.6009L13.983 13.8784L15.0796 12.958ZM15.5221 14.274C15.539 14.0275 15.4893 13.7749 15.4191 13.5671C15.3495 13.3614 15.2332 13.1208 15.0541 12.9292L14.0085 13.9071C14.0012 13.8994 14.0079 13.9048 14.0221 13.9307C14.0354 13.955 14.05 13.9876 14.0628 14.0256C14.0756 14.0635 14.0845 14.1001 14.0894 14.131C14.0946 14.1636 14.0936 14.1785 14.0938 14.176L15.5221 14.274ZM15.4186 15.9172L15.5223 14.27L14.0935 14.18L13.9898 15.8272L15.4186 15.9172ZM16.0916 16.3633C15.7627 16.4889 15.5999 16.4198 15.5487 16.3837C15.5046 16.3527 15.3963 16.2429 15.4183 15.9212L13.99 15.8232C13.9429 16.51 14.1718 17.1651 14.7243 17.5542C15.2697 17.9383 15.9629 17.9449 16.6023 17.7007L16.0916 16.3633ZM17.6637 15.7588L16.0901 16.3639L16.6039 17.7001L18.1775 17.095L17.6637 15.7588ZM19.0546 15.7507C18.8323 15.6735 18.5817 15.648 18.3702 15.648C18.1588 15.648 17.9081 15.6735 17.6859 15.7507L18.1554 17.1031C18.1752 17.0962 18.2531 17.0797 18.3702 17.0797C18.4874 17.0797 18.5653 17.0962 18.5851 17.1031L19.0546 15.7507ZM20.6504 16.3639L19.0767 15.7588L18.5629 17.095L20.1366 17.7001L20.6504 16.3639ZM21.3221 15.9212C21.3442 16.2429 21.2359 16.3527 21.1918 16.3837C21.1405 16.4198 20.9778 16.4889 20.6488 16.3633L20.1381 17.7007C20.7775 17.9449 21.4708 17.9383 22.0162 17.5542C22.5686 17.1651 22.7975 16.51 22.7504 15.8232L21.3221 15.9212ZM21.2181 14.27L21.3219 15.9172L22.7507 15.8272L22.6469 14.18L21.2181 14.27ZM21.6864 12.9292C21.5073 13.1208 21.3909 13.3614 21.3214 13.5671C21.2512 13.7749 21.2015 14.0275 21.2184 14.274L22.6467 14.176C22.6468 14.1785 22.6459 14.1636 22.6511 14.1311C22.656 14.1001 22.6648 14.0635 22.6776 14.0256C22.6905 13.9876 22.705 13.955 22.7184 13.9307C22.7326 13.9048 22.7392 13.8994 22.732 13.9071L21.6864 12.9292Z"
+                                        fill="black" />
+                                </svg>
+                                
+                            </div>
+                        
+                        <div id="chatIcon" style="cursor:pointer;">
+                            
+                            <button class="team btn-chat" data-id="${team.id}">
+                                💬 <span class="badge" id="badge-${team.id}">0</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="width: 100%;">
+                        <button class="rounded py-3"
+                            style="font-weight: 500; border:1px solid #EDF0F2; background:#EDF0F2; color:#000; width:100%; font-size:15px; font-weight:700;">
+                            <a href="javascript:void(0)" class="edit-icon" title="Edit"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editModal"
+                                data-id="${team.id}"
+                                data-team_name="${team.team_name}"
+                                data-team_description="${team.team_description}"
+                                data-users='${JSON.stringify(team.users ? team.users.map(u => u.id) : [])}'
+                                data-all-users='${JSON.stringify(users)}'>
+                                ${team.team_name.charAt(0).toUpperCase() + team.team_name.slice(1)}
+                            </a>
+                        </button>
+                    </div>
+                    <div class="overlay">
+                        <div class="icon-container"></div>
+                    </div>
+                </div>
+            `;
+
+            // Append the team card
+            container.appendChild(teamDiv);
+
+            // Attach chat button click
+            const btn = teamDiv.querySelector(".btn-chat");
+            btn.addEventListener("click", function() {
+                document.querySelectorAll(".btn-chat").forEach(t => t.classList.remove("active"));
+                this.classList.add("active");
+
+                currentTeamId = this.getAttribute("data-id");
+                messagesDiv.innerHTML = "<em>Loading chat...</em>";
+                clearUnreadBadge(currentTeamId);
+
+                modal.style.display = "block";
+                loadGroupMessages();
+            });
+        });
+
+        updateTeamOnlineStatus();
+    })
+    .catch(console.error);
+}
+
+
+
+        function updateTeamOnlineStatus() {
+            db.ref("status").once("value", snapshot => {
+                const statusData = snapshot.val() || {};
+            });
+        }
+
+        // Load Group Messages
+        function loadGroupMessages() {
+            db.ref("group_messages/" + currentTeamId).off();
+            const ref = db.ref("group_messages/" + currentTeamId);
+            messagesDiv.innerHTML = "";
+
+            ref.on("child_added", snapshot => {
+                const data = snapshot.val();
+                if (!data || !data.message) return;
+                const key = snapshot.key;
+                renderMessage({ ...data, key });
+
+                if (!data.read_by || !data.read_by[sender_id]) {
+                    db.ref(`group_messages/${currentTeamId}/${key}/read_by`).update({ [sender_id]: true });
+                }
+            });
+        }
+
+        // Send Text Message
+        document.getElementById("sendBtn").addEventListener("click", sendMessage);
+        document.getElementById("message").addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
+
+        function sendMessage() {
+            const message = document.getElementById("message").value.trim();
+            if(!message || !currentTeamId) return alert("Select team and type a message!");
+
+            const msgData = { sender_id, message, timestamp: Date.now(), delivered: false, read_by:{[sender_id]:true} };
+            const tempKey = "temp_" + Date.now();
+            renderMessage({ ...msgData, key: tempKey, local:true });
+
+            fetch("/chat/send-group-message", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ sender_id, team_id: currentTeamId, message })
+            }).then(() => {
+                document.querySelector(`[data-key='${tempKey}']`)?.remove();
+                document.getElementById("message").value = "";
+            }).catch(console.error);
+        }
+
+        // File Upload
+        document.getElementById("uploadBtn").addEventListener("click", () => document.getElementById("fileInput").click());
+        document.getElementById("fileInput").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if(!file || !currentTeamId) return alert("Select team first!");
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("sender_id", sender_id);
+            formData.append("team_id", currentTeamId);
+
+            const tempKey = "temp_" + Date.now();
+            renderMessage({ sender_id, message:"Uploading file...", key:tempKey, type:"file", local:true });
+
+            fetch("/chat/send-group-file", {
+                method: "POST",
+                headers: { "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content },
+                body: formData
+            })
+            .then(res=>res.json())
+            .then(data=>{ if(data.success) document.querySelector(`[data-key='${tempKey}']`)?.remove(); else alert("Upload failed!") })
+            .catch(()=>alert("Error uploading file"));
+        });
+
+        // Render Message
+        function renderMessage(msg){
+    const isMe = msg.sender_id == sender_id;
+    const senderLabel = isMe ? "Me" : (msg.sender_name || `User ID: ${msg.sender_id}`);
+    let content = "";
+
+    if(msg.type==="file"){
+        if(msg.message.match(/\.(jpeg|jpg|gif|png|webp)$/i)) content = `<img src="${msg.message}" class="chat-image" alt="Image">`;
+        else content = `<a href="${msg.message}" target="_blank">${msg.filename||'Download file'}</a>`;
+    } else content = `<div class="text">${msg.message}</div>`;
+
+    const html = `<div class="message ${isMe?'me':''}" data-key="${msg.key}">
+        <strong>${senderLabel}</strong>
+        ${content}
+        <div class="status">${msg.local?'<small>Sending...</small>':''}</div>
+    </div>`;
+    messagesDiv.insertAdjacentHTML("beforeend", html);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+        function clearUnreadBadge(id){
+            const badge = document.getElementById("badge-"+id);
+            const teamDiv = document.querySelector(`.team[data-id='${id}']`);
+            if(badge){ badge.textContent="0"; badge.style.display="none"; teamDiv.classList.remove("has-unread"); }
+        }
+
+        // Realtime unread
+        db.ref("group_messages").on("child_added", snapshot=>handleNewMessages(snapshot));
+        db.ref("group_messages").on("child_changed", snapshot=>handleNewMessages(snapshot));
+
+        function handleNewMessages(snapshot){
+            const teamId = snapshot.key;
+            if(teamId===currentTeamId) return;
+
+            snapshot.forEach(msgSnap=>{
+                const msg=msgSnap.val();
+                if(!msg||!msg.message) return;
+                if(msg.sender_id!==sender_id && (!msg.read_by||!msg.read_by[sender_id])){
+                    const badge=document.getElementById("badge-"+teamId);
+                    const teamDiv=document.querySelector(`.team[data-id='${teamId}']`);
+                    if(badge && teamDiv){
+                        const count = parseInt(badge.textContent)||0;
+                        badge.textContent = count+1;
+                        badge.style.display="inline-block";
+                        teamDiv.classList.add("has-unread");
+                    }
+                }
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadTeams);
+    </script>
 @endpush

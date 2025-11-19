@@ -108,6 +108,7 @@ class ProjectController extends Controller
 
     public function show(Project $project)
     {   
+        // dd('ther');
     // ✅ Load related models
     $project->load(['creator', 'tasks.assignee', 'tasks.tasks_document']);
 
@@ -115,6 +116,10 @@ class ProjectController extends Controller
         'id' => $project->id,
         'name' => $project->name,
         'description' => $project->description,
+        'sro' => $project->sro,
+        'ccio' => $project->ccio,
+        'team_id' => $project->team_id,
+
         'start_date' => $project->start_date ? Carbon::parse($project->start_date)->format('d-m-Y') : null,
         'end_date' => $project->end_date ? Carbon::parse($project->end_date)->format('d-m-Y') : null,
         'status' => ucfirst($project->status),
@@ -127,7 +132,7 @@ class ProjectController extends Controller
                 'id' => $task->id,
                 'title' => $task->title,
                 'description' => $task->description,
-                'status' => ucfirst(str_replace('_', ' ', $task->status)),
+                'status' => $task->status,
                 'priority' => ucfirst($task->priority),
                 'due_date' => $task->due_date ? Carbon::parse($task->due_date)->format('d-m-Y') : null,
                 'completed_at' => $task->completed_at ? Carbon::parse($task->completed_at)->format('d-m-Y') : null,

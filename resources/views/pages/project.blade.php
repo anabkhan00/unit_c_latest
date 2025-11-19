@@ -668,6 +668,33 @@
                         <input type="text" id="view_project_owner" class="form-control" readonly>
                     </div>
                 </div>
+                <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label for="team_id" class="col-form-label">Team:</label>
+                            <select class="form-control" id="view_team_id" name="team_id" required>
+                                <option value="">Select Team</option>
+                                @foreach ($teams as $team)
+                                    <option value="{{ $team->id }}">{{ $team->team_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sro" class="col-form-label">SRO:</label>
+                            <input type="text" class="form-control" id="view_sro" name="sro" required>
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <label for="ccio" class="col-form-label">CCIO:</label>
+                            <input type="text" class="form-control" id="view_ccio" name="ccio" required>
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <label for="edit_status_extra" class="col-form-label">Status:</label>
+                            <select class="form-control" id="view_status_extra" name="status_extra" required>
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
 
                 <label class="form-label mt-2">Project Description:</label>
                 <textarea id="view_description" class="form-control" rows="3" readonly></textarea>
@@ -730,8 +757,35 @@
                                 @endforeach
                             </select>
                         </div>
+                        
                     </div>
-
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label for="team_id" class="col-form-label">Team:</label>
+                            <select class="form-control" id="edit_team_id" name="team_id" required>
+                                <option value="">Select Team</option>
+                                @foreach ($teams as $team)
+                                    <option value="{{ $team->id }}">{{ $team->team_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sro" class="col-form-label">SRO:</label>
+                            <input type="text" class="form-control" id="edit_sro" name="sro" required>
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <label for="ccio" class="col-form-label">CCIO:</label>
+                            <input type="text" class="form-control" id="edit_ccio" name="ccio" required>
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <label for="edit_status_extra" class="col-form-label">Status:</label>
+                            <select class="form-control" id="edit_status_extra" name="status_extra" required>
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
                     <label class="col-form-label mt-2">Project Description:</label>
                     <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
 
@@ -756,10 +810,11 @@
 
                     <hr class="my-4">
                     <h5>Tasks</h5>
-                    <div id="edit-tasks-section"></div>
+                    <div id="edit-tasks-section">
+    <!-- Existing tasks will be appended here dynamically -->
+</div>
+<button type="button" class="btn btn-outline-primary btn-sm mt-3" onclick="addEditTaskRow()">+ Add Task</button>
 
-                    <!-- Add Task Button -->
-                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="addEditTaskBtn">+ Add Task</button>
 
                     <div class="modal-footer mt-4">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
@@ -1188,7 +1243,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     //////////////////////////////////////////////////////
 
-    <script>
+    {{--  <script>
 $(document).on('click', '.open-edit-project-modal', function () {
     let projectId = $(this).data('project-id');
 
@@ -1262,7 +1317,7 @@ $(document).on('click', '.open-edit-project-modal', function () {
         }
     });
 });
-</script>
+</script>  --}}
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -1750,6 +1805,11 @@ viewMainButton.addEventListener('click', function () {
                     $('#view_end_date').val(parts.reverse().join('-'));
                 }
 
+                $('#view_team_id').val(response.team_id);
+                $('#view_sro').val(response.sro || 'sdsd');
+                $('#view_ccio').val(response.ccio || '');
+                let normalizedStatus = response.status.toLowerCase().replace(/\s+/g, '_');
+                $('#view_status_extra').val(normalizedStatus);
                 // ✅ Creator / Owner
                 $('#view_project_owner').val(response.created_by?.name || 'Unknown');
 
@@ -1819,81 +1879,168 @@ viewMainButton.addEventListener('click', function () {
 
     // 🔹 Edit button modal open par data set karna
     editButton.addEventListener('click', function () {
-        const project = JSON.parse(this.getAttribute('data-project') || '{}');
-        if (project.id) {
-            $.ajax({
-        url: '/project/' + project.id,
-        type: 'GET',
-        success: function (response) {
+    const project = JSON.parse(this.getAttribute('data-project') || '{}');
+    if (project.id) {
+        $.ajax({
+            url: '/project/' + project.id,
+            type: 'GET',
+            success: function (response) {
+                // Fill basic fields
+                $('#edit_project_id').val(response.id);
+                $('#edit_project_name').val(response.name);
+                $('#edit_description').val(response.description);
+                $('#edit_status').val(response.status.toLowerCase().replace(' ', '_'));
+                console.log('SRO Value:', response.sro);
+                if (response.start_date) {
+                    let parts = response.start_date.split('-');
+                    $('#edit_start_date').val(parts.reverse().join('-'));
+                }
+                if (response.end_date) {
+                    let parts = response.end_date.split('-');
+                    $('#edit_end_date').val(parts.reverse().join('-'));
+                }
+                if (response.created_by && response.created_by.id) {
+                    $('#edit_created_by').val(response.created_by.id);
+                } else {
+                    $('#edit_created_by').val('');
+                }
 
-            // ✅ Fill basic project fields
-            $('#edit_project_id').val(response.id);
-            $('#edit_project_name').val(response.name);
-            $('#edit_description').val(response.description);
-            $('#edit_description').val(response.description);
-            $('#edit_status').val(response.status.toLowerCase().replace(' ', '_')); // normalize back to option value
+                // ===== New fields =====
+                $('#edit_team_id').val(response.team_id);
+                $('#edit_sro').val(response.sro || 'sdsd');
+                $('#edit_ccio').val(response.ccio || '');
+                let normalizedStatus = response.status.toLowerCase().replace(/\s+/g, '_');
+                $('#edit_status_extra').val(normalizedStatus);
+                // ======================
 
-            // ✅ Dates (convert from dd-mm-yyyy to yyyy-mm-dd)
-            if (response.start_date) {
-                let parts = response.start_date.split('-');
-                $('#edit_start_date').val(parts.reverse().join('-'));
+                // ✅ Clear old tasks
+                $('#edit-tasks-section').html('');
+
+                // ✅ Add existing tasks as **editable rows with trash icon**
+                if (response.tasks && response.tasks.length > 0) {
+                    response.tasks.forEach(task => addEditTaskRow(task));
+                }
+
+                // Show modal
+                $('#editMainProjectModal').modal('show');
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert('Error loading project details.');
             }
-            if (response.end_date) {
-                let parts = response.end_date.split('-');
-                $('#edit_end_date').val(parts.reverse().join('-'));
-            }
-
-            // ✅ Creator (handle nested object)
-            if (response.created_by && response.created_by.id) {
-                $('#edit_created_by').val(response.created_by.id);
-            } else {
-                $('#edit_created_by').val('');
-            }
-
-            // ✅ Tasks
-            let tasksHTML = '';
-            if (response.tasks && response.tasks.length > 0) {
-                response.tasks.forEach(task => {
-                    tasksHTML += `
-                        <div class="border rounded p-2 mb-2">
-                            <input type="hidden" name="tasks[${task.id}][id]" value="${task.id}">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label">Title:</label>
-                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][title]" value="${task.title}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Status:</label>
-                                    <input type="text" class="form-control form-control-sm" name="tasks[${task.id}][status]" value="${task.status}">
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-md-12">
-                                    <label class="form-label">Description:</label>
-                                    <textarea class="form-control form-control-sm" name="tasks[${task.id}][description]">${task.description ?? ''}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                tasksHTML = `<p class="text-muted">No tasks found for this project.</p>`;
-            }
-
-            $('#edit-tasks-section').html(tasksHTML);
-
-            // ✅ Finally, show modal
-            $('#editMainProjectModal').modal('show');
-        },
-        error: function (xhr) {
-            console.error(xhr);
-            alert('Error loading project details.');
-        }
-    });
-            
-        }
-    });
+        });
+    }
 });
+
+});
+let editTaskIndex = 0; // To track unique indexes for new tasks
+
+// Function to add a new task row in edit modal
+function addEditTaskRow(task = {}) {
+    const index = task.id ?? `new_${editTaskIndex++}`; // use existing id or new index
+    const assignedOptions = `@foreach($users as $user)<option value="{{ $user->id }}" ${task.assigned_to == {{ $user->id }} ? 'selected' : ''}>{{ $user->name }}</option>@endforeach`;
+
+    const html = `
+        <div class="task-row row g-0 align-items-end border rounded p-2 mb-2">
+            <input type="hidden" name="tasks[${index}][id]" value="${task.id ?? ''}">
+            <div class="col-md-3 pe-1">
+                <input type="text" class="form-control form-control-sm" name="tasks[${index}][title]" placeholder="Task Title" value="${task.title ?? ''}" required>
+            </div>
+            <div class="col-md-3 px-1">
+                <input type="text" class="form-control form-control-sm" name="tasks[${index}][description]" placeholder="Task Description" value="${task.description ?? ''}">
+            </div>
+            <div class="col-md-2 px-1">
+                <select class="form-control form-control-sm" name="tasks[${index}][assigned_to]">
+                    <option value="">Assign To</option>
+                    ${assignedOptions}
+                </select>
+            </div>
+            <div class="col-md-2 px-1">
+                <select class="form-control form-control-sm" name="tasks[${index}][priority]">
+                    <option value="medium" ${task.priority == 'medium' ? 'selected' : ''}>Medium</option>
+                    <option value="low" ${task.priority == 'low' ? 'selected' : ''}>Low</option>
+                    <option value="high" ${task.priority == 'high' ? 'selected' : ''}>High</option>
+                </select>
+            </div>
+            <div class="col-md-1 px-1">
+                <input type="date" class="form-control form-control-sm" name="tasks[${index}][due_date]" value="${task.due_date ?? ''}">
+            </div>
+            <div class="col-md-1 ps-1 d-flex align-items-center">
+                <button type="button" class="btn btn-danger btn-sm remove-task" onclick="removeTaskRow(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+
+    $('#edit-tasks-section').append(html);
+}
+
+// Function to remove task row
+function removeTaskRow(button) {
+    $(button).closest('.task-row').remove();
+}
+
+// Edit button click
+editButton.addEventListener('click', function () {
+    const project = JSON.parse(this.getAttribute('data-project') || '{}');
+    if (project.id) {
+        $.ajax({
+            url: '/project/' + project.id,
+            type: 'GET',
+            success: function (response) {
+                // Fill basic fields
+                $('#edit_project_id').val(response.id);
+                $('#edit_project_name').val(response.name);
+                $('#edit_description').val(response.description);
+                $('#edit_status').val(response.status.toLowerCase().replace(' ', '_'));
+                console.log('SRO Value:', response.sro);
+                if (response.start_date) {
+                    let parts = response.start_date.split('-');
+                    $('#edit_start_date').val(parts.reverse().join('-'));
+                }
+                if (response.end_date) {
+                    let parts = response.end_date.split('-');
+                    $('#edit_end_date').val(parts.reverse().join('-'));
+                }
+                if (response.created_by && response.created_by.id) {
+                    $('#edit_created_by').val(response.created_by.id);
+                } else {
+                    $('#edit_created_by').val('');
+                }
+
+                // ===== New fields =====
+                if (response.team && response.team.id) {
+                    $('#team_id').val(response.team.id);
+                } else {
+                    $('#team_id').val('');
+                }
+                
+                $('#sro').val(response.sro || 'sdsd');
+                $('#ccio').val(response.ccio || '');
+                $('#edit_status_extra').val(response.status_extra ? response.status_extra.toLowerCase().replace(' ', '_') : '');
+                // ======================
+
+                // Clear old tasks
+                $('#edit-tasks-section').html('');
+
+                // Add existing tasks
+                if (response.tasks && response.tasks.length > 0) {
+                    response.tasks.forEach(task => addEditTaskRow(task));
+                }
+
+                // Show modal
+                $('#editMainProjectModal').modal('show');
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert('Error loading project details.');
+            }
+        });
+    }
+});
+
+
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
