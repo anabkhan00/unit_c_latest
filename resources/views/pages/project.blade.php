@@ -2056,8 +2056,53 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+
+
 </script>
 
+<script>
+$(document).ready(function() {
+
+    // Submit edit project form via AJAX
+    $('#edit-project-form').on('submit', function(e) {
+        e.preventDefault();
+
+        let projectId = $('#edit_project_id').val();
+        let formData = $(this).serialize(); // serializes all form inputs including tasks
+
+        $.ajax({
+            url: '/project/' + projectId, // Assuming RESTful route: PUT /project/{id}
+            type: 'POST', // Laravel requires POST with _method PUT
+            data: formData,
+            success: function(response) {
+                // Optional: show success message
+                alert('Project updated successfully!');
+
+                // Close modal
+                $('#editMainProjectModal').modal('hide');
+
+                // Optional: reload project list or update the row dynamically
+                location.reload(); // simple way to refresh table
+            },
+            error: function(xhr) {
+                console.error(xhr);
+                let errors = xhr.responseJSON?.errors;
+                if (errors) {
+                    let errorText = '';
+                    Object.keys(errors).forEach(key => {
+                        errorText += errors[key].join(', ') + '\n';
+                    });
+                    alert(errorText);
+                } else {
+                    alert('An error occurred while updating the project.');
+                }
+            }
+        });
+    });
+
+});
+</script>
 
 
 

@@ -264,51 +264,117 @@ class ProjectController extends Controller
 
     return redirect()->back()->with('success', 'Project updated successfully!');
 }
+public function update(Request $request, Project $project)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'start_date' => 'nullable|date',
+        'end_date' => 'nullable|date|after_or_equal:start_date',
+        'status' => 'required|in:not_started,in_progress,completed',
+        'created_by' => 'required|exists:users,id',
+        'team_id' => 'required|exists:teams,id',
+        'sro' => 'required|string|max:255',
+        'ccio' => 'required|string|max:255',
+        'tasks' => 'nullable|array',
+        'tasks.*.title' => 'required|string|max:255',
+        'tasks.*.assigned_to' => 'nullable|exists:users,id',
+        'tasks.*.priority' => 'nullable|in:low,medium,high',
+        'tasks.*.due_date' => 'nullable|date',
+    ]);
 
-    public function update(Request $request, Project $project)
-    {   
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-            'status' => 'required|in:not_started,in_progress,completed',
-            'created_by' => 'required|exists:users,id',
-        ]);
+    // Update main project fields
+    $statusChanged = $project->status !== $validated['status'];
+    $project->update([
+        'name' => $validated['name'],
+        'description' => $validated['description'],
+        'start_date' => $validated['start_date'],
+        'end_date' => $validated['end_date'],
+        'status' => $validated['status'],
+        'created_by' => $validated['created_by'],
+        'team_id' => $validated['team_id'],
+        'sro' => $validated['sro'],
+        'ccio' => $validated['ccio'],
+    ]);
 
-        $statusChanged = $project->status !== $validated['status'];
-
-        $project->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'],
-            'start_date' => $validated['start_date'],
-            'end_date' => $validated['end_date'],
+    // Record status change if needed
+    if ($statusChanged) {
+        \App\Models\ProjectStatus::create([
+            'project_id' => $project->id,
             'status' => $validated['status'],
-            'created_by' => $validated['created_by'],
-        ]);
-
-        if ($statusChanged) {
-            \App\Models\ProjectStatus::create([
-                'project_id' => $project->id,
-                'status' => $validated['status'],
-                'updated_by' => Auth::id(),
-            ]);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Project updated successfully.',
-            'project' => [
-                'id' => $project->id,
-                'name' => $project->name,
-                'description' => $project->description,
-                'start_date' => $project->start_date,
-                'end_date' => $project->end_date,
-                'status' => $project->status,
-                'created_by' => $project->created_by,
-            ],
+            'updated_by' => auth()->id(),
         ]);
     }
+
+    // ===== Handle tasks =====
+    // Delete all existing tasks for this project
+    $project->tasks()->delete();
+
+    // Add new tasks from request
+    if (!empty($validated['tasks'])) {
+        foreach ($validated['tasks'] as $taskData) {
+            $project->tasks()->create([
+                'title' => $taskData['title'],
+                'description' => $taskData['description'] ?? null,
+                'assigned_to' => $taskData['assigned_to'] ?? null,
+                'priority' => $taskData['priority'] ?? 'medium',
+                'due_date' => $taskData['due_date'] ?? null,
+            ]);
+        }
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Project updated successfully.',
+        'project' => $project->load('tasks'), // return updated project with tasks
+    ]);
+}
+
+    // public function update(Request $request, Project $project)
+    // {   
+    //     dd($request->all());
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'description' => 'nullable|string',
+    //         'start_date' => 'nullable|date',
+    //         'end_date' => 'nullable|date|after_or_equal:start_date',
+    //         'status' => 'required|in:not_started,in_progress,completed',
+    //         'created_by' => 'required|exists:users,id',
+    //     ]);
+
+    //     $statusChanged = $project->status !== $validated['status'];
+
+    //     $project->update([
+    //         'name' => $validated['name'],
+    //         'description' => $validated['description'],
+    //         'start_date' => $validated['start_date'],
+    //         'end_date' => $validated['end_date'],
+    //         'status' => $validated['status'],
+    //         'created_by' => $validated['created_by'],
+    //     ]);
+
+    //     if ($statusChanged) {
+    //         \App\Models\ProjectStatus::create([
+    //             'project_id' => $project->id,
+    //             'status' => $validated['status'],
+    //             'updated_by' => Auth::id(),
+    //         ]);
+    //     }
+
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'message' => 'Project updated successfully.',
+    //         'project' => [
+    //             'id' => $project->id,
+    //             'name' => $project->name,
+    //             'description' => $project->description,
+    //             'start_date' => $project->start_date,
+    //             'end_date' => $project->end_date,
+    //             'status' => $project->status,
+    //             'created_by' => $project->created_by,
+    //         ],
+    //     ]);
+    // }
 
     public function destroy(Project $project)
     {
